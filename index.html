@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TagScanner — 옷 태그 OCR</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- 메인 캡처 화면 (다크 테마) -->
+  <main id="mainScreen" class="screen active">
+    <div class="topbar-darkfill">
+      <button id="navSettings" class="profile-circle" title="설정">M</button>
+    </div>
+
+    <div class="camera-mode-tabs">
+      <div class="camera-mode-pill">
+        <button class="camera-mode-tab active" data-mode="ocr">OCR</button>
+        <button class="camera-mode-tab" data-mode="normal">일반</button>
+      </div>
+    </div>
+
+    <div class="capture-area">
+      <div class="ocr-guide">
+        <span class="corner tl"></span>
+        <span class="corner tr"></span>
+        <span class="corner bl"></span>
+        <span class="corner br"></span>
+      </div>
+      <p class="guide-text">상품 태그를 가이드 안에 맞춰주세요</p>
+
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+    </div>
+
+    <div class="camera-bottom-nav">
+      <button class="nav-item" id="navFavorites">
+        <span class="nav-item-icon heart">♡</span>
+        <span>찜 목록</span>
+      </button>
+
+      <div class="shutter-group">
+        <label class="shutter-btn" for="cameraInput">
+          <span class="shutter-inner"></span>
+        </label>
+        <span class="shutter-label">사진 촬영</span>
+      </div>
+
+      <button class="nav-item" id="navList">
+        <span class="nav-item-icon">▦</span>
+        <span>내 상품 목록</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- 리뷰/편집 화면 -->
+  <section id="reviewScreen" class="screen">
+    <div class="screen-header">
+      <button class="screen-header-back" id="cancelReview" aria-label="뒤로">←</button>
+      <h2 class="screen-header-title">상품 수정</h2>
+      <span class="screen-header-spacer"></span>
+    </div>
+
+    <div class="review-container">
+      <div class="photo-preview">
+        <img id="reviewPhoto" alt="태그 사진">
+      </div>
+
+      <div id="ocrProgress" class="progress-box">
+        <div class="spinner"></div>
+        <div id="progressText">OCR 인식 중...</div>
+        <div class="progress-bar"><div id="progressFill"></div></div>
+      </div>
+
+      <form id="reviewForm" class="form" hidden>
+        <div class="field">
+          <label>카테고리</label>
+          <div class="filter-pills" id="reviewCategoryPills"></div>
+        </div>
+        <div class="field">
+          <label for="brand">브랜드</label>
+          <input type="text" id="brand" placeholder="예: NIKE">
+        </div>
+        <div class="field">
+          <label for="productName">상품명</label>
+          <input type="text" id="productName" placeholder="예: 에어 포스 1">
+        </div>
+        <div class="field">
+          <label for="size">사이즈</label>
+          <input type="text" id="size" placeholder="예: M, 95, 280">
+        </div>
+        <div class="field">
+          <label for="price">가격</label>
+          <input type="text" id="price" placeholder="예: ₩129,000">
+        </div>
+        <div class="field">
+          <label for="serial">시리얼/품번</label>
+          <input type="text" id="serial" placeholder="예: CW2288-111">
+        </div>
+        <div class="field">
+          <label for="store">매장명</label>
+          <input type="text" id="store" placeholder="예: 강남 브랜치">
+        </div>
+        <div class="field">
+          <label for="memo">사용자 메모</label>
+          <textarea id="memo" rows="3" placeholder="자유롭게 기록"></textarea>
+        </div>
+
+        <details class="raw-text">
+          <summary>OCR 원문 보기</summary>
+          <pre id="rawText"></pre>
+        </details>
+
+        <button type="button" id="retryOcr" class="secondary-btn retry-btn">
+          🔄 OCR 다른 모드로 다시 시도
+        </button>
+      </form>
+    </div>
+
+    <div class="action-bar">
+      <button type="button" form="reviewForm" id="reviewSubmit" class="primary-btn"
+        onclick="document.getElementById('reviewForm').requestSubmit();">
+        등록 / 수정 완료
+      </button>
+    </div>
+  </section>
+
+  <!-- 목록 화면 -->
+  <section id="listScreen" class="screen">
+    <div class="list-header">
+      <h2 id="listTitle">내 상품 목록</h2>
+      <div class="list-header-icons">
+        <button class="icon-btn" id="btnSearchToggle" title="검색">🔍</button>
+        <button class="icon-btn" id="btnFilterOpen" title="필터" aria-label="필터">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btnGoCompare" title="비교 목록">♡</button>
+      </div>
+    </div>
+
+    <div class="list-search" id="listSearchBar" hidden>
+      <input type="search" id="searchInput" placeholder="브랜드, 상품명, 매장명으로 검색...">
+    </div>
+
+    <div class="list-container">
+      <div id="emptyState" class="empty">
+        <p>아직 저장된 태그가 없습니다.</p>
+        <button id="emptyCapture" class="primary-btn" style="background: var(--color-fuschia-100);">
+          📷 첫 태그 촬영
+        </button>
+      </div>
+      <div id="tagList" class="tag-list"></div>
+    </div>
+
+    <button class="fab" id="fabCapture" aria-label="새 태그 촬영">+</button>
+  </section>
+
+  <!-- 필터 화면 (바텀시트 스타일) -->
+  <section id="filterScreen" class="screen filter-sheet">
+    <div class="filter-handle"></div>
+
+    <div class="filter-header">
+      <h2 class="filter-title">필터</h2>
+      <button class="filter-close" id="filterClose" aria-label="닫기">✕</button>
+    </div>
+
+    <div class="filter-body">
+      <!-- 카테고리 -->
+      <div class="filter-group">
+        <h3 class="filter-group-title">카테고리</h3>
+        <div class="filter-pills" id="categoryPills"></div>
+      </div>
+
+      <!-- 브랜드 -->
+      <div class="filter-group">
+        <div class="filter-group-header">
+          <h3 class="filter-group-title">브랜드</h3>
+          <button class="filter-more" id="brandMoreToggle" type="button">더보기 →</button>
+        </div>
+        <div class="filter-pills" id="brandPills"></div>
+      </div>
+
+      <!-- 등록 기간 -->
+      <div class="filter-group">
+        <h3 class="filter-group-title">등록 기간</h3>
+        <div class="filter-pills" id="datePills">
+          <button class="filter-pill active" data-date="all">전체</button>
+          <button class="filter-pill" data-date="today">오늘</button>
+          <button class="filter-pill" data-date="week">이번 주</button>
+          <button class="filter-pill" data-date="month">이번 달</button>
+        </div>
+      </div>
+
+      <!-- 가격대 -->
+      <div class="filter-group">
+        <h3 class="filter-group-title">가격대</h3>
+        <div class="price-range">
+          <div class="price-range-track">
+            <div class="price-range-fill" id="priceRangeFill"></div>
+            <input type="range" id="priceMin" min="0" max="1000000" step="10000" value="0">
+            <input type="range" id="priceMax" min="0" max="1000000" step="10000" value="1000000">
+          </div>
+          <div class="price-range-labels">
+            <span id="priceMinLabel">₩0</span>
+            <span id="priceMaxLabel">₩1,000,000+</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 정렬 -->
+      <div class="filter-group">
+        <h3 class="filter-group-title">정렬</h3>
+        <div class="filter-pills" id="sortPills">
+          <button class="filter-pill active" data-sort="newest">최신순</button>
+          <button class="filter-pill" data-sort="priceAsc">가격 낮은순</button>
+          <button class="filter-pill" data-sort="priceDesc">가격 높은순</button>
+        </div>
+      </div>
+
+      <!-- 찜한 상품만 -->
+      <div class="filter-group filter-toggle-row">
+        <span class="filter-group-title">찜한 상품만 보기</span>
+        <label class="switch">
+          <input type="checkbox" id="favoriteOnlyToggle">
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button type="button" id="filterReset" class="filter-reset-btn">
+        <span style="font-size: 13px;">⟲</span> 초기화
+      </button>
+      <button type="button" id="filterApply" class="filter-apply-btn">
+        <span id="filterApplyLabel">필터 적용</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- 비교 화면 (찜 목록) -->
+  <section id="compareScreen" class="screen">
+    <div class="screen-header">
+      <button class="screen-header-back" id="compareBack" aria-label="뒤로">←</button>
+      <h2 class="screen-header-title">상품 비교</h2>
+      <span class="compare-count" id="compareCount">0개</span>
+    </div>
+
+    <div class="compare-container">
+      <div id="compareList" class="compare-list"></div>
+
+      <button type="button" id="addCompareItem" class="compare-add-btn">
+        + 비교 상품 추가
+      </button>
+    </div>
+
+    <div class="action-bar compare-bottom">
+      <button type="button" id="compareNow" class="primary-btn">
+        <span id="compareNowLabel">상품 한눈에 비교하기</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- 비교 결과 (한눈에 보기) 화면 -->
+  <section id="compareResultScreen" class="screen">
+    <div class="screen-header">
+      <button class="screen-header-back" id="compareResultBack" aria-label="뒤로">←</button>
+      <h2 class="screen-header-title">비교 결과</h2>
+      <span class="screen-header-spacer"></span>
+    </div>
+    <div class="compare-result-container" id="compareResultBody"></div>
+  </section>
+
+  <!-- 상세 화면 -->
+  <section id="detailScreen" class="screen">
+    <div class="screen-header">
+      <button class="screen-header-back" id="detailBack" aria-label="뒤로">←</button>
+      <h2 class="screen-header-title">상품 상세</h2>
+      <span class="screen-header-spacer"></span>
+    </div>
+
+    <div class="detail-container">
+      <div class="detail-photos">
+        <img id="detailPhoto" alt="태그 사진">
+      </div>
+
+      <form id="detailForm">
+        <div class="detail-table">
+          <div class="detail-row">
+            <span class="label">카테고리</span>
+            <span class="value">
+              <select id="d_category">
+                <option value="">선택 안 함</option>
+                <option value="아우터">아우터</option>
+                <option value="상의">상의</option>
+                <option value="하의">하의</option>
+                <option value="신발">신발</option>
+                <option value="가방">가방</option>
+                <option value="모자">모자</option>
+                <option value="액세서리">액세서리</option>
+                <option value="기타">기타</option>
+              </select>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="label">브랜드</span>
+            <span class="value"><input type="text" id="d_brand"></span>
+          </div>
+          <div class="detail-row">
+            <span class="label">상품명</span>
+            <span class="value"><input type="text" id="d_productName"></span>
+          </div>
+          <div class="detail-row">
+            <span class="label">사이즈</span>
+            <span class="value"><input type="text" id="d_size"></span>
+          </div>
+          <div class="detail-row">
+            <span class="label">가격</span>
+            <span class="value"><input type="text" id="d_price"></span>
+          </div>
+          <div class="detail-row">
+            <span class="label">시리얼/품번</span>
+            <span class="value"><input type="text" id="d_serial"></span>
+          </div>
+          <div class="detail-row">
+            <span class="label">매장명</span>
+            <span class="value"><input type="text" id="d_store"></span>
+          </div>
+          <div class="detail-row">
+            <span class="label">사용자 메모</span>
+            <span class="value"><input type="text" id="d_memo"></span>
+          </div>
+        </div>
+
+        <div class="external-actions">
+          <button type="button" id="btnSearchPrice" class="primary-btn">
+            🔍 온라인 최저가 검색
+          </button>
+          <button type="button" id="btnVisitOfficial" class="secondary-btn">
+            🛍 브랜드 공식몰 이동
+          </button>
+        </div>
+
+        <p class="meta">저장: <span id="d_createdAt"></span></p>
+
+        <div class="action-bar">
+          <button type="button" id="deleteDetail" class="danger-btn">삭제</button>
+          <button type="submit" class="primary-btn">수정 저장</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 마이페이지 화면 -->
+  <section id="myPageScreen" class="screen">
+    <div class="screen-header">
+      <button class="screen-header-back" id="myPageBack" aria-label="뒤로">←</button>
+      <h2 class="screen-header-title">마이 페이지</h2>
+      <span class="screen-header-spacer"></span>
+    </div>
+
+    <div class="mypage-container">
+      <!-- 데이터 분석 섹션 -->
+      <h3 class="mypage-section-title">내 데이터 분석</h3>
+      <div class="mypage-stats">
+        <div class="mypage-stat-row">
+          <span class="mypage-stat-label">📦 총 저장 상품</span>
+          <span class="mypage-stat-value" id="statTotal">0개</span>
+        </div>
+        <div class="mypage-stat-row">
+          <span class="mypage-stat-label">♡ 찜한 상품</span>
+          <span class="mypage-stat-value" id="statFavorites">0%</span>
+        </div>
+        <div class="mypage-stat-row">
+          <span class="mypage-stat-label">🏷 등록 브랜드</span>
+          <span class="mypage-stat-value" id="statBrands">0개</span>
+        </div>
+        <div class="mypage-stat-row">
+          <span class="mypage-stat-label">💰 평균 가격</span>
+          <span class="mypage-stat-value" id="statAvgPrice">-</span>
+        </div>
+      </div>
+
+      <!-- 최근 저장 -->
+      <h3 class="mypage-section-title">최근 저장 상품</h3>
+      <div id="recentList" class="mypage-recent-list"></div>
+
+      <!-- 메뉴 -->
+      <h3 class="mypage-section-title">설정</h3>
+      <div class="mypage-menu">
+        <button class="mypage-menu-item" id="menuApiSettings">
+          <span class="menu-icon">⚙️</span>
+          <span class="menu-label">OCR 엔진 / API 키 설정</span>
+          <span class="menu-arrow">›</span>
+        </button>
+        <button class="mypage-menu-item" id="menuExport">
+          <span class="menu-icon">📤</span>
+          <span class="menu-label">데이터 내보내기 (JSON)</span>
+          <span class="menu-arrow">›</span>
+        </button>
+        <button class="mypage-menu-item danger" id="menuClearAll">
+          <span class="menu-icon">🗑</span>
+          <span class="menu-label">전체 데이터 삭제</span>
+          <span class="menu-arrow">›</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 설정 화면 -->
+  <section id="settingsScreen" class="screen">
+    <div class="screen-header">
+      <button class="screen-header-back" id="settingsBack" aria-label="뒤로">←</button>
+      <h2 class="screen-header-title">설정</h2>
+      <span class="screen-header-spacer"></span>
+    </div>
+
+    <div class="settings-container">
+      <div class="form">
+        <div class="field">
+          <label for="ocrEngine">OCR 엔진 선택</label>
+          <select id="ocrEngine">
+            <option value="auto">자동 (Google Vision 키 있으면 우선)</option>
+            <option value="google">Google Cloud Vision (정확)</option>
+            <option value="tesseract">Tesseract.js (무료/오프라인)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="googleApiKey">Google Cloud Vision API 키</label>
+          <input type="password" id="googleApiKey" placeholder="AIzaSy..." autocomplete="off">
+          <p class="hint-small">
+            발급 방법은 아래 안내 참고. 키는 이 브라우저에만 저장됩니다.
+          </p>
+        </div>
+
+        <div class="action-bar" style="padding: 16px 0;">
+          <button type="button" id="testApiKey" class="secondary-btn">🔑 키 테스트</button>
+          <button type="button" id="saveSettings" class="primary-btn">저장</button>
+        </div>
+
+        <details class="raw-text" style="margin-top: 24px;">
+          <summary>❓ Google Cloud Vision API 키 발급 방법</summary>
+          <ol class="guide-list">
+            <li><a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> 접속 → 구글 계정 로그인</li>
+            <li>상단 프로젝트 선택 → <b>새 프로젝트</b> (이름 자유)</li>
+            <li>좌측 메뉴 → <b>API 및 서비스</b> → <b>라이브러리</b></li>
+            <li>"Vision" 검색 → <b>Cloud Vision API</b> → <b>사용 설정</b></li>
+            <li>좌측 메뉴 → <b>API 및 서비스</b> → <b>사용자 인증 정보</b></li>
+            <li><b>+ 사용자 인증 정보 만들기</b> → <b>API 키</b> 클릭</li>
+            <li>생성된 키 복사 → 위 입력란에 붙여넣고 <b>저장</b></li>
+            <li>(권장) 키 옆 ✏️ 편집 → <b>API 제한사항</b>에서 <b>Cloud Vision API만</b> 선택</li>
+          </ol>
+          <p class="hint-small" style="margin-top: 8px;">
+            💳 결제 카드 등록이 필요해요 (월 1000회까지 무료, 초과해야 청구).
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tesseract.js (브라우저 OCR, 한국어+영어 지원) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script src="parser.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
