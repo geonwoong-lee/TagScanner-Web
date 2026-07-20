@@ -3,6 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    font-src 'self' https://cdn.jsdelivr.net data:;
+    img-src 'self' data: blob:;
+    connect-src 'self' https://vision.googleapis.com https://cdn.jsdelivr.net blob:;
+    worker-src 'self' blob:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  ">
   <title>TagScanner — 옷 태그 OCR</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -399,6 +411,12 @@
           <span class="menu-label">데이터 내보내기 (JSON)</span>
           <span class="menu-arrow">›</span>
         </button>
+        <label class="mypage-menu-item" for="importFileInput" style="cursor: pointer;">
+          <span class="menu-icon">📥</span>
+          <span class="menu-label">데이터 가져오기 (JSON)</span>
+          <span class="menu-arrow">›</span>
+        </label>
+        <input type="file" id="importFileInput" accept=".json,application/json" hidden>
         <button class="mypage-menu-item danger" id="menuClearAll">
           <span class="menu-icon">🗑</span>
           <span class="menu-label">전체 데이터 삭제</span>

@@ -1602,7 +1602,7 @@ button {
   transform: translateX(-50%);
   background: var(--color-black);
   color: white;
-  padding: 12px 20px;
+  padding: 12px 16px 12px 20px;
   border-radius: var(--radius-pill);
   font-size: 14px;
   z-index: 100;
@@ -1610,9 +1610,32 @@ button {
   transition: opacity 0.2s;
   pointer-events: none;
   box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 40px);
 }
 
-.toast.show { opacity: 1; }
+.toast.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.toast-action {
+  background: transparent;
+  border: none;
+  color: var(--color-fuschia-100);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.toast-action:hover {
+  color: var(--color-fuschia-80);
+}
 
 @media (max-width: 480px) {
   .screen { padding: 0; }

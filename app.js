@@ -375,7 +375,20 @@ function loadTags() {
 }
 
 function saveTags(tags) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tags));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tags));
+    return { ok: true };
+  } catch (e) {
+    const isQuota =
+      e.name === 'QuotaExceededError' ||
+      e.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+      /quota/i.test(e.message || '');
+    return {
+      ok: false,
+      error: e,
+      isQuota,
+    };
+  }
 }
 
 function addTag(data) {
@@ -386,7 +399,22 @@ function addTag(data) {
     ...data,
   };
   tags.unshift(tag);
-  saveTags(tags);
+  const r = saveTags(tags);
+  if (!r.ok) {
+    if (r.isQuota) {
+      alert(
+        '⚠️ 저장 공간이 가득 찼습니다!\n\n' +
+        '해결 방법:\n' +
+        '1. 마이페이지에서 데이터를 JSON으로 내보내기\n' +
+        '2. 오래된 상품 삭제\n' +
+        '3. 그 후 다시 저장 시도\n\n' +
+        '※ 브라우저 localStorage 한계 (보통 5~10MB)'
+      );
+    } else {
+      alert('저장 실패: ' + (r.error?.message || '알 수 없는 오류'));
+    }
+    return null;
+  }
   return tag;
 }
 
@@ -395,11 +423,32 @@ function updateTag(id, data) {
   const idx = tags.findIndex((t) => t.id === id);
   if (idx < 0) return;
   tags[idx] = { ...tags[idx], ...data };
-  saveTags(tags);
+  const r = saveTags(tags);
+  if (!r.ok) {
+    if (r.isQuota) {
+      alert('⚠️ 저장 공간이 가득 찼습니다. 오래된 항목을 삭제하거나 데이터를 내보내세요.');
+    } else {
+      alert('수정 저장 실패: ' + (r.error?.message || '알 수 없는 오류'));
+    }
+  }
 }
 
 function deleteTagById(id) {
-  const tags = loadTags().filter((t) => t.id !== id);
+  const tags = loadTags();
+  const deletedTag = tags.find((t) => t.id === id);
+  const remaining = tags.filter((t) => t.id !== id);
+  saveTags(remaining);
+  return deletedTag;
+}
+
+// 삭제된 항목을 다시 목록에 복구 (같은 id/데이터 그대로)
+function restoreTag(tag) {
+  if (!tag) return;
+  const tags = loadTags();
+  // 이미 같은 id가 있으면 무시 (중복 방지)
+  if (tags.some((t) => t.id === tag.id)) return;
+  tags.unshift(tag);
+  tags.sort((a, b) => b.createdAt - a.createdAt);
   saveTags(tags);
 }
 
@@ -543,11 +592,17 @@ function renderList() {
       if (action) {
         e.stopPropagation();
         if (action.dataset.action === 'delete') {
-          if (confirm('이 태그를 삭제할까요?')) {
-            deleteTagById(t.id);
-            renderList();
-            showToast('삭제되었습니다');
-          }
+          const deleted = deleteTagById(t.id);
+          renderList();
+          showToast('삭제되었습니다', {
+            duration: 5000,
+            actionLabel: '실행 취소',
+            onAction: () => {
+              restoreTag(deleted);
+              renderList();
+              showToast('복구되었습니다');
+            },
+          });
         } else if (action.dataset.action === 'favorite') {
           toggleFavorite(t.id);
           renderList();
@@ -621,7 +676,14 @@ function renderCompare() {
         if (action.dataset.action === 'unfavorite') {
           toggleFavorite(t.id);
           renderCompare();
-          showToast('비교 목록에서 제거했습니다');
+          showToast('비교 목록에서 제거했습니다', {
+            duration: 4000,
+            actionLabel: '실행 취소',
+            onAction: () => {
+              toggleFavorite(t.id);
+              renderCompare();
+            },
+          });
         }
         return;
       }
@@ -913,6 +975,62 @@ function exportData() {
   showToast('데이터를 다운로드했습니다');
 }
 
+// ---- 데이터 가져오기 (JSON 파일에서) ----
+function importDataFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      // 스키마 검증
+      if (!parsed || !Array.isArray(parsed.tags)) {
+        alert('❌ 유효한 TagScanner 백업 파일이 아닙니다.\n(tags 배열이 없음)');
+        return;
+      }
+      const importedTags = parsed.tags;
+      const existing = loadTags();
+
+      const mergeChoice = confirm(
+        `📥 ${importedTags.length}개 항목을 가져옵니다.\n\n` +
+        `현재 저장된 항목: ${existing.length}개\n\n` +
+        `[확인] = 기존 데이터에 추가 (병합)\n` +
+        `[취소] = 가져오지 않음\n\n` +
+        `※ 전체 교체하려면 먼저 "전체 데이터 삭제" 후 가져오기`
+      );
+      if (!mergeChoice) return;
+
+      // 중복 제거: 기존 id와 겹치면 새 id 부여
+      const existingIds = new Set(existing.map((t) => t.id));
+      let now = Date.now();
+      const cleaned = importedTags.map((t) => {
+        let newT = { ...t };
+        if (!newT.id || existingIds.has(newT.id)) {
+          newT.id = now++;
+        }
+        if (!newT.createdAt) newT.createdAt = newT.id;
+        return newT;
+      });
+
+      // 병합 후 저장
+      const merged = [...cleaned, ...existing].sort((a, b) => b.createdAt - a.createdAt);
+      const r = saveTags(merged);
+      if (!r.ok) {
+        if (r.isQuota) {
+          alert('⚠️ 저장 공간 부족으로 일부만 가져올 수 있습니다. 기존 데이터를 정리한 후 다시 시도하세요.');
+        } else {
+          alert('가져오기 실패: ' + (r.error?.message || '알 수 없는 오류'));
+        }
+        return;
+      }
+      showToast(`✅ ${cleaned.length}개 항목을 가져왔습니다`);
+      renderMyPage();
+    } catch (err) {
+      alert('❌ JSON 파싱 실패: ' + err.message);
+    }
+  };
+  reader.onerror = () => alert('❌ 파일을 읽을 수 없습니다.');
+  reader.readAsText(file);
+}
+
 // ---- 전체 데이터 삭제 ----
 function clearAllData() {
   if (!confirm('정말 전체 태그 데이터를 삭제할까요?\n이 작업은 되돌릴 수 없습니다.')) return;
@@ -1011,18 +1129,36 @@ function openDetail(id) {
   showScreen('detail');
 }
 
-// ---- 토스트 ----
+// ---- 토스트 (undo 버튼 옵션 지원) ----
 let toastEl = null;
-function showToast(msg) {
+function showToast(msg, opts = {}) {
   if (!toastEl) {
     toastEl = document.createElement('div');
     toastEl.className = 'toast';
     document.body.appendChild(toastEl);
   }
-  toastEl.textContent = msg;
+  toastEl.innerHTML = '';
+  const msgSpan = document.createElement('span');
+  msgSpan.textContent = msg;
+  toastEl.appendChild(msgSpan);
+
+  const duration = opts.duration ?? 2200;
+
+  if (opts.actionLabel && typeof opts.onAction === 'function') {
+    const btn = document.createElement('button');
+    btn.className = 'toast-action';
+    btn.textContent = opts.actionLabel;
+    btn.addEventListener('click', () => {
+      clearTimeout(toastEl._t);
+      toastEl.classList.remove('show');
+      opts.onAction();
+    });
+    toastEl.appendChild(btn);
+  }
+
   toastEl.classList.add('show');
   clearTimeout(toastEl._t);
-  toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  toastEl._t = setTimeout(() => toastEl.classList.remove('show'), duration);
 }
 
 // ---- 이벤트 바인딩 ----
@@ -1039,7 +1175,7 @@ function bindEvents() {
   $('reviewForm').addEventListener('submit', (e) => {
     e.preventDefault();
     if (!currentReview) return;
-    addTag({
+    const saved = addTag({
       photoData: currentReview.photoData,
       rawText: currentReview.rawText,
       category: reviewSelectedCategory,
@@ -1051,6 +1187,7 @@ function bindEvents() {
       store: $('store').value.trim(),
       memo: $('memo').value.trim(),
     });
+    if (!saved) return; // 저장 실패 시 화면 유지
     currentReview = null;
     // 폼 리셋
     ['brand', 'productName', 'price', 'size', 'serial', 'store', 'memo'].forEach((id) => {
@@ -1322,7 +1459,7 @@ function bindEvents() {
         return;
       }
       const url = `https://www.google.com/search?q=${encodeURIComponent(q + ' 최저가')}&tbm=shop`;
-      window.open(url, '_blank');
+      window.open(url, '_blank', 'noopener,noreferrer');
     });
   }
   const btnVisitOfficial = $('btnVisitOfficial');
@@ -1335,7 +1472,7 @@ function bindEvents() {
         return;
       }
       const url = `https://www.google.com/search?q=${encodeURIComponent(t.brand + ' 공식몰')}&btnI=1`;
-      window.open(url, '_blank');
+      window.open(url, '_blank', 'noopener,noreferrer');
     });
   }
 
@@ -1366,6 +1503,16 @@ function bindEvents() {
   const menuExport = $('menuExport');
   if (menuExport) {
     menuExport.addEventListener('click', exportData);
+  }
+
+  // 마이페이지 메뉴: 데이터 가져오기
+  const importFileInput = $('importFileInput');
+  if (importFileInput) {
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) importDataFromFile(file);
+      e.target.value = ''; // 같은 파일 다시 고를 수 있게 초기화
+    });
   }
 
   // 마이페이지 메뉴: 전체 삭제
@@ -1453,11 +1600,19 @@ function bindEvents() {
   $('deleteDetail').addEventListener('click', () => {
     if (!currentDetailId) return;
     if (!confirm('이 태그를 삭제할까요?')) return;
-    deleteTagById(currentDetailId);
+    const deleted = deleteTagById(currentDetailId);
     currentDetailId = null;
-    showToast('삭제되었습니다');
     renderList();
     showScreen('list');
+    showToast('삭제되었습니다', {
+      duration: 5000,
+      actionLabel: '실행 취소',
+      onAction: () => {
+        restoreTag(deleted);
+        renderList();
+        showToast('복구되었습니다');
+      },
+    });
   });
 }
 
