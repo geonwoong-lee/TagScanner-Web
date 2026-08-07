@@ -310,8 +310,8 @@ function finishOcr({ photoData, rawData, processedData, rawText, engine }) {
   if (!$('memo').value) $('memo').value = '';
   $('rawText').textContent = rawText || '(인식된 텍스트 없음)';
 
-  // 카테고리 pills 렌더 (선택 초기화)
-  reviewSelectedCategory = '';
+  // 카테고리 pills 렌더 (파서가 감지한 카테고리 있으면 자동 선택)
+  reviewSelectedCategory = fields.category || '';
   renderReviewCategoryPills();
 
   // 엔진 표시 배지
