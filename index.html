@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- connect-src 주의: Hugging Face가 모델 파일을 cdn.hf.co로 리다이렉트하므로 *.hf.co 필요,
+       촬영 사진을 data URL로 CLIP에 넘기므로 data: 도 필요 -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net;
     style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
     font-src 'self' https://cdn.jsdelivr.net data:;
-    img-src 'self' data: blob:;
-    connect-src 'self' https://vision.googleapis.com https://cdn.jsdelivr.net blob:;
+    img-src 'self' data: blob: https:;
+    connect-src 'self' https://vision.googleapis.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co blob: data:;
     worker-src 'self' blob:;
     object-src 'none';
     base-uri 'self';
@@ -91,8 +93,10 @@
         </div>
         <div class="field">
           <label for="brand">브랜드</label>
-          <input type="text" id="brand" placeholder="예: NIKE">
+          <input type="text" id="brand" placeholder="예: NIKE" list="brandOptions">
+          <div class="brand-suggest" id="brandSuggest" hidden></div>
         </div>
+        <datalist id="brandOptions"></datalist>
         <div class="field">
           <label for="productName">상품명</label>
           <input type="text" id="productName" placeholder="예: 에어 포스 1">
@@ -108,6 +112,11 @@
         <div class="field">
           <label for="serial">시리얼/품번</label>
           <input type="text" id="serial" placeholder="예: CW2288-111">
+        </div>
+        <div class="field">
+          <label for="material">소재</label>
+          <input type="text" id="material" placeholder="예: 코튼 100%">
+          <div class="fabric-tags" id="fabricTags" hidden></div>
         </div>
         <div class="field">
           <label for="store">매장명</label>
@@ -336,6 +345,10 @@
             <span class="value"><input type="text" id="d_serial"></span>
           </div>
           <div class="detail-row">
+            <span class="label">소재</span>
+            <span class="value"><input type="text" id="d_material"></span>
+          </div>
+          <div class="detail-row">
             <span class="label">매장명</span>
             <span class="value"><input type="text" id="d_store"></span>
           </div>
@@ -352,6 +365,14 @@
           <button type="button" id="btnVisitOfficial" class="secondary-btn">
             🛍 브랜드 공식몰 이동
           </button>
+        </div>
+
+        <!-- 유사한 옷 섹션 (CLIP 기반) -->
+        <div class="similar-section">
+          <h3 class="similar-title">🎨 내 옷장에서 비슷한 옷</h3>
+          <div id="similarContent" class="similar-content">
+            <p class="similar-hint">분석 준비 중...</p>
+          </div>
         </div>
 
         <p class="meta">저장: <span id="d_createdAt"></span></p>
@@ -392,6 +413,12 @@
           <span class="mypage-stat-label">💰 평균 가격</span>
           <span class="mypage-stat-value" id="statAvgPrice">-</span>
         </div>
+      </div>
+
+      <!-- 스타일 분석 (CLIP 기반) -->
+      <h3 class="mypage-section-title">🎨 스타일 분석</h3>
+      <div id="styleAnalysis" class="style-analysis">
+        <p class="style-hint">준비 중... (CLIP 로딩 필요)</p>
       </div>
 
       <!-- 최근 저장 -->
@@ -480,7 +507,11 @@
 
   <!-- Tesseract.js (브라우저 OCR, 한국어+영어 지원) -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script src="fabric_dict.js"></script>
+  <script src="brands.js"></script>
+  <script src="tag_profiles.js"></script>
   <script src="parser.js"></script>
+  <script src="clip.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

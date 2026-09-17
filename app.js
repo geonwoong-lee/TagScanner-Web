@@ -146,7 +146,8 @@ function preprocessForOcr(canvas) {
   return canvas;
 }
 
-// ---- OCR (Google Cloud Vision) ----
+// ---- OCR (Google Cloud Vision) — TEXT + LOGO 동시 요청 ----
+// 반환: { text: string, logos: [{description, score}, ...] }
 async function runGoogleVisionOcr(imageData) {
   const settings = loadSettings();
   const key = settings.googleApiKey;
@@ -154,7 +155,7 @@ async function runGoogleVisionOcr(imageData) {
 
   const progressText = $('progressText');
   const progressFill = $('progressFill');
-  progressText.textContent = 'Google Vision API 호출 중...';
+  progressText.textContent = 'Google Vision API 호출 중... (텍스트 + 로고)';
   progressFill.style.width = '40%';
 
   // base64 데이터에서 데이터 URL 헤더 제거
@@ -165,7 +166,10 @@ async function runGoogleVisionOcr(imageData) {
     requests: [
       {
         image: { content: base64 },
-        features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
+        features: [
+          { type: 'TEXT_DETECTION', maxResults: 1 },
+          { type: 'LOGO_DETECTION', maxResults: 5 },
+        ],
         imageContext: { languageHints: ['ko', 'en'] },
       },
     ],
@@ -191,8 +195,13 @@ async function runGoogleVisionOcr(imageData) {
 
   const data = await res.json();
   progressFill.style.width = '100%';
-  const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
-  return text;
+  const response = data.responses?.[0] || {};
+  const text = response.fullTextAnnotation?.text || '';
+  const logos = (response.logoAnnotations || []).map((l) => ({
+    description: l.description,
+    score: l.score || 0,
+  }));
+  return { text, logos };
 }
 
 // ---- OCR (Tesseract.js) ----
@@ -239,11 +248,13 @@ async function runTesseractOcr(imageData, modeIndex = 0) {
 // engine: 'google' | 'tesseract'
 // rawData: 전처리 안 된 OCR 이미지 (Google Vision용)
 // processedData: 전처리된 OCR 이미지 (Tesseract용)
+// 반환: { text: string, logos: [] }  (Tesseract는 logos 항상 빈 배열)
 async function runOcr({ rawData, processedData, engine, modeIndex = 0 }) {
   if (engine === 'google') {
     return await runGoogleVisionOcr(rawData);
   }
-  return await runTesseractOcr(processedData, modeIndex);
+  const text = await runTesseractOcr(processedData, modeIndex);
+  return { text, logos: [] };
 }
 
 // ---- 사진 처리 (카메라/갤러리 공통) ----
@@ -287,8 +298,15 @@ async function handleImageSelected(file) {
 
     const engine = pickEngine();
     ocrAttempts = 0;
-    const rawText = await runOcr({ rawData, processedData, engine, modeIndex: ocrAttempts });
-    finishOcr({ photoData, rawData, processedData, rawText, engine });
+    const ocrResult = await runOcr({ rawData, processedData, engine, modeIndex: ocrAttempts });
+    finishOcr({
+      photoData,
+      rawData,
+      processedData,
+      rawText: ocrResult.text,
+      logos: ocrResult.logos,
+      engine,
+    });
   } catch (e) {
     console.error(e);
     showToast('OCR 실패: ' + (e.message || e));
@@ -296,19 +314,97 @@ async function handleImageSelected(file) {
   }
 }
 
-function finishOcr({ photoData, rawData, processedData, rawText, engine }) {
-  const lines = window.splitLines(rawText);
-  const fields = window.parseFields(lines);
+// ---- 소재·원단 표시 ----
+// 파서가 사전에서 찾은 가공·조직 용어를 칩으로 보여 준다 (누르면 소재 칸에 추가)
+function renderFabricTags(tags) {
+  const box = $('fabricTags');
+  if (!box) return;
+  const list = tags || [];
+  box.innerHTML = list
+    .map((t) => `<button type="button" class="fabric-chip" data-term="${t}">${t}</button>`)
+    .join('');
+  box.hidden = list.length === 0;
+  box.querySelectorAll('.fabric-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cur = $('material').value.trim();
+      const term = btn.dataset.term;
+      if (cur.includes(term)) return;
+      $('material').value = cur ? `${cur} / ${term}` : term;
+    });
+  });
+}
 
-  currentReview = { photoData, rawData, processedData, rawText, fields, engine };
+// ---- 브랜드 후보 제시 ----
+// 브랜드를 확실히 못 잡았을 때 브랜드 기준 데이터(brands.js)에서 후보를 띄운다
+function renderBrandSuggest(fields, lines) {
+  const box = $('brandSuggest');
+  if (!box) return;
+  const uncertain = !fields.brand || fields.brandSource === 'fallback';
+  const names = [];
+  if (uncertain) {
+    // 택 양식 지문 추정 (자동 입력 기준에는 못 미치는 경우) → 첫 후보로
+    const byProfile = window.suggestBrandByProfile ? window.suggestBrandByProfile(lines) : null;
+    if (byProfile) names.push(byProfile.brand);
+    // 브랜드 기준 데이터와 글자가 비슷한 후보
+    for (const s of window.suggestBrands ? window.suggestBrands(lines, 3) : []) {
+      if (!names.includes(s.name)) names.push(s.name);
+    }
+  }
+  const suggestions = names.slice(0, 3);
+  box.innerHTML = suggestions.length
+    ? '<span class="brand-suggest-label">이 브랜드인가요?</span>' +
+      suggestions
+        .map((name) => `<button type="button" class="brand-chip" data-name="${name}">${name}</button>`)
+        .join('')
+    : '';
+  box.hidden = suggestions.length === 0;
+  box.querySelectorAll('.brand-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      $('brand').value = btn.dataset.name;
+      box.hidden = true;
+    });
+  });
+}
+
+// 브랜드 입력칸 자동완성 목록 (브랜드 기준 데이터 전체)
+function initBrandOptions() {
+  const dl = $('brandOptions');
+  if (!dl || !window.BRAND_CATALOG) return;
+  dl.innerHTML = window.BRAND_CATALOG.map(
+    (b) => `<option value="${b.name}">${b.ko || ''}</option>`
+  ).join('');
+}
+
+function finishOcr({ photoData, rawData, processedData, rawText, logos, engine }) {
+  const lines = window.splitLines(rawText);
+  const fields = window.parseFields(lines, { logos: logos || [] });
+
+  currentReview = { photoData, rawData, processedData, rawText, logos: logos || [], fields, engine };
 
   $('brand').value = fields.brand;
   $('productName').value = fields.productName;
   $('price').value = fields.price;
   $('size').value = fields.size;
   $('serial').value = fields.serial;
+  $('material').value = fields.material || '';
+  renderFabricTags(fields.fabric);
+  renderBrandSuggest(fields, lines);
   if (!$('memo').value) $('memo').value = '';
   $('rawText').textContent = rawText || '(인식된 텍스트 없음)';
+
+  // 브랜드 감지 소스 표시 (logo/dictionary/fallback)
+  const brandLabel = document.querySelector('label[for="brand"]');
+  if (brandLabel) {
+    let badge = '';
+    if (fields.brandSource === 'logo') {
+      badge = ' <span class="brand-source-badge logo">🎯 로고 자동인식</span>';
+    } else if (fields.brandSource === 'dictionary') {
+      badge = ' <span class="brand-source-badge dict">📖 사전 매칭</span>';
+    } else if (fields.brandSource === 'fallback') {
+      badge = ' <span class="brand-source-badge fallback">💭 추정</span>';
+    }
+    brandLabel.innerHTML = '브랜드' + badge;
+  }
 
   // 카테고리 pills 렌더 (파서가 감지한 카테고리 있으면 자동 선택)
   reviewSelectedCategory = fields.category || '';
@@ -341,7 +437,7 @@ async function retryOcr() {
 
   try {
     const engine = currentReview.engine; // 동일 엔진으로 재시도
-    const rawText = await runOcr({
+    const ocrResult = await runOcr({
       rawData: currentReview.rawData,
       processedData: currentReview.processedData,
       engine,
@@ -351,7 +447,8 @@ async function retryOcr() {
       photoData: currentReview.photoData,
       rawData: currentReview.rawData,
       processedData: currentReview.processedData,
-      rawText,
+      rawText: ocrResult.text,
+      logos: ocrResult.logos,
       engine,
     });
     showToast('재시도 완료');
@@ -898,6 +995,254 @@ function updateFilterApplyLabel() {
   if (lbl) lbl.textContent = `필터 적용 (${count}개 상품)`;
 }
 
+// ============================================================
+// CLIP 통합 (이미지 embedding + 유사도 검색)
+// ============================================================
+
+// 외부 상품 DB (crawler에서 미리 계산한 embedding 로드)
+let productsDB = null;
+let productsDBLoading = null;
+
+async function loadProductsDB() {
+  if (productsDB !== null) return productsDB;
+  if (productsDBLoading) return productsDBLoading;
+
+  productsDBLoading = (async () => {
+    try {
+      const res = await fetch('products_db.json');
+      if (!res.ok) {
+        console.warn('products_db.json 없음 (외부 상품 검색 비활성화)');
+        productsDB = { products: [] };
+        return productsDB;
+      }
+      const data = await res.json();
+      console.log(`[Products DB] ${data.count}개 상품 로드 완료 (${data.brands.length}개 브랜드)`);
+      productsDB = data;
+      return data;
+    } catch (e) {
+      console.warn('products_db.json 로드 실패:', e);
+      productsDB = { products: [] };
+      return productsDB;
+    }
+  })();
+
+  return productsDBLoading;
+}
+
+// 외부 상품 DB에서 유사 상품 검색
+async function findSimilarProducts(targetEmbedding, topK = 5) {
+  const db = await loadProductsDB();
+  if (!db.products || db.products.length === 0) return [];
+
+  const scored = db.products
+    .map((p) => ({
+      product: p,
+      similarity: window.CLIP.cosineSimilarity(targetEmbedding, p.embedding),
+    }))
+    .sort((a, b) => b.similarity - a.similarity);
+  return scored.slice(0, topK);
+}
+
+// 저장 시 embedding 백그라운드 계산
+async function generateEmbeddingForTag(tagId, photoData) {
+  try {
+    const embedding = await window.CLIP.computeImageEmbedding(photoData);
+    // 저장된 태그에 embedding 추가
+    const tags = loadTags();
+    const idx = tags.findIndex((t) => t.id === tagId);
+    if (idx >= 0) {
+      tags[idx].embedding = embedding;
+      saveTags(tags);
+    }
+    return embedding;
+  } catch (e) {
+    console.warn('embedding 생성 실패:', e);
+    return null;
+  }
+}
+
+// 상세 화면에서 유사한 옷 표시
+async function renderSimilarClothes(currentTag) {
+  const container = $('similarContent');
+  if (!container) return;
+
+  const allTags = loadTags();
+  const tagsWithEmb = allTags.filter((t) => t.embedding);
+
+  if (tagsWithEmb.length === 0) {
+    container.innerHTML = `<p class="similar-hint">비교할 옷이 없어요. 옷을 더 저장하면 유사한 옷을 찾아드립니다.</p>`;
+    return;
+  }
+
+  // 현재 태그의 embedding 확인/생성
+  let targetEmb = currentTag.embedding;
+
+  if (!targetEmb) {
+    container.innerHTML = `
+      <div class="similar-loading">
+        <div>🎨 이미지 분석 중...</div>
+        <div class="similar-loading-bar"><div id="similarProgressFill" class="similar-loading-fill"></div></div>
+        <div id="similarProgressText" style="font-size: 11px;">CLIP 모델 로딩 중 (첫 실행 시 40MB 다운로드)</div>
+      </div>
+    `;
+
+    window.CLIP.setProgressCallback((msg, pct) => {
+      const fill = $('similarProgressFill');
+      const text = $('similarProgressText');
+      if (fill) fill.style.width = pct + '%';
+      if (text) text.textContent = msg;
+    });
+
+    try {
+      targetEmb = await window.CLIP.computeImageEmbedding(currentTag.photoData);
+      // 저장
+      const tags = loadTags();
+      const idx = tags.findIndex((t) => t.id === currentTag.id);
+      if (idx >= 0) {
+        tags[idx].embedding = targetEmb;
+        saveTags(tags);
+      }
+    } catch (e) {
+      container.innerHTML = `<p class="similar-hint">❌ 분석 실패: ${escapeHtml(e.message || String(e))}</p>`;
+      return;
+    } finally {
+      window.CLIP.setProgressCallback(null);
+    }
+  }
+
+  // 유사한 옷 찾기 (자기 자신 제외)
+  const similar = window.CLIP.findSimilar(targetEmb, tagsWithEmb, currentTag.id, 3);
+
+  if (similar.length === 0) {
+    container.innerHTML = `<p class="similar-hint">유사한 옷을 찾지 못했어요.</p>`;
+    return;
+  }
+
+  // 내 옷장 결과
+  let html = `
+    <h4 class="similar-subtitle">🎨 내 옷장에서 (${similar.length}개)</h4>
+    <div class="similar-list">
+      ${similar.map(({ tag, similarity }) => `
+        <div class="similar-card" data-id="${tag.id}">
+          <img src="${tag.photoData}" alt="">
+          <div class="similar-card-info">
+            <div class="similar-card-brand">${escapeHtml(tag.brand) || '(브랜드 없음)'}</div>
+            <div class="similar-card-score">유사도 ${Math.round(similarity * 100)}%</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  container.innerHTML = html;
+
+  // 클릭 시 해당 상세로 이동
+  container.querySelectorAll('.similar-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const id = parseInt(card.dataset.id, 10);
+      openDetail(id);
+    });
+  });
+
+  // 외부 상품 DB 검색 (비동기, 백그라운드)
+  findSimilarProducts(targetEmb, 5).then((products) => {
+    if (products.length === 0) return;
+    const externalHtml = `
+      <h4 class="similar-subtitle" style="margin-top: 20px;">🛍 시장에서 비슷한 상품 (${products.length}개)</h4>
+      <div class="similar-list similar-list-external">
+        ${products.map(({ product, similarity }) => `
+          <div class="similar-card">
+            <img src="${product.image}" alt="" onerror="this.style.opacity=0.3;">
+            <div class="similar-card-info">
+              <div class="similar-card-brand">${escapeHtml(product.brand)}</div>
+              <div class="similar-card-score">유사도 ${Math.round(similarity * 100)}%</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', externalHtml);
+  }).catch((e) => console.warn('외부 상품 검색 실패:', e));
+}
+
+// 마이페이지에서 스타일 분석
+async function renderStyleAnalysis() {
+  const container = $('styleAnalysis');
+  if (!container) return;
+
+  const tags = loadTags();
+  const tagsWithEmb = tags.filter((t) => t.embedding);
+
+  if (tagsWithEmb.length === 0) {
+    container.innerHTML = `
+      <p class="style-hint">아직 분석할 데이터가 없어요.<br>옷을 저장하면 자동으로 스타일이 분석됩니다.</p>
+    `;
+    return;
+  }
+
+  // 이미 분석된 embedding 있는지, 없으면 버튼으로 실행
+  container.innerHTML = `
+    <p class="style-hint">${tagsWithEmb.length}개 상품에 대한 스타일 분석 준비 완료</p>
+    <button class="style-load-btn" id="runStyleAnalysis">📊 스타일 분석 실행</button>
+  `;
+
+  $('runStyleAnalysis').addEventListener('click', async () => {
+    const btn = $('runStyleAnalysis');
+    btn.disabled = true;
+    btn.textContent = '분석 중...';
+
+    try {
+      // 각 태그마다 스타일 분류
+      const styleCounts = {};
+      window.CLIP.STYLE_LABELS_EN.forEach((s) => (styleCounts[s] = 0));
+
+      for (let i = 0; i < tagsWithEmb.length; i++) {
+        const tag = tagsWithEmb[i];
+        btn.textContent = `분석 중... (${i + 1}/${tagsWithEmb.length})`;
+
+        const scores = await window.CLIP.classifyStyle(
+          tag.embedding,
+          window.CLIP.STYLE_LABELS_EN
+        );
+        // 최고 점수 스타일에 +1
+        if (scores.length > 0) {
+          styleCounts[scores[0].label] += 1;
+        }
+      }
+
+      const total = tagsWithEmb.length;
+      const sorted = Object.entries(styleCounts)
+        .map(([label, count]) => ({
+          label,
+          labelKo: window.CLIP.STYLE_LABEL_KO[label] || label,
+          count,
+          pct: Math.round((count / total) * 100),
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      const topStyle = sorted[0];
+      container.innerHTML = `
+        ${sorted.filter((s) => s.count > 0).map((s) => `
+          <div class="style-bar-row">
+            <div class="style-bar-label">
+              <span>${s.labelKo}</span>
+              <span>${s.pct}% (${s.count}개)</span>
+            </div>
+            <div class="style-bar-track">
+              <div class="style-bar-fill" style="width: ${s.pct}%"></div>
+            </div>
+          </div>
+        `).join('')}
+        <div class="style-summary">
+          🏆 당신의 대표 스타일: <b>${topStyle.labelKo}</b>
+          <br>총 <b>${total}개</b> 상품 분석 완료
+        </div>
+      `;
+    } catch (e) {
+      container.innerHTML = `<p class="style-hint">❌ 분석 실패: ${escapeHtml(e.message || String(e))}</p>`;
+    }
+  });
+}
+
 // ---- 마이페이지 통계/렌더링 ----
 function renderMyPage() {
   const tags = loadTags();
@@ -1122,11 +1467,15 @@ function openDetail(id) {
   $('d_price').value = t.price || '';
   $('d_size').value = t.size || '';
   $('d_serial').value = t.serial || '';
+  $('d_material').value = t.material || '';
   $('d_store').value = t.store || '';
   $('d_memo').value = t.memo || '';
   $('d_createdAt').textContent = new Date(t.createdAt).toLocaleString('ko-KR');
 
   showScreen('detail');
+
+  // CLIP 기반 유사 옷 표시 (백그라운드, 실패해도 앱 진행 OK)
+  renderSimilarClothes(t).catch((e) => console.warn('유사 옷 렌더 실패:', e));
 }
 
 // ---- 토스트 (undo 버튼 옵션 지원) ----
@@ -1184,10 +1533,16 @@ function bindEvents() {
       price: $('price').value.trim(),
       size: $('size').value.trim(),
       serial: $('serial').value.trim(),
+      material: $('material').value.trim(),
       store: $('store').value.trim(),
       memo: $('memo').value.trim(),
     });
     if (!saved) return; // 저장 실패 시 화면 유지
+
+    // 백그라운드에서 CLIP embedding 생성 (실패해도 앱 진행에 영향 없음)
+    generateEmbeddingForTag(saved.id, currentReview.photoData).catch((e) =>
+      console.warn('embedding 생성 실패:', e)
+    );
     currentReview = null;
     // 폼 리셋
     ['brand', 'productName', 'price', 'size', 'serial', 'store', 'memo'].forEach((id) => {
@@ -1471,7 +1826,11 @@ function bindEvents() {
         showToast('브랜드 정보가 없습니다');
         return;
       }
-      const url = `https://www.google.com/search?q=${encodeURIComponent(t.brand + ' 공식몰')}&btnI=1`;
+      // 브랜드 기준 데이터에 공식몰 주소가 있으면 바로 이동, 없으면 검색으로 대체
+      const domain = window.brandDomain ? window.brandDomain(t.brand) : '';
+      const url = domain
+        ? `https://${domain}`
+        : `https://www.google.com/search?q=${encodeURIComponent(t.brand + ' 공식몰')}&btnI=1`;
       window.open(url, '_blank', 'noopener,noreferrer');
     });
   }
@@ -1479,6 +1838,7 @@ function bindEvents() {
   // M 버튼 → 마이페이지
   $('navSettings').addEventListener('click', () => {
     renderMyPage();
+    renderStyleAnalysis().catch((e) => console.warn('스타일 분석 초기화 실패:', e));
     showScreen('myPage');
   });
 
@@ -1574,11 +1934,6 @@ function bindEvents() {
     showScreen('main');
   });
 
-  document.querySelector('.topbar h1').addEventListener('click', () => {
-    showScreen('main');
-  });
-  document.querySelector('.topbar h1').style.cursor = 'pointer';
-
   $('detailForm').addEventListener('submit', (e) => {
     e.preventDefault();
     if (!currentDetailId) return;
@@ -1589,6 +1944,7 @@ function bindEvents() {
       price: $('d_price').value.trim(),
       size: $('d_size').value.trim(),
       serial: $('d_serial').value.trim(),
+      material: $('d_material').value.trim(),
       store: $('d_store').value.trim(),
       memo: $('d_memo').value.trim(),
     });
@@ -1619,5 +1975,6 @@ function bindEvents() {
 // ---- 시작 ----
 document.addEventListener('DOMContentLoaded', () => {
   bindEvents();
+  initBrandOptions();
   showScreen('main');
 });
