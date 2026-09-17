@@ -1,0 +1,4206 @@
+{
+ "parser": "C:\\Users\\k3570\\Desktop\\Claude\\tagscanner-web\\parser.js",
+ "summary": {
+  "brand": {
+   "hit": 135,
+   "n": 135
+  },
+  "price": {
+   "hit": 134,
+   "n": 134
+  },
+  "size": {
+   "hit": 132,
+   "n": 135
+  },
+  "serial": {
+   "hit": 133,
+   "n": 135
+  },
+  "name": {
+   "hit": 56,
+   "n": 60
+  }
+ },
+ "rows": [
+  {
+   "id": "t001",
+   "truth": {
+    "id": "t001",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 39900,
+    "size": "XL(86-88)",
+    "serial": "456821MMGA"
+   },
+   "pred": {
+    "productName": "45 68 21 MMGA XL",
+    "brand": "8SECONDS",
+    "price": "39,900",
+    "size": "XL(86-88)",
+    "serial": "456821MMGA",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t002",
+   "truth": {
+    "id": "t002",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "베이직 플리스 집업",
+    "price": 19900,
+    "size": "XL",
+    "serial": "SPFZE4TC02-00"
+   },
+   "pred": {
+    "productName": "[고객감사] 베이직 플리스 집업",
+    "brand": "SPAO",
+    "price": "19,900",
+    "size": "XL",
+    "serial": "SPFZE4TC02-00",
+    "material": "",
+    "fabric": [
+     "메시",
+     "플리스"
+    ],
+    "category": "",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t003",
+   "truth": {
+    "id": "t003",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 39900,
+    "size": "95/M",
+    "serial": "456864CME5"
+   },
+   "pred": {
+    "productName": "45 68 64 CME5 M",
+    "brand": "8SECONDS",
+    "price": "39,900",
+    "size": "95/M",
+    "serial": "456864CME5",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t004",
+   "truth": {
+    "id": "t004",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "피그먼트 오버사이즈 후디드 스웨트 집업",
+    "price": 69900,
+    "size": "L",
+    "serial": "MMDTJ0Z01-CG-00L"
+   },
+   "pred": {
+    "productName": "피그먼트 오버사이즈 후디드 스웨트 집업",
+    "brand": "MUSINSA STANDARD",
+    "price": "W69,900",
+    "size": "L",
+    "serial": "MMDTJOZ01-CG-OOL",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t005",
+   "truth": {
+    "id": "t005",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "베이직 플리스 집업",
+    "price": 19900,
+    "size": "XL",
+    "serial": "SPFZE4TC02-00",
+    "note": "t002와 같은 택"
+   },
+   "pred": {
+    "productName": "[고객감사] 베이직 플리스 집업",
+    "brand": "SPAO",
+    "price": "19,900",
+    "size": "XL",
+    "serial": "SPFZE4TC02-00",
+    "material": "",
+    "fabric": [
+     "플리스"
+    ],
+    "category": "",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t006",
+   "truth": {
+    "id": "t006",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 135000,
+    "size": "S",
+    "serial": "1327611 005",
+    "note": "cos.com 세로 표기"
+   },
+   "pred": {
+    "productName": "COS 106 38 Stockholm 117.7.14 ^7.7 CH.RU/ 東京都渋谷区宇田川町33-6 cos.com",
+    "brand": "COS",
+    "price": "135,000",
+    "size": "S",
+    "serial": "1327611 005",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t007",
+   "truth": {
+    "id": "t007",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "풀밴딩 와이드 슬랙스",
+    "price": 39900,
+    "size": "S",
+    "serial": "SPTAF23W07-00"
+   },
+   "pred": {
+    "productName": "[스트레치+] 풀밴딩 와이드 슬랙스",
+    "brand": "SPAO",
+    "price": "39,900",
+    "size": "S",
+    "serial": "SPTAF23W07-00",
+    "material": "",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t008",
+   "truth": {
+    "id": "t008",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 64900,
+    "size": "30/30",
+    "serial": "1357829 001",
+    "note": "H&M 그룹 양식, 브랜드 추정"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "W 64,900",
+    "size": "30/30",
+    "serial": "1357829 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t009",
+   "truth": {
+    "id": "t009",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 59900,
+    "size": "44",
+    "serial": "6045/350/400",
+    "note": "zara.com 아주 작게"
+   },
+   "pred": {
+    "productName": "36 38 40 42 44 46 48",
+    "brand": "ZARA",
+    "price": "59,900",
+    "size": "44",
+    "serial": "6045/350/400",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t010",
+   "truth": {
+    "id": "t010",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 59000,
+    "size": "M",
+    "serial": "1229297 007"
+   },
+   "pred": {
+    "productName": "Al Az",
+    "brand": "COS",
+    "price": "59,000",
+    "size": "M",
+    "serial": "1229297 007",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t011",
+   "truth": {
+    "id": "t011",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "윈드블럭 후리스 풀집파카",
+    "price": 79900,
+    "size": "L",
+    "serial": "341-486116"
+   },
+   "pred": {
+    "productName": "윈드블럭 후리스 풀집파카",
+    "brand": "UNIQLO",
+    "price": "₩79,900",
+    "size": "L",
+    "serial": "341-486116",
+    "material": "폴리에스터 100%",
+    "fabric": [
+     "플리스"
+    ],
+    "category": "아우터",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t012",
+   "truth": {
+    "id": "t012",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "시티 레저 시어 윈드브레이커 재킷",
+    "price": 49900,
+    "size": "M",
+    "serial": "MMDJJ5Z02-CY-00M"
+   },
+   "pred": {
+    "productName": "시티레저 시어 윈드브레이커 재킷",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩49,900",
+    "size": "M",
+    "serial": "MMDJJ5Z02-CY-00M",
+    "material": "",
+    "fabric": [],
+    "category": "아우터",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t013",
+   "truth": {
+    "id": "t013",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 65000,
+    "size": "S",
+    "serial": "1271137 001",
+    "note": "H&M 그룹 양식(COS 가능성), 90도 회전 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "ARKET",
+    "price": "65000",
+    "size": "S",
+    "serial": "1271137 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t014",
+   "truth": {
+    "id": "t014",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "투습발수 후드 재킷",
+    "price": 49900,
+    "size": "M",
+    "serial": "AD0YWA6A-011",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "투습발수 후드 재킷",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "M",
+    "serial": "ADOYWA6A-011",
+    "material": "",
+    "fabric": [
+     "발수",
+     "방풍"
+    ],
+    "category": "아우터",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t015",
+   "truth": {
+    "id": "t015",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 34900,
+    "size": "S",
+    "serial": "1339772 003",
+    "note": "H&M 그룹 양식, 브랜드 추정"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "34,900",
+    "size": "S",
+    "serial": "1339772 003",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t016",
+   "truth": {
+    "id": "t016",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 209900,
+    "size": "S",
+    "serial": "2893/300/082",
+    "note": "zara.com 아주 작게"
+   },
+   "pred": {
+    "productName": "USA MEX UK IT",
+    "brand": "ZARA",
+    "price": "₩ 209,900",
+    "size": "S",
+    "serial": "2893/300/082",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t017",
+   "truth": {
+    "id": "t017",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "PUFFTECH 컴팩트 재킷",
+    "price": 79900,
+    "size": "S",
+    "serial": "311-486819"
+   },
+   "pred": {
+    "productName": "PUFFTECH 컴팩트 재킷",
+    "brand": "UNIQLO",
+    "price": "₩79,900",
+    "size": "S",
+    "serial": "311-486819",
+    "material": "나일론 100% / 폴리에스터 80% / 폴리에스터 20% / 폴리에스터 100%",
+    "fabric": [],
+    "category": "아우터",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t018",
+   "truth": {
+    "id": "t018",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "드라이피케 폴로셔츠",
+    "price": 39900,
+    "size": "S",
+    "serial": "341-482304"
+   },
+   "pred": {
+    "productName": "드라이피케 폴로셔츠",
+    "brand": "UNIQLO",
+    "price": "W 39,900",
+    "size": "S",
+    "serial": "341-482304",
+    "material": "코튼 72% / 폴리에스터 28% / 폴리에스터 73% / 코튼 27%",
+    "fabric": [
+     "리브"
+    ],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t019",
+   "truth": {
+    "id": "t019",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 169000,
+    "size": "48",
+    "serial": "0990934 034",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "08 4 6019961",
+    "brand": "ARKET",
+    "price": "169000",
+    "size": "48",
+    "serial": "0990934 034",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t020",
+   "truth": {
+    "id": "t020",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 49900,
+    "size": "100/L",
+    "serial": "456941MC53"
+   },
+   "pred": {
+    "productName": "45 69 41 MC53 L",
+    "brand": "8SECONDS",
+    "price": "49,900",
+    "size": "100/L",
+    "serial": "456941MC53",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t021",
+   "truth": {
+    "id": "t021",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 32000,
+    "size": "S",
+    "serial": "0494713 152",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "19 4 6278411",
+    "brand": "ARKET",
+    "price": "32000",
+    "size": "S",
+    "serial": "0494713 152",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t022",
+   "truth": {
+    "id": "t022",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 259000,
+    "size": "L",
+    "serial": "1354581 001",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "07 4 6152611",
+    "brand": "ARKET",
+    "price": "259000",
+    "size": "L",
+    "serial": "1354581 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t023",
+   "truth": {
+    "id": "t023",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "[시티 레저] 그리드 폴라 플리스 바라클라바 후디드 집업",
+    "price": 69900,
+    "size": "M",
+    "serial": "MMEJJ9C05-BK-00M"
+   },
+   "pred": {
+    "productName": "[시티 레저] 그리드 폴라플리스 바라클라바 후디드 집업",
+    "brand": "MUSINSA STANDARD",
+    "price": "W69,900",
+    "size": "M",
+    "serial": "MMEJJ9C05-BK-00M",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t024",
+   "truth": {
+    "id": "t024",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "피그먼트 와플 긴소매 티셔츠",
+    "price": 39900,
+    "size": "XL",
+    "serial": "MMFTL8C09-OW-0XL"
+   },
+   "pred": {
+    "productName": "피그먼트 와플 긴소매 티셔츠",
+    "brand": "MUSINSA STANDARD",
+    "price": "W39,900",
+    "size": "XL",
+    "serial": "MMFTLSC09-OW-OXL",
+    "material": "",
+    "fabric": [
+     "와플"
+    ],
+    "category": "상의",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": false,
+    "name": true
+   }
+  },
+  {
+   "id": "t025",
+   "truth": {
+    "id": "t025",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "원턱 와이드 스웨트팬츠",
+    "price": 39900,
+    "size": "S",
+    "serial": "SPMTG12C02-04"
+   },
+   "pred": {
+    "productName": "[프렌치테리] 원덕 와이드 스웨트팬츠",
+    "brand": "SPAO",
+    "price": "39,900",
+    "size": "S",
+    "serial": "SPMTG12C02-04",
+    "material": "",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t026",
+   "truth": {
+    "id": "t026",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 89900,
+    "size": "M",
+    "serial": "2893/334/816"
+   },
+   "pred": {
+    "productName": "USA MEX UK IT BR",
+    "brand": "ZARA",
+    "price": "89,900",
+    "size": "M",
+    "serial": "2893/334/816",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t027",
+   "truth": {
+    "id": "t027",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "티어드 롱 스커트",
+    "price": 49900,
+    "size": "S",
+    "serial": "SPWHF25G12-00"
+   },
+   "pred": {
+    "productName": "티어드 롱 스커트",
+    "brand": "SPAO",
+    "price": "49,900",
+    "size": "S",
+    "serial": "SPWHF25G12-00",
+    "material": "",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t028",
+   "truth": {
+    "id": "t028",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "[UV차단] 크롭 윈드브레이커",
+    "price": 49900,
+    "size": "L",
+    "serial": "SPJJE23G01-13"
+   },
+   "pred": {
+    "productName": "[UV차단] 크롭 윈드브레이커",
+    "brand": "SPAO",
+    "price": "49,900",
+    "size": "L",
+    "serial": "SPJJE23G01-13",
+    "material": "",
+    "fabric": [],
+    "category": "아우터",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t029",
+   "truth": {
+    "id": "t029",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "피그먼트 오버사이즈 스웨트셔츠",
+    "price": 49900,
+    "size": "L",
+    "serial": "MMDTK0Z05-UB-00L"
+   },
+   "pred": {
+    "productName": "피그먼트 오버사이즈 스웨트셔츠",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩49,900",
+    "size": "L",
+    "serial": "MMDTKOZ05-UB-OOL",
+    "material": "",
+    "fabric": [],
+    "category": "상의",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t030",
+   "truth": {
+    "id": "t030",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 32000,
+    "size": "M",
+    "serial": "0494713 004",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "07 4 6725821",
+    "brand": "ARKET",
+    "price": "32000",
+    "size": "M",
+    "serial": "0494713 004",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t031",
+   "truth": {
+    "id": "t031",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 69000,
+    "size": "XS",
+    "serial": "0844469 002",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "10 3 589695 1",
+    "brand": "ARKET",
+    "price": "69000",
+    "size": "XS",
+    "serial": "0844469 002",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t032",
+   "truth": {
+    "id": "t032",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 29900,
+    "size": "M",
+    "serial": "1354831 001",
+    "note": "DUAL 양식, 브랜드 추정"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "29,900",
+    "size": "M",
+    "serial": "1354831 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t033",
+   "truth": {
+    "id": "t033",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 175000,
+    "size": "S",
+    "serial": "1338797 005"
+   },
+   "pred": {
+    "productName": "社東京都批客胚寧田川町33-6 FSC FBC C140963",
+    "brand": "COS",
+    "price": "175,000",
+    "size": "S",
+    "serial": "1338797 005",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t034",
+   "truth": {
+    "id": "t034",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "소프트브러시드 크루넥T 긴팔",
+    "price": 29900,
+    "size": "L",
+    "serial": "341-486106"
+   },
+   "pred": {
+    "productName": "소프트브러시드 크루넥T 긴팔",
+    "brand": "UNIQLO",
+    "price": "₩ 29,900",
+    "size": "L",
+    "serial": "341-486106",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t035",
+   "truth": {
+    "id": "t035",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "후리스 조거팬츠",
+    "price": 39900,
+    "size": "L",
+    "serial": "341-491268"
+   },
+   "pred": {
+    "productName": "K&R #Ix 빠진 후리스 조거팬츠",
+    "brand": "UNIQLO",
+    "price": "₩39,900",
+    "size": "",
+    "serial": "341-491268",
+    "material": "폴리에스터 100%",
+    "fabric": [
+     "플리스"
+    ],
+    "category": "하의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": false,
+    "serial": true,
+    "name": false
+   }
+  },
+  {
+   "id": "t036",
+   "truth": {
+    "id": "t036",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "[시티 레저] 후디드 라이트 다운 재킷",
+    "price": 109900,
+    "size": "M",
+    "serial": "MMDDJAZ01-AH-00M"
+   },
+   "pred": {
+    "productName": "[시티 레저] 후디드 라이트 다운 재킷",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩109,900",
+    "size": "M",
+    "serial": "MMDDJAZ01-AH-00M",
+    "material": "",
+    "fabric": [],
+    "category": "아우터",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t037",
+   "truth": {
+    "id": "t037",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "워싱 브로드 레귤러 칼라 긴소매 셔츠",
+    "price": 29900,
+    "size": "S",
+    "serial": "AC2WPA6A-085",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "워싱 브로드 레귤러 칼라 긴소매 셔츠",
+    "brand": "MUJI",
+    "price": "29,900원",
+    "size": "S",
+    "serial": "AC2WPA6A-085",
+    "material": "",
+    "fabric": [],
+    "category": "상의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t038",
+   "truth": {
+    "id": "t038",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "SUPIMA COTTON T",
+    "price": 19900,
+    "size": "L",
+    "serial": "341-482297"
+   },
+   "pred": {
+    "productName": "SUPIMA T",
+    "brand": "UNIQLO",
+    "price": "₩ 19,900",
+    "size": "L",
+    "serial": "341-482297",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": false
+   }
+  },
+  {
+   "id": "t039",
+   "truth": {
+    "id": "t039",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "원턱 와이드 스웨트팬츠",
+    "price": 39900,
+    "size": "S",
+    "serial": "SPMTG12C02-04",
+    "note": "t025와 같은 택"
+   },
+   "pred": {
+    "productName": "[프렌치테리] 원덕 와이드 스웨트팬츠",
+    "brand": "SPAO",
+    "price": "39,900",
+    "size": "S",
+    "serial": "SPMTG12C02-04",
+    "material": "",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t040",
+   "truth": {
+    "id": "t040",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 18900,
+    "size": "6-7",
+    "serial": "6264/704/105",
+    "note": "키즈 122cm, zara.com 아주 작게"
+   },
+   "pred": {
+    "productName": "122 CM 6-778-99-10 11-12 12-13 13-14",
+    "brand": "ZARA",
+    "price": "18,900",
+    "size": "6-7",
+    "serial": "6264/704/105",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t041",
+   "truth": {
+    "id": "t041",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 32000,
+    "size": "L",
+    "serial": "0494713 145",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "763 5513331",
+    "brand": "ARKET",
+    "price": "32000",
+    "size": "L",
+    "serial": "0494713 145",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t042",
+   "truth": {
+    "id": "t042",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 59900,
+    "size": "S",
+    "serial": "1345992 004",
+    "note": "DUAL 양식, 브랜드 추정"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "59,900",
+    "size": "S",
+    "serial": "1345992 004",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t043",
+   "truth": {
+    "id": "t043",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "더블 니트 커브드 스웨트 팬츠",
+    "price": 45900,
+    "size": "L",
+    "serial": "MMFPK8B70-ML-00L"
+   },
+   "pred": {
+    "productName": "더블 니트 커브드 스웨트 팬츠",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩45,900",
+    "size": "L",
+    "serial": "MMFPK8B70-ML-00L",
+    "material": "",
+    "fabric": [
+     "멜란지"
+    ],
+    "category": "상의",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t044",
+   "truth": {
+    "id": "t044",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "케이폭 혼방 코듀로이 칼라 커버올",
+    "price": 79900,
+    "size": "S",
+    "serial": "AD0Y6A6A-068",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "케이폭 혼방 코듀로이 칼라 커버올",
+    "brand": "MUJI",
+    "price": "79,900원",
+    "size": "S",
+    "serial": "ADOY6A6A-068",
+    "material": "",
+    "fabric": [
+     "케이블",
+     "코듀로이"
+    ],
+    "category": "아우터",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t045",
+   "truth": {
+    "id": "t045",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 32000,
+    "size": "L",
+    "serial": "0494713 001",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "09 3 5879481",
+    "brand": "ARKET",
+    "price": "32000",
+    "size": "L",
+    "serial": "0494713 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t046",
+   "truth": {
+    "id": "t046",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 220000,
+    "size": "29/32",
+    "serial": "1303183 001"
+   },
+   "pred": {
+    "productName": "os.com",
+    "brand": "COS",
+    "price": "220,000",
+    "size": "29/32",
+    "serial": "1303183 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t047",
+   "truth": {
+    "id": "t047",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 59900,
+    "size": "L",
+    "serial": "5755/315/800"
+   },
+   "pred": {
+    "productName": "USA MEX UK IT BR",
+    "brand": "ZARA",
+    "price": "59,900",
+    "size": "L",
+    "serial": "5755/315/800",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t048",
+   "truth": {
+    "id": "t048",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 29900,
+    "size": "100/L",
+    "serial": "456841CM01"
+   },
+   "pred": {
+    "productName": "45 68 41 CM01 L",
+    "brand": "8SECONDS",
+    "price": "29,900",
+    "size": "100/L",
+    "serial": "456841CM01",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t049",
+   "truth": {
+    "id": "t049",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 49900,
+    "size": "80",
+    "serial": "456921MMF5"
+   },
+   "pred": {
+    "productName": "45 69 21 MMF5 080",
+    "brand": "8SECONDS",
+    "price": "49,900",
+    "size": "80",
+    "serial": "456921MMF5",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t050",
+   "truth": {
+    "id": "t050",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 39900,
+    "size": "XS",
+    "serial": "1352177 002",
+    "note": "DUAL 양식, 노란 뒷면"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "39,900",
+    "size": "XS",
+    "serial": "1352177 002",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t051",
+   "truth": {
+    "id": "t051",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 175000,
+    "size": "29/32",
+    "serial": "1303189 016"
+   },
+   "pred": {
+    "productName": "www.fsc.org FSC C013603 COS 106 38 Stockholm 117 7. ^ J",
+    "brand": "COS",
+    "price": "175,000",
+    "size": "29/32",
+    "serial": "1303189 016",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t052",
+   "truth": {
+    "id": "t052",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 39900,
+    "size": "95/M",
+    "serial": "456864CME5",
+    "note": "t003과 같은 품번"
+   },
+   "pred": {
+    "productName": "45 68 64 CME5 M",
+    "brand": "8SECONDS",
+    "price": "39,900",
+    "size": "95/M",
+    "serial": "456864CME5",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t053",
+   "truth": {
+    "id": "t053",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 49900,
+    "size": "64/XS",
+    "serial": "356921CM1D"
+   },
+   "pred": {
+    "productName": "35 69 21 CM1D 064",
+    "brand": "8SECONDS",
+    "price": "49,900",
+    "size": "64/XS",
+    "serial": "356921CM1D",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t054",
+   "truth": {
+    "id": "t054",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 59900,
+    "size": "82",
+    "serial": "456921CMAD"
+   },
+   "pred": {
+    "productName": "74 76 78 80 82 84 86 NO.",
+    "brand": "8SECONDS",
+    "price": "59,900",
+    "size": "L",
+    "serial": "456921CMAD",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": false,
+    "serial": true
+   }
+  },
+  {
+   "id": "t055",
+   "truth": {
+    "id": "t055",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 64900,
+    "size": "XL(86-88)",
+    "serial": "456821CC6R"
+   },
+   "pred": {
+    "productName": "45 68 21 CC6R XL",
+    "brand": "8SECONDS",
+    "price": "64,900",
+    "size": "XL(86-88)",
+    "serial": "456821CC6R",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t056",
+   "truth": {
+    "id": "t056",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 32000,
+    "size": "L",
+    "serial": "0494713 002",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "10 3 5879481",
+    "brand": "ARKET",
+    "price": "32000",
+    "size": "L",
+    "serial": "0494713 002",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t057",
+   "truth": {
+    "id": "t057",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 59900,
+    "size": "M",
+    "serial": "1195/331/981"
+   },
+   "pred": {
+    "productName": "ALARM SYSTEM ALAVINADO",
+    "brand": "ZARA",
+    "price": "59,900",
+    "size": "M",
+    "serial": "1195/331/981",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t058",
+   "truth": {
+    "id": "t058",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "오버핏 반팔 옥스포드 셔츠",
+    "price": 35900,
+    "size": "L",
+    "serial": "SPYWE38C41-03"
+   },
+   "pred": {
+    "productName": "오버핏 반팔 옥스포드 셔츠",
+    "brand": "SPAO",
+    "price": "35,900",
+    "size": "L",
+    "serial": "SPYWE38C41-03",
+    "material": "",
+    "fabric": [
+     "옥스포드"
+    ],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t059",
+   "truth": {
+    "id": "t059",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 109900,
+    "size": "40",
+    "serial": "4015/640/721"
+   },
+   "pred": {
+    "productName": "32 34 36 38 40 42 44",
+    "brand": "ZARA",
+    "price": "₩109,900",
+    "size": "40",
+    "serial": "4015/640/721",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t060",
+   "truth": {
+    "id": "t060",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "양면 기모 플란넬 긴소매 셔츠",
+    "price": 39900,
+    "size": "S",
+    "serial": "AC24XA6A-212",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "양면 기모 플란넬 긴소매 셔츠",
+    "brand": "MUJI",
+    "price": "39,900원",
+    "size": "S",
+    "serial": "AC24XA6A-212",
+    "material": "",
+    "fabric": [
+     "기모"
+    ],
+    "category": "상의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t061",
+   "truth": {
+    "id": "t061",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 23900,
+    "size": "6-7",
+    "serial": "0935/713/812",
+    "note": "키즈 122cm"
+   },
+   "pred": {
+    "productName": "122 cm 6-7 8-9 9-10 11-12 12-13 13-14",
+    "brand": "ZARA",
+    "price": "23,900",
+    "size": "6-7",
+    "serial": "0935/713/812",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t062",
+   "truth": {
+    "id": "t062",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 59900,
+    "size": "XL(86-88)",
+    "serial": "456921CM2P"
+   },
+   "pred": {
+    "productName": "45 69 21 CM2P XL",
+    "brand": "8SECONDS",
+    "price": "59,900",
+    "size": "XL(86-88)",
+    "serial": "456921CM2P",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t063",
+   "truth": {
+    "id": "t063",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 115000,
+    "size": "S",
+    "serial": "1358972 002"
+   },
+   "pred": {
+    "productName": "4 4513",
+    "brand": "COS",
+    "price": "115,000",
+    "size": "S",
+    "serial": "1358972 002",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t064",
+   "truth": {
+    "id": "t064",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "[에센셜] 크롭 와이드 슬랙스 (-5CM)",
+    "price": 39900,
+    "size": "26",
+    "serial": "SPTAE23W04-00"
+   },
+   "pred": {
+    "productName": "[에센셜] 크롭 와이드 슬랙스(-5CM)",
+    "brand": "SPAO",
+    "price": "39,900",
+    "size": "26",
+    "serial": "SPTAE23W04-00",
+    "material": "",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t065",
+   "truth": {
+    "id": "t065",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 39900,
+    "size": "S",
+    "serial": "1311969 009",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "Elás PL S RS U BG П",
+    "brand": "H&M",
+    "price": "39,900",
+    "size": "S",
+    "serial": "1311969 009",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t066",
+   "truth": {
+    "id": "t066",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "[시티 레저] 그리드 폴라 플리스 쿼터 집",
+    "price": 59900,
+    "size": "M",
+    "serial": "MMFFE9A82-BK-00M"
+   },
+   "pred": {
+    "productName": "[시티 레저] 그리드 폴라 플리스 쿼터 집",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩59,900",
+    "size": "M",
+    "serial": "MMFFE9A82-BK-00M",
+    "material": "",
+    "fabric": [
+     "플리스"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t067",
+   "truth": {
+    "id": "t067",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 64900,
+    "size": "30/30",
+    "serial": "1352077 001",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "64,900",
+    "size": "30/30",
+    "serial": "1352077 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t068",
+   "truth": {
+    "id": "t068",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 115000,
+    "size": "XXL",
+    "serial": "1260173 010"
+   },
+   "pred": {
+    "productName": "社東京都渋谷区宇田川町33-6 FSC FSC™ C140963 cos.com",
+    "brand": "COS",
+    "price": "115,000",
+    "size": "XXL",
+    "serial": "1260173 010",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t069",
+   "truth": {
+    "id": "t069",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "커브드 데님 팬츠",
+    "price": 49900,
+    "size": "29",
+    "serial": "MMFNP4A19-LI-029"
+   },
+   "pred": {
+    "productName": "커브드 데님 팬츠",
+    "brand": "MUSINSA STANDARD",
+    "price": "W49,900",
+    "size": "29",
+    "serial": "MMFNP4A19-LI-029",
+    "material": "",
+    "fabric": [
+     "데님"
+    ],
+    "category": "하의",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t070",
+   "truth": {
+    "id": "t070",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 279000,
+    "size": "XS",
+    "serial": "1272541 005",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "794 5538371",
+    "brand": "ARKET",
+    "price": "279000",
+    "size": "XS",
+    "serial": "1272541 005",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t071",
+   "truth": {
+    "id": "t071",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "레더배색 바시티 자켓",
+    "price": 89900,
+    "size": "S",
+    "serial": "SPJAE12C01-03"
+   },
+   "pred": {
+    "productName": "레더배색 바시티 자켓",
+    "brand": "SPAO",
+    "price": "89,900",
+    "size": "S",
+    "serial": "SPJAE12C01-03",
+    "material": "",
+    "fabric": [],
+    "category": "아우터",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t072",
+   "truth": {
+    "id": "t072",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 129000,
+    "size": "L",
+    "serial": "1356028 001",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "244 6148901",
+    "brand": "ARKET",
+    "price": "129000",
+    "size": "",
+    "serial": "1356028 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": false,
+    "serial": true
+   }
+  },
+  {
+   "id": "t073",
+   "truth": {
+    "id": "t073",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 64900,
+    "size": "28/30",
+    "serial": "1357829 002",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "₩ 64,900",
+    "size": "28/30",
+    "serial": "1357829 002",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t074",
+   "truth": {
+    "id": "t074",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "코튼 파라슈트 카고 팬츠",
+    "price": null,
+    "size": "29",
+    "serial": "MMCPC503-BE",
+    "note": "가격 없는 케어라벨형 택"
+   },
+   "pred": {
+    "productName": "코튼 파라슈트 카고 팬츠",
+    "brand": "MUSINSA STANDARD",
+    "price": "",
+    "size": "29",
+    "serial": "MMCPC503-BE",
+    "material": "",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t075",
+   "truth": {
+    "id": "t075",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 59900,
+    "size": "95/M",
+    "serial": "456864SC3Q"
+   },
+   "pred": {
+    "productName": "45 68 64 SC3Q M",
+    "brand": "8SECONDS",
+    "price": "59,900",
+    "size": "95/M",
+    "serial": "456864SC3Q",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t076",
+   "truth": {
+    "id": "t076",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "드라이피케 스트라이프 폴로셔츠",
+    "price": 39900,
+    "size": "XL",
+    "serial": "341-485567"
+   },
+   "pred": {
+    "productName": "드라이피케 스트라이프 폴로셔츠",
+    "brand": "UNIQLO",
+    "price": "W 39,900",
+    "size": "XL",
+    "serial": "341-485567",
+    "material": "코튼 73% / 폴리에스터 27% / 폴리에스터 73% / 코튼 27%",
+    "fabric": [
+     "리브"
+    ],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t077",
+   "truth": {
+    "id": "t077",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "드레이프 반팔티",
+    "price": 25900,
+    "size": "S",
+    "serial": "SPRWG37G33-00"
+   },
+   "pred": {
+    "productName": "드레이프",
+    "brand": "SPAO",
+    "price": "25,900",
+    "size": "S",
+    "serial": "SPRWG37G33-00",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": false
+   }
+  },
+  {
+   "id": "t078",
+   "truth": {
+    "id": "t078",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "워싱 코튼 이지 카고 팬츠",
+    "price": 49900,
+    "size": "M",
+    "serial": "AE13GA6A-059",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "워싱 코튼 이지 카고 팬츠",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "M",
+    "serial": "AE13GA6A-059",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t079",
+   "truth": {
+    "id": "t079",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 59900,
+    "size": "M",
+    "serial": "1341511 001",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "W 59,900",
+    "size": "M",
+    "serial": "1341511 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t080",
+   "truth": {
+    "id": "t080",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 115000,
+    "size": "L",
+    "serial": "1260173 011"
+   },
+   "pred": {
+    "productName": "4 4516",
+    "brand": "COS",
+    "price": "115,000",
+    "size": "L",
+    "serial": "1260173 011",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t081",
+   "truth": {
+    "id": "t081",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 29900,
+    "size": "XL",
+    "serial": "1318075 002",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "29,900",
+    "size": "XL",
+    "serial": "1318075 002",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t082",
+   "truth": {
+    "id": "t082",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 49900,
+    "size": "105/XL",
+    "serial": "456841SS1U"
+   },
+   "pred": {
+    "productName": "45 68 41 SS1U XL",
+    "brand": "8SECONDS",
+    "price": "49,900",
+    "size": "105/XL",
+    "serial": "456841SS1U",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t083",
+   "truth": {
+    "id": "t083",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 119000,
+    "size": "M",
+    "serial": "1359176 001",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "744 6101171",
+    "brand": "ARKET",
+    "price": "119000",
+    "size": "M",
+    "serial": "1359176 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t084",
+   "truth": {
+    "id": "t084",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 32000,
+    "size": "S",
+    "serial": "0494713 151",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "76 45976321",
+    "brand": "ARKET",
+    "price": "32000",
+    "size": "S",
+    "serial": "0494713 151",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t085",
+   "truth": {
+    "id": "t085",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "라이트 시스루 긴팔 셔츠",
+    "price": 39900,
+    "size": "M",
+    "serial": "SPYWF37W04-00",
+    "note": "저해상도(251px), 상품명 판독 불확실"
+   },
+   "pred": {
+    "productName": "라이트 시스루 긴팔셔츠",
+    "brand": "SPAO",
+    "price": "39,900",
+    "size": "M",
+    "serial": "SPYWF37W04-00",
+    "material": "",
+    "fabric": [],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t086",
+   "truth": {
+    "id": "t086",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "UV 컷 포케터블 윈드 브레이커",
+    "price": 49900,
+    "size": "S",
+    "serial": "AD10Z46A-006",
+    "note": "품번 판독 불확실"
+   },
+   "pred": {
+    "productName": "UV 컷 포케터블 윈드 브레이커",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "S",
+    "serial": "",
+    "material": "",
+    "fabric": [
+     "발수",
+     "방풍"
+    ],
+    "category": "아우터",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": false,
+    "name": true
+   }
+  },
+  {
+   "id": "t087",
+   "truth": {
+    "id": "t087",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "[시티 레저] 메시 플리스 후디드 긴소매 티셔츠",
+    "price": 49900,
+    "size": "L",
+    "serial": "MMFFE9A81-BK-00L"
+   },
+   "pred": {
+    "productName": "[시티 레저] 메시 플리스 후디드 긴소매 티셔츠",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩49,900",
+    "size": "L",
+    "serial": "MMFFE9A81-BK-00L",
+    "material": "",
+    "fabric": [
+     "메시",
+     "플리스"
+    ],
+    "category": "상의",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t088",
+   "truth": {
+    "id": "t088",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 69000,
+    "size": "M",
+    "serial": "1318643 001"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "COS",
+    "price": "69,000",
+    "size": "M",
+    "serial": "1318643 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t089",
+   "truth": {
+    "id": "t089",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "케이폭 혼방 가제 개더 팬츠",
+    "price": 59900,
+    "size": "S",
+    "serial": "AE12GA6A-089",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "케이폭 혼방 가제 개더 팬츠",
+    "brand": "MUJI",
+    "price": "59,900원",
+    "size": "S",
+    "serial": "AE12GA6A-089",
+    "material": "",
+    "fabric": [
+     "케이블"
+    ],
+    "category": "하의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t090",
+   "truth": {
+    "id": "t090",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 49900,
+    "size": "M",
+    "serial": "3992/430/800"
+   },
+   "pred": {
+    "productName": "MM M SML XL",
+    "brand": "ZARA",
+    "price": "49,900",
+    "size": "M",
+    "serial": "3992/430/800",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t091",
+   "truth": {
+    "id": "t091",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 39900,
+    "size": "11-12",
+    "serial": "5987/705/505",
+    "note": "키즈 148cm"
+   },
+   "pred": {
+    "productName": "6-7 8-9 9-10 11-12 12-13 13-14",
+    "brand": "ZARA",
+    "price": "39,900",
+    "size": "11-12",
+    "serial": "5987/705/505",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t092",
+   "truth": {
+    "id": "t092",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "워싱 코튼 이지 카고 팬츠",
+    "price": 49900,
+    "size": "M",
+    "serial": "AE13GA6A-009",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "워싱 코튼 이지 카고 팬츠",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "M",
+    "serial": "AE13GA6A-009",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t093",
+   "truth": {
+    "id": "t093",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "여성 후드 푸퍼",
+    "price": 79900,
+    "size": "S",
+    "serial": "SPJPF4TG03-05"
+   },
+   "pred": {
+    "productName": "여성 후드 푸퍼",
+    "brand": "SPAO",
+    "price": "79,900",
+    "size": "S",
+    "serial": "SPJPF4TG03-05",
+    "material": "",
+    "fabric": [],
+    "category": "아우터",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t094",
+   "truth": {
+    "id": "t094",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "윈드블럭 후리스 풀집파카",
+    "price": 79900,
+    "size": "L",
+    "serial": "341-486116"
+   },
+   "pred": {
+    "productName": "윈드블럭 후리스 풀집파카",
+    "brand": "UNIQLO",
+    "price": "₩79,900",
+    "size": "L",
+    "serial": "341-486116",
+    "material": "폴리에스터 100%",
+    "fabric": [
+     "플리스"
+    ],
+    "category": "아우터",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t095",
+   "truth": {
+    "id": "t095",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "워싱 코튼 이지 카고 팬츠",
+    "price": 49900,
+    "size": "M",
+    "serial": "AE13GA6A-009",
+    "note": "t092와 같은 택"
+   },
+   "pred": {
+    "productName": "워싱 코튼 이지 카고 팬츠",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "M",
+    "serial": "AE13GA6A-009",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t096",
+   "truth": {
+    "id": "t096",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "PUFFTECH 베스트",
+    "price": 69900,
+    "size": "S",
+    "serial": "311-487348"
+   },
+   "pred": {
+    "productName": "PUFFTECH 베스트",
+    "brand": "UNIQLO",
+    "price": "₩69,900",
+    "size": "S",
+    "serial": "311-487348",
+    "material": "나일론 100% / 폴리에스터 80% / 폴리에스터 20% / 폴리에스터 100%",
+    "fabric": [],
+    "category": "아우터",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t098",
+   "truth": {
+    "id": "t098",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 49900,
+    "size": "28",
+    "serial": "1341412 001",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "49,900",
+    "size": "28",
+    "serial": "1341412 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t099",
+   "truth": {
+    "id": "t099",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 169000,
+    "size": "L",
+    "serial": "1304291 002",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "174 6422621",
+    "brand": "ARKET",
+    "price": "169000",
+    "size": "L",
+    "serial": "1304291 002",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t100",
+   "truth": {
+    "id": "t100",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 39900,
+    "size": "100/L",
+    "serial": "456841SS36"
+   },
+   "pred": {
+    "productName": "45 68 41 SS36 L",
+    "brand": "8SECONDS",
+    "price": "39,900",
+    "size": "100/L",
+    "serial": "456841SS36",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t101",
+   "truth": {
+    "id": "t101",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "치노 턱 와이드 팬츠",
+    "price": 49900,
+    "size": "79cm",
+    "serial": "AE11AA6A-089",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "치노 턱 와이드 팬츠",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "79cm",
+    "serial": "AE11AA6A-089",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t102",
+   "truth": {
+    "id": "t102",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "치노 턱 와이드 팬츠",
+    "price": 49900,
+    "size": "82cm",
+    "serial": "AE11AA6S-006",
+    "note": "JAN 4548… = 무인양품"
+   },
+   "pred": {
+    "productName": "치노 턱 와이드 팬츠",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "82cm",
+    "serial": "AE11AA6S-006",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t103",
+   "truth": {
+    "id": "t103",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "워싱 코튼 이지 카고 팬츠",
+    "price": 49900,
+    "size": "M",
+    "serial": "AE13GA6A-008",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "워싱 코튼 이지 카고 팬츠",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "M",
+    "serial": "AE13GA6A-008",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t104",
+   "truth": {
+    "id": "t104",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 150000,
+    "size": "42",
+    "serial": "1351093 001"
+   },
+   "pred": {
+    "productName": "4 4513",
+    "brand": "COS",
+    "price": "150,000",
+    "size": "42",
+    "serial": "1351093 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t105",
+   "truth": {
+    "id": "t105",
+    "brand": "ARKET",
+    "brand_in_text": false,
+    "name": "",
+    "price": 129000,
+    "size": "S",
+    "serial": "1296629 003",
+    "note": "90도 회전, RN101255 | 사용자 확인(택 모음 PDF 2페이지)"
+   },
+   "pred": {
+    "productName": "064 596169 1",
+    "brand": "ARKET",
+    "price": "129000",
+    "size": "S",
+    "serial": "1296629 003",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t106",
+   "truth": {
+    "id": "t106",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "소프트브러시드 터틀넥T 긴팔",
+    "price": 29900,
+    "size": "S",
+    "serial": "341-486129"
+   },
+   "pred": {
+    "productName": "소프트브러시드 터틀넥ㅜ 긴팔",
+    "brand": "UNIQLO",
+    "price": "W 29,900",
+    "size": "S",
+    "serial": "341-486129",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t107",
+   "truth": {
+    "id": "t107",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "케이폭 혼방 코듀로이 칼라 커버올",
+    "price": 79900,
+    "size": "S",
+    "serial": "AD0Y6A6A-019",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "케이폭 혼방 코듀로이 칼라 커버올",
+    "brand": "MUJI",
+    "price": "79,900원",
+    "size": "S",
+    "serial": "ADOY6A6A-019",
+    "material": "",
+    "fabric": [
+     "케이블",
+     "코듀로이"
+    ],
+    "category": "아우터",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t108",
+   "truth": {
+    "id": "t108",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 175000,
+    "size": "S",
+    "serial": "1350225 001"
+   },
+   "pred": {
+    "productName": "COS 106 38 Stockholm I·PR·I ㅅㅊㅈ.了。 FSC FSC C140983",
+    "brand": "COS",
+    "price": "175,000",
+    "size": "S",
+    "serial": "1350225 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t109",
+   "truth": {
+    "id": "t109",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 34900,
+    "size": "M",
+    "serial": "1352180 001",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "34,900",
+    "size": "M",
+    "serial": "1352180 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t110",
+   "truth": {
+    "id": "t110",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "드레이프 반팔티",
+    "price": 25900,
+    "size": "S",
+    "serial": "SPRWG37G33-00",
+    "note": "t077과 같은 택"
+   },
+   "pred": {
+    "productName": "드레이프",
+    "brand": "SPAO",
+    "price": "25,900",
+    "size": "S",
+    "serial": "SPRWG37G33-00",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": false
+   }
+  },
+  {
+   "id": "t111",
+   "truth": {
+    "id": "t111",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 64900,
+    "size": "XL(86-88)",
+    "serial": "456821CC6R",
+    "note": "t055와 같은 택"
+   },
+   "pred": {
+    "productName": "45 68 21 CC6R XL",
+    "brand": "8SECONDS",
+    "price": "64,900",
+    "size": "XL(86-88)",
+    "serial": "456821CC6R",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t112",
+   "truth": {
+    "id": "t112",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "드라이피케 폴로셔츠",
+    "price": 39900,
+    "size": "XL",
+    "serial": "341-482304"
+   },
+   "pred": {
+    "productName": "드라이피케 폴로셔츠",
+    "brand": "UNIQLO",
+    "price": "₩ 39,900",
+    "size": "XL",
+    "serial": "341-482304",
+    "material": "코튼 72% / 폴리에스터 28% / 폴리에스터 73% / 코튼 27%",
+    "fabric": [
+     "리브"
+    ],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t113",
+   "truth": {
+    "id": "t113",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 99900,
+    "size": "XL",
+    "serial": "4938/324/800"
+   },
+   "pred": {
+    "productName": "USA MEX UK IT",
+    "brand": "ZARA",
+    "price": "99,900",
+    "size": "XL",
+    "serial": "4938/324/800",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t114",
+   "truth": {
+    "id": "t114",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 89900,
+    "size": "S",
+    "serial": "7147/450/800"
+   },
+   "pred": {
+    "productName": "USA MEX UK IT BR",
+    "brand": "ZARA",
+    "price": "89,900",
+    "size": "S",
+    "serial": "7147/450/800",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t115",
+   "truth": {
+    "id": "t115",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "AIRism코튼 피케 폴로셔츠",
+    "price": 39900,
+    "size": "L",
+    "serial": "341-482302"
+   },
+   "pred": {
+    "productName": "AIRism코튼 피케 폴로셔츠",
+    "brand": "UNIQLO",
+    "price": "₩39,900",
+    "size": "L",
+    "serial": "341-482302",
+    "material": "코튼 57% / 나일론 43% / 폴리에스터 73% / 레이온 27%",
+    "fabric": [
+     "리브"
+    ],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t116",
+   "truth": {
+    "id": "t116",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "솔리드 CP 커브드 치노 팬츠",
+    "price": 49900,
+    "size": "28",
+    "serial": "MMFPC3A15-OL-028"
+   },
+   "pred": {
+    "productName": "솔리드 CP 커브드 치노 팬츠",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩49,900",
+    "size": "28",
+    "serial": "MMFPC3A15-OL-028",
+    "material": "",
+    "fabric": [
+     "리브"
+    ],
+    "category": "하의",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t117",
+   "truth": {
+    "id": "t117",
+    "brand": "8seconds",
+    "brand_in_text": true,
+    "name": "",
+    "price": 69900,
+    "size": "95/M",
+    "serial": "456839SM4Q"
+   },
+   "pred": {
+    "productName": "45 68 39 SM4Q M",
+    "brand": "8SECONDS",
+    "price": "69,900",
+    "size": "95/M",
+    "serial": "456839SM4Q",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t118",
+   "truth": {
+    "id": "t118",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "UT",
+    "price": 12900,
+    "size": "S",
+    "serial": "341-488247",
+    "note": "가격 일부 잘림"
+   },
+   "pred": {
+    "productName": "UT",
+    "brand": "UNIQLO",
+    "price": "₩12,900",
+    "size": "S",
+    "serial": "341-488247",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t119",
+   "truth": {
+    "id": "t119",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 59900,
+    "size": "M",
+    "serial": "1341511 002",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "W 59,900",
+    "size": "M",
+    "serial": "1341511 002",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t120",
+   "truth": {
+    "id": "t120",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 135000,
+    "size": "S",
+    "serial": "1373692 002"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "COS",
+    "price": "135,000",
+    "size": "S",
+    "serial": "1373692 002",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t121",
+   "truth": {
+    "id": "t121",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "박시 크롭T",
+    "price": 19900,
+    "size": "S",
+    "serial": "341-487962"
+   },
+   "pred": {
+    "productName": "박시 크롭T",
+    "brand": "UNIQLO",
+    "price": "₩19,900",
+    "size": "S",
+    "serial": "341-487962",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t122",
+   "truth": {
+    "id": "t122",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 135000,
+    "size": "S",
+    "serial": "1327611 006"
+   },
+   "pred": {
+    "productName": "•시는 IL ^7.7 東京都渋谷区宇田川町33-6 cos.com",
+    "brand": "COS",
+    "price": "135,000",
+    "size": "S",
+    "serial": "1327611 006",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t123",
+   "truth": {
+    "id": "t123",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 39900,
+    "size": "8-9",
+    "serial": "5987/705/300",
+    "note": "키즈 131cm"
+   },
+   "pred": {
+    "productName": "6-7 8-9 9-10 11-12 12-13 13-14",
+    "brand": "ZARA",
+    "price": "39,900",
+    "size": "8-9",
+    "serial": "5987/705/300",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t124",
+   "truth": {
+    "id": "t124",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 220000,
+    "size": "31/32",
+    "serial": "1303183 001"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "COS",
+    "price": "220,000",
+    "size": "31/32",
+    "serial": "1303183 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t125",
+   "truth": {
+    "id": "t125",
+    "brand": "SPAO",
+    "brand_in_text": true,
+    "name": "플란넬 체크 셔츠",
+    "price": 39900,
+    "size": "M",
+    "serial": "SPYCE11W01-00"
+   },
+   "pred": {
+    "productName": "플란넬 체크 셔츠",
+    "brand": "SPAO",
+    "price": "39,900",
+    "size": "M",
+    "serial": "SPYCE11W01-00",
+    "material": "",
+    "fabric": [],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t126",
+   "truth": {
+    "id": "t126",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "피그먼트 오버사이즈 데님 트러커 재킷",
+    "price": 89900,
+    "size": "M",
+    "serial": "MMDNJ3Z11-BE-00M"
+   },
+   "pred": {
+    "productName": "피그먼트 오버사이즈 데님 트러커 재킷",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩89,900",
+    "size": "M",
+    "serial": "MMDNJ3Z11-BE-00M",
+    "material": "",
+    "fabric": [
+     "데님"
+    ],
+    "category": "아우터",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t127",
+   "truth": {
+    "id": "t127",
+    "brand": "UNIQLO",
+    "brand_in_text": true,
+    "name": "소프트브러시드 터틀넥T 긴팔",
+    "price": 29900,
+    "size": "L",
+    "serial": "341-486129"
+   },
+   "pred": {
+    "productName": "소프트브러시드 터틀넥ㅜ 긴팔",
+    "brand": "UNIQLO",
+    "price": "W29,900",
+    "size": "L",
+    "serial": "341-486129",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "상의",
+    "brandSource": "logo"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t128",
+   "truth": {
+    "id": "t128",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "[시티 레저] 후디드 라이트 다운 재킷",
+    "price": 109900,
+    "size": "M",
+    "serial": "MMDDJAZ01-MZ-00M"
+   },
+   "pred": {
+    "productName": "[시티 레저] 후디드 라이트 다운 재킷",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩109,900",
+    "size": "M",
+    "serial": "MMDDJAZ01-MZ-00M",
+    "material": "",
+    "fabric": [],
+    "category": "아우터",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t129",
+   "truth": {
+    "id": "t129",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 57900,
+    "size": "11-12",
+    "serial": "0327/700/802",
+    "note": "키즈 148cm"
+   },
+   "pred": {
+    "productName": "148 CM 6-7 8-9 9-10 11-12 12-13 13-14",
+    "brand": "ZARA",
+    "price": "57,900",
+    "size": "11-12",
+    "serial": "0327/700/802",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t130",
+   "truth": {
+    "id": "t130",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "치노 턱 와이드 팬츠",
+    "price": 49900,
+    "size": "79cm",
+    "serial": "AE11AA6A-019",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "치노 턱 와이드 팬츠",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "79cm",
+    "serial": "AE11AA6A-019",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t131",
+   "truth": {
+    "id": "t131",
+    "brand": "ZARA",
+    "brand_in_text": true,
+    "name": "",
+    "price": 59900,
+    "size": "L",
+    "serial": "3411/320/800"
+   },
+   "pred": {
+    "productName": "USA MEX UK IT",
+    "brand": "ZARA",
+    "price": "59,900",
+    "size": "L",
+    "serial": "3411/320/800",
+    "material": "",
+    "fabric": [],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t132",
+   "truth": {
+    "id": "t132",
+    "brand": "COS",
+    "brand_in_text": true,
+    "name": "",
+    "price": 115000,
+    "size": "S",
+    "serial": "1307720 014"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "COS",
+    "price": "115,000",
+    "size": "S",
+    "serial": "1307720 014",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t133",
+   "truth": {
+    "id": "t133",
+    "brand": "MUJI",
+    "brand_in_text": false,
+    "name": "치노 턱 와이드 팬츠",
+    "price": 49900,
+    "size": "79cm",
+    "serial": "AE11AA6A-009",
+    "note": "JAN 4550… = 무인양품"
+   },
+   "pred": {
+    "productName": "치노 턱 와이드 팬츠",
+    "brand": "MUJI",
+    "price": "49,900원",
+    "size": "79cm",
+    "serial": "AE11AA6A-009",
+    "material": "코튼 100%",
+    "fabric": [],
+    "category": "하의",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t134",
+   "truth": {
+    "id": "t134",
+    "brand": "musinsa standard",
+    "brand_in_text": true,
+    "name": "피그먼트 오버사이즈 데님 트러커 재킷",
+    "price": 89900,
+    "size": "L",
+    "serial": "MMDNJ3Z11-CG-00L"
+   },
+   "pred": {
+    "productName": "피그먼트 오버사이즈 데님 트러커 재킷",
+    "brand": "MUSINSA STANDARD",
+    "price": "₩89,900",
+    "size": "L",
+    "serial": "MMDNJ3Z11-CG-OOL",
+    "material": "",
+    "fabric": [
+     "데님"
+    ],
+    "category": "아우터",
+    "brandSource": "dictionary"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true,
+    "name": true
+   }
+  },
+  {
+   "id": "t135",
+   "truth": {
+    "id": "t135",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 59900,
+    "size": "L",
+    "serial": "1340845 001",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "59,900",
+    "size": "L",
+    "serial": "1340845 001",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  },
+  {
+   "id": "t136",
+   "truth": {
+    "id": "t136",
+    "brand": "H&M",
+    "brand_in_text": false,
+    "name": "",
+    "price": 34900,
+    "size": "L",
+    "serial": "1313928 011",
+    "note": "DUAL 양식"
+   },
+   "pred": {
+    "productName": "",
+    "brand": "H&M",
+    "price": "34,900",
+    "size": "L",
+    "serial": "1313928 011",
+    "material": "",
+    "fabric": [
+     "퍼"
+    ],
+    "category": "",
+    "brandSource": "signature"
+   },
+   "ok": {
+    "brand": true,
+    "price": true,
+    "size": true,
+    "serial": true
+   }
+  }
+ ]
+}
