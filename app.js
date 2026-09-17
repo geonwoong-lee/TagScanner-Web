@@ -284,6 +284,9 @@ async function handleImageSelected(file) {
 
     $('reviewPhoto').src = photoData;
 
+    // 일반 모드는 택이 아니라 옷을 찍은 경우라 사진 종류를 옷으로 둔다
+    const primaryKind = captureMode === 'normal' ? 'garment' : 'tag';
+
     // 일반 모드면 OCR 건너뛰고 빈 폼으로 진행
     if (captureMode === 'normal') {
       finishOcr({
@@ -292,6 +295,7 @@ async function handleImageSelected(file) {
         processedData,
         rawText: '',
         engine: 'none',
+        primaryKind,
       });
       return;
     }
@@ -306,6 +310,7 @@ async function handleImageSelected(file) {
       rawText: ocrResult.text,
       logos: ocrResult.logos,
       engine,
+      primaryKind,
     });
   } catch (e) {
     console.error(e);
@@ -375,11 +380,61 @@ function initBrandOptions() {
   ).join('');
 }
 
-function finishOcr({ photoData, rawData, processedData, rawText, logos, engine }) {
+// ---- 등록 화면 사진 목록 ----
+// 처음 찍은 사진(택 또는 옷)은 빼지 않고, 추가한 옷·착용 사진만 뺄 수 있다
+function renderReviewPhotos() {
+  const strip = $('reviewPhotoStrip');
+  if (!strip || !currentReview) return;
+  const items = [
+    { kind: currentReview.primaryKind, dataUrl: currentReview.photoData, fixed: true },
+    ...currentReview.extraPhotos,
+  ];
+  strip.innerHTML = items.map((p, i) => `
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}" alt="">
+      <span class="photo-kind">${PHOTO_KIND_LABEL[p.kind]}</span>
+      ${p.fixed ? '' : `<button type="button" class="photo-remove" data-index="${i - 1}" aria-label="사진 빼기">×</button>`}
+    </div>
+  `).join('');
+  strip.querySelectorAll('.photo-remove').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      currentReview.extraPhotos.splice(Number(btn.dataset.index), 1);
+      renderReviewPhotos();
+    });
+  });
+  $('reviewPhotoCount').textContent = `${items.length}/${MAX_PHOTOS}`;
+  document.querySelectorAll('#reviewForm .photo-add-btn').forEach((b) => {
+    b.disabled = items.length >= MAX_PHOTOS;
+  });
+}
+
+async function addReviewPhotos(files, kind) {
+  if (!currentReview || !files || files.length === 0) return;
+  const room = MAX_PHOTOS - 1 - currentReview.extraPhotos.length;
+  if (room <= 0) {
+    showToast(`사진은 상품당 ${MAX_PHOTOS}장까지 넣을 수 있어요`);
+    return;
+  }
+  try {
+    const urls = await filesToPhotoDataUrls(files, room);
+    currentReview.extraPhotos.push(...urls.map((dataUrl) => ({ kind, dataUrl })));
+    renderReviewPhotos();
+    if (files.length > room) showToast(`${room}장만 추가했어요 (상품당 최대 ${MAX_PHOTOS}장)`);
+  } catch (e) {
+    showToast('사진을 불러오지 못했어요: ' + (e.message || e));
+  }
+}
+
+function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, primaryKind = 'tag', extraPhotos = [] }) {
   const lines = window.splitLines(rawText);
   const fields = window.parseFields(lines, { logos: logos || [] });
 
-  currentReview = { photoData, rawData, processedData, rawText, logos: logos || [], fields, engine };
+  currentReview = {
+    photoData, rawData, processedData, rawText, logos: logos || [], fields, engine,
+    primaryKind, // 처음 찍은 사진의 종류 ('tag' | 'garment')
+    extraPhotos, // 저장 전에 추가한 옷·착용 사진 [{ kind, dataUrl }]
+  };
+  renderReviewPhotos();
 
   $('brand').value = fields.brand;
   $('productName').value = fields.productName;
@@ -450,6 +505,8 @@ async function retryOcr() {
       rawText: ocrResult.text,
       logos: ocrResult.logos,
       engine,
+      primaryKind: currentReview.primaryKind,
+      extraPhotos: currentReview.extraPhotos,
     });
     showToast('재시도 완료');
   } catch (e) {
@@ -536,6 +593,109 @@ function deleteTagById(id) {
   const remaining = tags.filter((t) => t.id !== id);
   saveTags(remaining);
   return deletedTag;
+}
+
+// ---- 상품 사진 ----
+// 상품 하나에 사진 여러 장: photos = [{ id, kind: 'tag' | 'garment' | 'wearing', createdAt }]
+// 사진 파일은 PhotoStore(IndexedDB)에 있고 상품 정보에는 id만 저장한다.
+const MAX_PHOTOS = 6;
+const PHOTO_KIND_LABEL = { tag: '택', garment: '옷', wearing: '착용' };
+
+function tagPhotos(t) {
+  return Array.isArray(t && t.photos) ? t.photos : [];
+}
+
+// 목록·비교에 보여줄 대표 사진: 직접 지정한 사진 → 옷 사진 → 첫 사진
+function coverPhotoId(t) {
+  const photos = tagPhotos(t);
+  if (t.coverPhotoId && photos.some((p) => p.id === t.coverPhotoId)) return t.coverPhotoId;
+  const garment = photos.find((p) => p.kind === 'garment');
+  return (garment || photos[0] || {}).id || '';
+}
+
+// 비슷한 옷 찾기에 쓰는 사진: 옷 사진만 (택이나 착용샷끼리는 옷 비교가 안 된다)
+function garmentPhotoId(t) {
+  const photos = tagPhotos(t);
+  const cover = photos.find((p) => p.id === t.coverPhotoId && p.kind === 'garment');
+  return (cover || photos.find((p) => p.kind === 'garment') || {}).id || '';
+}
+
+// 저장된 embedding이 지금의 옷 사진으로 만든 것인지
+function hasValidEmbedding(t) {
+  return Boolean(t.embedding && t.embeddingPhotoId && t.embeddingPhotoId === garmentPhotoId(t));
+}
+
+// 대표 사진 태그. 실제 이미지는 렌더 후 PhotoStore.hydrate()가 채운다.
+function coverImg(t, className = '') {
+  // 이전 형식이 아직 옮겨지지 않은 상품
+  if (!Array.isArray(t.photos) && t.photoData) {
+    return `<img class="${className}" src="${t.photoData}" alt="">`;
+  }
+  const id = coverPhotoId(t);
+  return id
+    ? `<img class="${className}" data-photo-id="${id}" alt="">`
+    : `<div class="${className} photo-placeholder">사진 없음</div>`;
+}
+
+// 파일 여러 장을 저장용 크기로 줄여 data URL로 바꾼다
+async function filesToPhotoDataUrls(files, room) {
+  const out = [];
+  for (const file of Array.from(files).slice(0, Math.max(0, room))) {
+    const img = await loadImageFromFile(file);
+    out.push(imageToCanvas(img, STORAGE_MAX_DIMENSION).toDataURL('image/jpeg', JPEG_QUALITY));
+  }
+  return out;
+}
+
+// data URL 사진들을 사진 저장소에 넣고 photos 항목을 돌려준다
+async function storePhotos(items) {
+  const now = Date.now();
+  const stored = [];
+  try {
+    for (const p of items) {
+      const id = PhotoStore.newId();
+      await PhotoStore.put(id, await PhotoStore.dataUrlToBlob(p.dataUrl));
+      stored.push({ id, kind: p.kind, createdAt: p.createdAt || now });
+    }
+  } catch (e) {
+    await PhotoStore.remove(stored.map((p) => p.id)).catch(() => {});
+    throw e;
+  }
+  return stored;
+}
+
+// 예전 형식(상품마다 photoData 한 장)을 사진 저장소로 옮긴다.
+// 옮기기에 성공한 상품만 photoData를 지우므로 도중에 실패해도 원본 사진은 남는다.
+async function migrateLegacyPhotos() {
+  const tags = loadTags();
+  let moved = 0;
+  for (const t of tags) {
+    if (!t.photoData || Array.isArray(t.photos)) continue;
+    try {
+      const [photo] = await storePhotos([{ kind: 'tag', dataUrl: t.photoData, createdAt: t.createdAt }]);
+      t.photos = [photo];
+      delete t.photoData;
+      // 기존 embedding은 택 사진으로 만든 것이라 옷끼리 비교하는 데 쓸 수 없다
+      delete t.embedding;
+      delete t.embeddingPhotoId;
+      moved++;
+    } catch (e) {
+      console.warn('사진 이전 실패 (원본 유지):', t.id, e);
+    }
+  }
+  if (moved > 0) saveTags(tags);
+  return moved;
+}
+
+// 어느 상품에도 연결되지 않은 사진 정리 (삭제 후 되돌리기 시간이 지난 사진 등)
+async function cleanupOrphanPhotos() {
+  const used = new Set(loadTags().flatMap((t) => tagPhotos(t).map((p) => p.id)));
+  // 저장 중인 사진(사진을 먼저 넣고 상품을 나중에 저장)을 지우지 않도록 최근 10분 사진은 남긴다
+  const createdAt = (id) => parseInt(String(id).slice(1, -6), 36) || 0;
+  const orphans = (await PhotoStore.listIds())
+    .filter((id) => !used.has(id) && Date.now() - createdAt(id) > 10 * 60 * 1000);
+  if (orphans.length > 0) await PhotoStore.remove(orphans);
+  return orphans.length;
 }
 
 // 삭제된 항목을 다시 목록에 복구 (같은 id/데이터 그대로)
@@ -669,7 +829,7 @@ function renderList() {
 
     card.innerHTML = `
       <div class="tag-card-image-wrap">
-        <img class="tag-card-image" src="${t.photoData}" alt="">
+        ${coverImg(t, 'tag-card-image')}
         ${t.category ? `<span class="tag-card-category">${escapeHtml(t.category)}</span>` : ''}
       </div>
       <div class="tag-card-icons">
@@ -711,6 +871,7 @@ function renderList() {
 
     listEl.appendChild(card);
   }
+  PhotoStore.hydrate(listEl);
 }
 
 function toggleFavorite(id) {
@@ -755,7 +916,7 @@ function renderCompare() {
     const sizeText = t.size ? `사이즈: ${escapeHtml(t.size)}` : '';
 
     card.innerHTML = `
-      <img class="compare-card-image" src="${t.photoData}" alt="">
+      ${coverImg(t, 'compare-card-image')}
       <div class="compare-card-info">
         <div class="compare-card-brand">${escapeHtml(t.brand) || '-'}</div>
         <div class="compare-card-name">${escapeHtml(t.productName) || '(상품명 없음)'}</div>
@@ -789,6 +950,7 @@ function renderCompare() {
 
     listEl.appendChild(card);
   }
+  PhotoStore.hydrate(listEl);
 }
 
 // ---- 카테고리 Pills 렌더링 ----
@@ -1043,15 +1205,16 @@ async function findSimilarProducts(targetEmbedding, topK = 5) {
   return scored.slice(0, topK);
 }
 
-// 저장 시 embedding 백그라운드 계산
-async function generateEmbeddingForTag(tagId, photoData) {
+// 옷 사진으로 embedding을 만들어 상품에 저장한다 (어떤 사진으로 만들었는지도 함께 기록)
+async function generateEmbeddingForTag(tagId, photoId) {
   try {
-    const embedding = await window.CLIP.computeImageEmbedding(photoData);
-    // 저장된 태그에 embedding 추가
+    const embedding = await window.CLIP.computeImageEmbedding(await PhotoStore.url(photoId));
     const tags = loadTags();
     const idx = tags.findIndex((t) => t.id === tagId);
-    if (idx >= 0) {
+    // 계산하는 사이 옷 사진이 바뀌었으면 저장하지 않는다
+    if (idx >= 0 && garmentPhotoId(tags[idx]) === photoId) {
       tags[idx].embedding = embedding;
+      tags[idx].embeddingPhotoId = photoId;
       saveTags(tags);
     }
     return embedding;
@@ -1061,53 +1224,74 @@ async function generateEmbeddingForTag(tagId, photoData) {
   }
 }
 
-// 상세 화면에서 유사한 옷 표시
+// 옷 사진은 있는데 embedding이 없거나 예전 사진 기준인 상품들을 채운다
+async function fillMissingEmbeddings(tags, onProgress) {
+  const pending = tags.filter((t) => garmentPhotoId(t) && !hasValidEmbedding(t));
+  for (let i = 0; i < pending.length; i++) {
+    if (onProgress) onProgress(i + 1, pending.length);
+    await generateEmbeddingForTag(pending[i].id, garmentPhotoId(pending[i]));
+  }
+  return pending.length;
+}
+
+function showSimilarLoading(container, message) {
+  container.innerHTML = `
+    <div class="similar-loading">
+      <div>🎨 이미지 분석 중...</div>
+      <div class="similar-loading-bar"><div id="similarProgressFill" class="similar-loading-fill"></div></div>
+      <div id="similarProgressText" style="font-size: 11px;">${message}</div>
+    </div>
+  `;
+}
+
+// 상세 화면에서 유사한 옷 표시 (옷 사진끼리 비교)
 async function renderSimilarClothes(currentTag) {
   const container = $('similarContent');
   if (!container) return;
 
-  const allTags = loadTags();
-  const tagsWithEmb = allTags.filter((t) => t.embedding);
-
-  if (tagsWithEmb.length === 0) {
-    container.innerHTML = `<p class="similar-hint">비교할 옷이 없어요. 옷을 더 저장하면 유사한 옷을 찾아드립니다.</p>`;
+  if (!garmentPhotoId(currentTag)) {
+    container.innerHTML = `<p class="similar-hint">옷 사진을 추가하면 내 옷장에서 비슷한 옷을 찾아 드려요.</p>`;
     return;
   }
 
-  // 현재 태그의 embedding 확인/생성
-  let targetEmb = currentTag.embedding;
+  const candidates = loadTags().filter((t) => t.id !== currentTag.id && garmentPhotoId(t));
+  if (candidates.length === 0) {
+    container.innerHTML = `<p class="similar-hint">옷 사진이 있는 상품이 하나 더 있어야 비교할 수 있어요.</p>`;
+    return;
+  }
 
-  if (!targetEmb) {
-    container.innerHTML = `
-      <div class="similar-loading">
-        <div>🎨 이미지 분석 중...</div>
-        <div class="similar-loading-bar"><div id="similarProgressFill" class="similar-loading-fill"></div></div>
-        <div id="similarProgressText" style="font-size: 11px;">CLIP 모델 로딩 중 (첫 실행 시 40MB 다운로드)</div>
-      </div>
-    `;
-
+  const needsWork = !hasValidEmbedding(currentTag) || candidates.some((t) => !hasValidEmbedding(t));
+  if (needsWork) {
+    showSimilarLoading(container, 'CLIP 모델 로딩 중 (첫 실행 시 40MB 다운로드)');
     window.CLIP.setProgressCallback((msg, pct) => {
       const fill = $('similarProgressFill');
       const text = $('similarProgressText');
       if (fill) fill.style.width = pct + '%';
       if (text) text.textContent = msg;
     });
-
     try {
-      targetEmb = await window.CLIP.computeImageEmbedding(currentTag.photoData);
-      // 저장
-      const tags = loadTags();
-      const idx = tags.findIndex((t) => t.id === currentTag.id);
-      if (idx >= 0) {
-        tags[idx].embedding = targetEmb;
-        saveTags(tags);
-      }
+      await fillMissingEmbeddings([currentTag, ...candidates], (i, n) => {
+        const text = $('similarProgressText');
+        if (text) text.textContent = `옷 사진 분석 중 (${i}/${n})`;
+      });
     } catch (e) {
       container.innerHTML = `<p class="similar-hint">❌ 분석 실패: ${escapeHtml(e.message || String(e))}</p>`;
       return;
     } finally {
       window.CLIP.setProgressCallback(null);
     }
+  }
+
+  // 분석 중 다른 상품으로 이동했으면 결과를 그리지 않는다
+  if (currentDetailId !== currentTag.id) return;
+
+  const fresh = loadTags();
+  const target = fresh.find((t) => t.id === currentTag.id);
+  const targetEmb = target && hasValidEmbedding(target) ? target.embedding : null;
+  const tagsWithEmb = fresh.filter((t) => t.id !== currentTag.id && hasValidEmbedding(t));
+  if (!targetEmb || tagsWithEmb.length === 0) {
+    container.innerHTML = `<p class="similar-hint">❌ 옷 사진을 분석하지 못했어요.</p>`;
+    return;
   }
 
   // 유사한 옷 찾기 (자기 자신 제외)
@@ -1124,7 +1308,7 @@ async function renderSimilarClothes(currentTag) {
     <div class="similar-list">
       ${similar.map(({ tag, similarity }) => `
         <div class="similar-card" data-id="${tag.id}">
-          <img src="${tag.photoData}" alt="">
+          ${coverImg(tag)}
           <div class="similar-card-info">
             <div class="similar-card-brand">${escapeHtml(tag.brand) || '(브랜드 없음)'}</div>
             <div class="similar-card-score">유사도 ${Math.round(similarity * 100)}%</div>
@@ -1134,6 +1318,7 @@ async function renderSimilarClothes(currentTag) {
     </div>
   `;
   container.innerHTML = html;
+  PhotoStore.hydrate(container);
 
   // 클릭 시 해당 상세로 이동
   container.querySelectorAll('.similar-card').forEach((card) => {
@@ -1169,19 +1354,18 @@ async function renderStyleAnalysis() {
   const container = $('styleAnalysis');
   if (!container) return;
 
-  const tags = loadTags();
-  const tagsWithEmb = tags.filter((t) => t.embedding);
+  // 스타일은 옷 사진이 있는 상품만 분석한다
+  const withGarment = loadTags().filter((t) => garmentPhotoId(t));
 
-  if (tagsWithEmb.length === 0) {
+  if (withGarment.length === 0) {
     container.innerHTML = `
-      <p class="style-hint">아직 분석할 데이터가 없어요.<br>옷을 저장하면 자동으로 스타일이 분석됩니다.</p>
+      <p class="style-hint">아직 분석할 옷 사진이 없어요.<br>상품에 옷 사진을 추가하면 스타일을 분석해 드려요.</p>
     `;
     return;
   }
 
-  // 이미 분석된 embedding 있는지, 없으면 버튼으로 실행
   container.innerHTML = `
-    <p class="style-hint">${tagsWithEmb.length}개 상품에 대한 스타일 분석 준비 완료</p>
+    <p class="style-hint">옷 사진이 있는 상품 ${withGarment.length}개를 분석할 수 있어요</p>
     <button class="style-load-btn" id="runStyleAnalysis">📊 스타일 분석 실행</button>
   `;
 
@@ -1191,6 +1375,12 @@ async function renderStyleAnalysis() {
     btn.textContent = '분석 중...';
 
     try {
+      await fillMissingEmbeddings(withGarment, (i, n) => {
+        btn.textContent = `옷 사진 분석 중... (${i}/${n})`;
+      });
+      const tagsWithEmb = loadTags().filter((t) => hasValidEmbedding(t));
+      if (tagsWithEmb.length === 0) throw new Error('옷 사진을 분석하지 못했어요');
+
       // 각 태그마다 스타일 분류
       const styleCounts = {};
       window.CLIP.STYLE_LABELS_EN.forEach((s) => (styleCounts[s] = 0));
@@ -1286,7 +1476,7 @@ function renderMyPage() {
       const item = document.createElement('div');
       item.className = 'mypage-recent-item';
       item.innerHTML = `
-        <img src="${t.photoData}" alt="">
+        ${coverImg(t)}
         <div class="mypage-recent-info">
           <div class="mypage-recent-name">${escapeHtml(t.productName) || escapeHtml(t.brand) || '(이름 없음)'}</div>
           <div class="mypage-recent-meta">
@@ -1298,16 +1488,38 @@ function renderMyPage() {
       item.addEventListener('click', () => openDetail(t.id));
       recentEl.appendChild(item);
     }
+    PhotoStore.hydrate(recentEl);
   }
 }
 
 // ---- 데이터 내보내기 ----
-function exportData() {
-  const data = {
-    exportedAt: new Date().toISOString(),
-    version: 1,
-    tags: loadTags(),
-  };
+// version 2: 사진은 photos[].dataUrl로 담는다 (사진 제외를 고르면 dataUrl 없음)
+async function buildExportPayload(includePhotos) {
+  const tags = [];
+  for (const t of loadTags()) {
+    const copy = { ...t };
+    // embedding은 사진으로 다시 계산할 수 있고 파일만 커진다
+    delete copy.embedding;
+    delete copy.embeddingPhotoId;
+    if (includePhotos) {
+      copy.photos = [];
+      for (const p of tagPhotos(t)) {
+        const blob = await PhotoStore.get(p.id);
+        if (blob) copy.photos.push({ ...p, dataUrl: await PhotoStore.blobToDataUrl(blob) });
+      }
+    }
+    tags.push(copy);
+  }
+  return { exportedAt: new Date().toISOString(), version: 2, includesPhotos: includePhotos, tags };
+}
+
+async function exportData() {
+  const includePhotos = confirm(
+    '사진도 함께 내보낼까요?\n\n' +
+    '[확인] 사진 포함 (파일이 커집니다)\n' +
+    '[취소] 상품 정보만'
+  );
+  const data = await buildExportPayload(includePhotos);
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1323,7 +1535,7 @@ function exportData() {
 // ---- 데이터 가져오기 (JSON 파일에서) ----
 function importDataFromFile(file) {
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const parsed = JSON.parse(e.target.result);
       // 스키마 검증
@@ -1346,19 +1558,35 @@ function importDataFromFile(file) {
       // 중복 제거: 기존 id와 겹치면 새 id 부여
       const existingIds = new Set(existing.map((t) => t.id));
       let now = Date.now();
-      const cleaned = importedTags.map((t) => {
-        let newT = { ...t };
+      const cleaned = [];
+      const storedIds = [];
+      for (const t of importedTags) {
+        const newT = { ...t };
         if (!newT.id || existingIds.has(newT.id)) {
           newT.id = now++;
         }
         if (!newT.createdAt) newT.createdAt = newT.id;
-        return newT;
-      });
+        // 사진은 새 id로 사진 저장소에 넣는다 (예전 형식은 photoData 한 장)
+        const source = Array.isArray(t.photos)
+          ? t.photos
+          : t.photoData ? [{ kind: 'tag', dataUrl: t.photoData, createdAt: t.createdAt }] : [];
+        const withData = source.filter((p) => p.dataUrl);
+        const stored = await storePhotos(withData);
+        storedIds.push(...stored.map((p) => p.id));
+        const coverIndex = withData.findIndex((p) => p.id && p.id === t.coverPhotoId);
+        newT.photos = stored;
+        newT.coverPhotoId = coverIndex >= 0 ? stored[coverIndex].id : undefined;
+        delete newT.photoData;
+        delete newT.embedding;
+        delete newT.embeddingPhotoId;
+        cleaned.push(newT);
+      }
 
       // 병합 후 저장
       const merged = [...cleaned, ...existing].sort((a, b) => b.createdAt - a.createdAt);
       const r = saveTags(merged);
       if (!r.ok) {
+        await PhotoStore.remove(storedIds).catch(() => {});
         if (r.isQuota) {
           alert('⚠️ 저장 공간 부족으로 일부만 가져올 수 있습니다. 기존 데이터를 정리한 후 다시 시도하세요.');
         } else {
@@ -1381,6 +1609,7 @@ function clearAllData() {
   if (!confirm('정말 전체 태그 데이터를 삭제할까요?\n이 작업은 되돌릴 수 없습니다.')) return;
   if (!confirm('한 번 더 확인합니다. 모든 사진과 정보가 삭제됩니다. 계속할까요?')) return;
   localStorage.removeItem(STORAGE_KEY);
+  PhotoStore.clear().catch((e) => console.warn('사진 삭제 실패:', e));
   showToast('전체 데이터를 삭제했습니다');
   renderMyPage();
 }
@@ -1425,7 +1654,7 @@ function renderCompareResult() {
     <div class="compare-table">
       <div class="compare-row" style="grid-template-columns: ${cols};">
         <div class="compare-cell label">사진</div>
-        ${favs.map((t) => `<div class="compare-cell"><img src="${t.photoData}" alt=""></div>`).join('')}
+        ${favs.map((t) => `<div class="compare-cell">${coverImg(t)}</div>`).join('')}
       </div>
       ${row('브랜드', (t) => escapeHtml(t.brand), 'brand')}
       ${row('상품명', (t) => escapeHtml(t.productName))}
@@ -1441,6 +1670,7 @@ function renderCompareResult() {
       ${row('메모', (t) => escapeHtml(t.memo))}
     </div>
   `;
+  PhotoStore.hydrate(body);
 }
 
 function escapeHtml(s) {
@@ -1453,14 +1683,117 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+// ---- 상세 화면 사진 ----
+let detailSelectedPhotoId = null;
+
+function renderDetailPhotos() {
+  const t = loadTags().find((x) => x.id === currentDetailId);
+  const strip = $('detailPhotoStrip');
+  if (!t || !strip) return;
+  const photos = tagPhotos(t);
+  const cover = coverPhotoId(t);
+  if (!photos.some((p) => p.id === detailSelectedPhotoId)) detailSelectedPhotoId = null;
+
+  strip.innerHTML = photos.length
+    ? photos.map((p) => `
+        <div class="detail-photo-item ${p.id === detailSelectedPhotoId ? 'selected' : ''}" data-photo="${p.id}">
+          <img data-photo-id="${p.id}" alt="">
+          ${p.id === cover ? '<span class="photo-cover-mark">대표</span>' : ''}
+          <span class="photo-kind">${PHOTO_KIND_LABEL[p.kind] || ''}</span>
+        </div>
+      `).join('')
+    : `<div class="photo-placeholder detail-photo-empty">사진 없음</div>`;
+
+  strip.querySelectorAll('.detail-photo-item').forEach((el) => {
+    el.addEventListener('click', () => {
+      detailSelectedPhotoId = detailSelectedPhotoId === el.dataset.photo ? null : el.dataset.photo;
+      renderDetailPhotos();
+    });
+  });
+  PhotoStore.hydrate(strip);
+
+  const actions = $('detailPhotoActions');
+  actions.hidden = !detailSelectedPhotoId;
+  $('detailSetCover').disabled = detailSelectedPhotoId === cover;
+  $('detailPhotoCount').textContent = `사진 ${photos.length}/${MAX_PHOTOS}`;
+  document.querySelectorAll('#detailScreen .photo-add-btn').forEach((b) => {
+    b.disabled = photos.length >= MAX_PHOTOS;
+  });
+}
+
+// 사진 구성이 바뀐 뒤 옷 사진 기준이 달라졌으면 비슷한 옷을 다시 계산한다
+function afterDetailPhotosChanged(prevGarmentId) {
+  renderDetailPhotos();
+  renderList();
+  const t = loadTags().find((x) => x.id === currentDetailId);
+  if (t && garmentPhotoId(t) !== prevGarmentId) {
+    renderSimilarClothes(t).catch((e) => console.warn('유사 옷 렌더 실패:', e));
+  }
+}
+
+async function addDetailPhotos(files, kind) {
+  const t = loadTags().find((x) => x.id === currentDetailId);
+  if (!t || !files || files.length === 0) return;
+  const room = MAX_PHOTOS - tagPhotos(t).length;
+  if (room <= 0) {
+    showToast(`사진은 상품당 ${MAX_PHOTOS}장까지 넣을 수 있어요`);
+    return;
+  }
+  const prevGarment = garmentPhotoId(t);
+  try {
+    const urls = await filesToPhotoDataUrls(files, room);
+    const stored = await storePhotos(urls.map((dataUrl) => ({ kind, dataUrl })));
+    const latest = loadTags().find((x) => x.id === currentDetailId);
+    updateTag(currentDetailId, { photos: [...tagPhotos(latest), ...stored] });
+    showToast(files.length > room ? `${room}장만 추가했어요 (최대 ${MAX_PHOTOS}장)` : `사진 ${stored.length}장을 추가했어요`);
+    afterDetailPhotosChanged(prevGarment);
+  } catch (e) {
+    showToast('사진 추가 실패: ' + (e.message || e));
+  }
+}
+
+function setDetailCover() {
+  const t = loadTags().find((x) => x.id === currentDetailId);
+  if (!t || !detailSelectedPhotoId) return;
+  const prevGarment = garmentPhotoId(t);
+  updateTag(currentDetailId, { coverPhotoId: detailSelectedPhotoId });
+  showToast('대표 사진으로 정했어요');
+  afterDetailPhotosChanged(prevGarment);
+}
+
+async function deleteDetailPhoto() {
+  const t = loadTags().find((x) => x.id === currentDetailId);
+  if (!t || !detailSelectedPhotoId) return;
+  const photos = tagPhotos(t);
+  if (photos.length <= 1) {
+    showToast('사진은 최소 1장이 있어야 해요');
+    return;
+  }
+  if (!confirm('이 사진을 삭제할까요?')) return;
+  const prevGarment = garmentPhotoId(t);
+  const removeId = detailSelectedPhotoId;
+  const patch = { photos: photos.filter((p) => p.id !== removeId) };
+  if (t.coverPhotoId === removeId) patch.coverPhotoId = undefined;
+  if (t.embeddingPhotoId === removeId) {
+    patch.embedding = undefined;
+    patch.embeddingPhotoId = undefined;
+  }
+  updateTag(currentDetailId, patch);
+  detailSelectedPhotoId = null;
+  await PhotoStore.remove(removeId).catch((e) => console.warn('사진 파일 삭제 실패:', e));
+  showToast('사진을 삭제했어요');
+  afterDetailPhotosChanged(prevGarment);
+}
+
 // ---- 상세 화면 ----
 function openDetail(id) {
   const tags = loadTags();
   const t = tags.find((x) => x.id === id);
   if (!t) return;
   currentDetailId = id;
+  detailSelectedPhotoId = null;
 
-  $('detailPhoto').src = t.photoData;
+  renderDetailPhotos();
   $('d_category').value = t.category || '';
   $('d_brand').value = t.brand || '';
   $('d_productName').value = t.productName || '';
@@ -1521,12 +1854,47 @@ function bindEvents() {
     e.target.value = '';
   });
 
-  $('reviewForm').addEventListener('submit', (e) => {
+  // 사진 추가 버튼 (등록 화면·상세 화면 공용): 누른 버튼의 종류를 기억했다가 파일 선택 후 반영
+  let pendingPhotoKind = 'garment';
+  document.querySelectorAll('.photo-add-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      pendingPhotoKind = btn.dataset.kind;
+      $(btn.dataset.target === 'detail' ? 'detailPhotoInput' : 'reviewPhotoInput').click();
+    });
+  });
+  $('reviewPhotoInput').addEventListener('change', async (e) => {
+    await addReviewPhotos(e.target.files, pendingPhotoKind);
+    e.target.value = '';
+  });
+  $('detailPhotoInput').addEventListener('change', async (e) => {
+    await addDetailPhotos(e.target.files, pendingPhotoKind);
+    e.target.value = '';
+  });
+  $('detailSetCover').addEventListener('click', setDetailCover);
+  $('detailDeletePhoto').addEventListener('click', deleteDetailPhoto);
+
+  let reviewSaving = false;
+  $('reviewForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!currentReview) return;
+    if (!currentReview || reviewSaving) return;
+    reviewSaving = true;
+    const review = currentReview;
+
+    let photos;
+    try {
+      photos = await storePhotos([
+        { kind: review.primaryKind, dataUrl: review.photoData },
+        ...review.extraPhotos,
+      ]);
+    } catch (err) {
+      reviewSaving = false;
+      showToast('사진 저장 실패: ' + (err.message || err));
+      return;
+    }
+
     const saved = addTag({
-      photoData: currentReview.photoData,
-      rawText: currentReview.rawText,
+      photos,
+      rawText: review.rawText,
       category: reviewSelectedCategory,
       brand: $('brand').value.trim(),
       productName: $('productName').value.trim(),
@@ -1537,15 +1905,23 @@ function bindEvents() {
       store: $('store').value.trim(),
       memo: $('memo').value.trim(),
     });
-    if (!saved) return; // 저장 실패 시 화면 유지
+    reviewSaving = false;
+    if (!saved) {
+      // 상품 저장에 실패하면 방금 넣은 사진도 지운다 (화면은 유지)
+      await PhotoStore.remove(photos.map((p) => p.id)).catch(() => {});
+      return;
+    }
 
-    // 백그라운드에서 CLIP embedding 생성 (실패해도 앱 진행에 영향 없음)
-    generateEmbeddingForTag(saved.id, currentReview.photoData).catch((e) =>
-      console.warn('embedding 생성 실패:', e)
-    );
+    // 옷 사진이 있으면 백그라운드에서 CLIP embedding 생성 (실패해도 앱 진행에 영향 없음)
+    const garmentId = garmentPhotoId(saved);
+    if (garmentId) {
+      generateEmbeddingForTag(saved.id, garmentId).catch((err) =>
+        console.warn('embedding 생성 실패:', err)
+      );
+    }
     currentReview = null;
     // 폼 리셋
-    ['brand', 'productName', 'price', 'size', 'serial', 'store', 'memo'].forEach((id) => {
+    ['brand', 'productName', 'price', 'size', 'serial', 'material', 'store', 'memo'].forEach((id) => {
       const el = $(id);
       if (el) el.value = '';
     });
@@ -1973,8 +2349,15 @@ function bindEvents() {
 }
 
 // ---- 시작 ----
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   bindEvents();
   initBrandOptions();
   showScreen('main');
+  try {
+    const moved = await migrateLegacyPhotos();
+    if (moved > 0) console.info(`사진 ${moved}장을 새 저장소로 옮겼습니다`);
+    await cleanupOrphanPhotos();
+  } catch (e) {
+    console.warn('사진 저장소 준비 실패:', e);
+  }
 });
