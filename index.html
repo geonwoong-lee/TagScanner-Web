@@ -88,6 +88,15 @@
 
       <form id="reviewForm" class="form" hidden>
         <div class="field">
+          <label>사진 <span class="photo-count" id="reviewPhotoCount"></span></label>
+          <div class="photo-strip" id="reviewPhotoStrip"></div>
+          <div class="photo-add-row">
+            <button type="button" class="secondary-btn photo-add-btn" data-kind="garment" data-target="review">옷 사진 추가</button>
+            <button type="button" class="secondary-btn photo-add-btn" data-kind="wearing" data-target="review">착용샷 추가</button>
+          </div>
+          <input type="file" id="reviewPhotoInput" accept="image/*" multiple hidden>
+        </div>
+        <div class="field">
           <label>카테고리</label>
           <div class="filter-pills" id="reviewCategoryPills"></div>
         </div>
@@ -302,8 +311,21 @@
     </div>
 
     <div class="detail-container">
-      <div class="detail-photos">
-        <img id="detailPhoto" alt="태그 사진">
+      <div class="detail-photos" id="detailPhotoStrip"></div>
+      <div class="detail-photo-tools">
+        <div class="detail-photo-head">
+          <span class="photo-count" id="detailPhotoCount"></span>
+          <span class="detail-photo-tip">사진을 누르면 대표 사진 지정이나 삭제를 할 수 있어요</span>
+        </div>
+        <div class="photo-selected-actions" id="detailPhotoActions" hidden>
+          <button type="button" class="photo-action-btn" id="detailSetCover">대표 사진으로</button>
+          <button type="button" class="photo-action-btn danger" id="detailDeletePhoto">이 사진 삭제</button>
+        </div>
+        <div class="photo-add-row">
+          <button type="button" class="secondary-btn photo-add-btn" data-kind="garment" data-target="detail">옷 사진 추가</button>
+          <button type="button" class="secondary-btn photo-add-btn" data-kind="wearing" data-target="detail">착용샷 추가</button>
+        </div>
+        <input type="file" id="detailPhotoInput" accept="image/*" multiple hidden>
       </div>
 
       <form id="detailForm">
@@ -512,6 +534,7 @@
   <script src="tag_profiles.js"></script>
   <script src="parser.js"></script>
   <script src="clip.js"></script>
+  <script src="photos.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
