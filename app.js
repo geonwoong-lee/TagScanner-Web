@@ -339,6 +339,35 @@ function renderFabricTags(tags) {
   });
 }
 
+// ---- 세탁법 선택 버튼 ----
+// 세탁법은 가격표 택보다 옷 안쪽 케어라벨에 적혀 있어 자동으로 못 읽는 경우가 많다.
+// 자주 쓰는 표현을 버튼으로 두고 눌러서 넣고 빼게 한다.
+const CARE_OPTIONS = ['손세탁', '드라이클리닝', '세탁기 가능', '물세탁 금지', '세탁기 금지', '표백 금지', '다림질 주의', '그늘 건조'];
+const CARE_SEPARATOR = ' · ';
+
+function splitCare(value) {
+  return String(value || '').split(/\s*[·,/]\s*/).map((s) => s.trim()).filter(Boolean);
+}
+
+function renderCareChips() {
+  document.querySelectorAll('.care-chips').forEach((box) => {
+    const input = $(box.dataset.input);
+    if (!input) return;
+    const selected = splitCare(input.value);
+    box.innerHTML = CARE_OPTIONS.map((opt) =>
+      `<button type="button" class="care-chip ${selected.includes(opt) ? 'active' : ''}" data-care="${opt}">${opt}</button>`
+    ).join('');
+  });
+}
+
+function toggleCare(inputId, option) {
+  const input = $(inputId);
+  const items = splitCare(input.value);
+  const next = items.includes(option) ? items.filter((x) => x !== option) : [...items, option];
+  input.value = next.join(CARE_SEPARATOR);
+  renderCareChips();
+}
+
 // ---- 브랜드 후보 제시 ----
 // 브랜드를 확실히 못 잡았을 때 브랜드 기준 데이터(brands.js)에서 후보를 띄운다
 function renderBrandSuggest(fields, lines) {
@@ -442,6 +471,8 @@ function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, 
   $('size').value = fields.size;
   $('serial').value = fields.serial;
   $('material').value = fields.material || '';
+  $('care').value = fields.care || '';
+  renderCareChips();
   renderFabricTags(fields.fabric);
   renderBrandSuggest(fields, lines);
   if (!$('memo').value) $('memo').value = '';
@@ -1615,6 +1646,27 @@ function clearAllData() {
 }
 
 // ---- 비교 결과 (한눈에 보기) 렌더링 ----
+// 찜한 상품을 나란히 놓고 항목별로 비교하는 대시보드.
+// 휴대폰에서는 상품 2개가 한 화면에 온전히 보이고 나머지는 옆으로 넘긴다. 넓은 화면에서는 모두 나란히 보인다.
+let comparePhotoKind = 'garment'; // 사진 줄에 보여줄 종류: 'garment' | 'wearing' | 'tag'
+const COMPARE_PHOTO_KINDS = [
+  { kind: 'garment', label: '옷' },
+  { kind: 'wearing', label: '착용샷' },
+  { kind: 'tag', label: '택' },
+];
+
+// 비교 화면 사진: 옷은 대표로 고른 옷 사진 우선, 나머지는 해당 종류 첫 장
+function comparePhotoOf(t, kind) {
+  if (kind === 'garment') return garmentPhotoId(t);
+  const photos = tagPhotos(t);
+  const cover = photos.find((p) => p.id === t.coverPhotoId && p.kind === kind);
+  return (cover || photos.find((p) => p.kind === kind) || {}).id || '';
+}
+
+function formatWon(n) {
+  return '₩' + Number(n).toLocaleString('ko-KR');
+}
+
 function renderCompareResult() {
   const favs = loadTags().filter((t) => t.favorite);
   const body = $('compareResultBody');
@@ -1629,49 +1681,97 @@ function renderCompareResult() {
     return;
   }
 
-  // 가격(₩숫자)에서 정수 추출해 최저가 표시
-  const priceNumbers = favs.map((t) => {
-    const m = (t.price || '').match(/([\d,]+)/);
-    return m ? parseInt(m[1].replace(/,/g, ''), 10) : null;
-  });
-  const validPrices = priceNumbers.filter((p) => p !== null);
+  // 최저가와 차액
+  const prices = favs.map((t) => parsePriceNumber(t.price));
+  const validPrices = prices.filter((p) => p !== null);
   const minPrice = validPrices.length ? Math.min(...validPrices) : null;
 
-  const cols = `repeat(${favs.length + 1}, minmax(120px, 1fr))`;
-  const headerCells = `
-    <div class="compare-cell label">항목</div>
-    ${favs.map(() => `<div class="compare-cell"></div>`).join('')}
+  const empty = (text = '정보 없음') => `<span class="cmp-empty">${text}</span>`;
+  const chips = (values, cls) =>
+    values.length ? values.map((v) => `<span class="cmp-chip ${cls}">${escapeHtml(v)}</span>`).join('') : empty();
+
+  // 항목 한 줄: 항목 이름은 줄 위에 가로로 두고(옆으로 넘겨도 왼쪽에 고정), 값은 상품마다 한 칸
+  const section = (label, cellFn, cls = '') => `
+    <div class="cmp-label"><span>${label}</span></div>
+    ${favs.map((t, i) => `<div class="cmp-cell ${cls}">${cellFn(t, i)}</div>`).join('')}
   `;
 
-  const row = (label, valueFn, extraClass = '') => `
-    <div class="compare-row" style="grid-template-columns: ${cols};">
-      <div class="compare-cell label">${label}</div>
-      ${favs.map((t, i) => `<div class="compare-cell ${extraClass}">${valueFn(t, i) || '-'}</div>`).join('')}
-    </div>
-  `;
+  const photoCell = (t) => {
+    const id = comparePhotoOf(t, comparePhotoKind);
+    const kindLabel = COMPARE_PHOTO_KINDS.find((k) => k.kind === comparePhotoKind).label;
+    const count = tagPhotos(t).filter((p) => p.kind === comparePhotoKind).length;
+    return id
+      ? `<div class="cmp-photo">
+           <img data-photo-id="${id}" alt="">
+           ${count > 1 ? `<span class="cmp-photo-count">${count}장</span>` : ''}
+         </div>`
+      : `<div class="cmp-photo cmp-photo-none">${kindLabel} 사진 없음</div>`;
+  };
+
+  const heads = favs.map((t) => `
+    <button type="button" class="cmp-head" data-id="${t.id}">
+      ${photoCell(t)}
+      <span class="cmp-brand">${escapeHtml(t.brand) || '브랜드 없음'}</span>
+      <span class="cmp-name">${escapeHtml(t.productName) || '상품명 없음'}</span>
+    </button>
+  `).join('');
+
+  const priceCell = (t, i) => {
+    if (prices[i] === null) return empty();
+    const diff = prices[i] - minPrice;
+    return `
+      <span class="cmp-price">${formatWon(prices[i])}</span>
+      ${diff === 0 && validPrices.length > 1
+        ? '<span class="cmp-badge best">최저가</span>'
+        : diff > 0 ? `<span class="cmp-diff">최저가보다 +${formatWon(diff)}</span>` : ''}
+    `;
+  };
+
+  const text = (v) => (v ? `<span class="cmp-text">${escapeHtml(v)}</span>` : empty());
 
   body.innerHTML = `
-    <div class="compare-table">
-      <div class="compare-row" style="grid-template-columns: ${cols};">
-        <div class="compare-cell label">사진</div>
-        ${favs.map((t) => `<div class="compare-cell">${coverImg(t)}</div>`).join('')}
+    <div class="cmp-toolbar">
+      <div class="cmp-kind-toggle" role="tablist" aria-label="비교할 사진 종류">
+        ${COMPARE_PHOTO_KINDS.map(({ kind, label }) =>
+          `<button type="button" class="${kind === comparePhotoKind ? 'active' : ''}" data-kind="${kind}">${label}</button>`
+        ).join('')}
       </div>
-      ${row('브랜드', (t) => escapeHtml(t.brand), 'brand')}
-      ${row('상품명', (t) => escapeHtml(t.productName))}
-      ${row('사이즈', (t) => escapeHtml(t.size))}
-      <div class="compare-row" style="grid-template-columns: ${cols};">
-        <div class="compare-cell label">가격</div>
-        ${favs.map((t, i) => {
-          const isMin = priceNumbers[i] !== null && priceNumbers[i] === minPrice;
-          return `<div class="compare-cell price ${isMin ? 'cheapest' : ''}">${escapeHtml(t.price) || '-'}${isMin ? ' 🏆' : ''}</div>`;
-        }).join('')}
+      <span class="cmp-count">상품 ${favs.length}개</span>
+    </div>
+    <p class="cmp-swipe-hint" hidden>옆으로 넘기면 나머지 상품도 볼 수 있어요</p>
+    <div class="cmp-scroll">
+      <div class="cmp-grid" style="--cols: ${favs.length};">
+        ${heads}
+        ${section('가격', priceCell, 'cmp-cell-price')}
+        ${section('사이즈', (t) => text(t.size))}
+        ${section('소재', (t) => chips(String(t.material || '').split(/\s*\/\s*/).filter(Boolean), 'material'))}
+        ${section('세탁법', (t) => chips(splitCare(t.care), 'care'))}
+        ${section('매장', (t) => text(t.store))}
+        ${section('메모', (t) => text(t.memo), 'cmp-cell-memo')}
       </div>
-      ${row('매장명', (t) => escapeHtml(t.store))}
-      ${row('메모', (t) => escapeHtml(t.memo))}
     </div>
   `;
+
+  body.querySelectorAll('.cmp-kind-toggle button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      comparePhotoKind = btn.dataset.kind;
+      renderCompareResult();
+    });
+  });
+  body.querySelectorAll('.cmp-head').forEach((el) => {
+    el.addEventListener('click', () => openDetail(Number(el.dataset.id)));
+  });
   PhotoStore.hydrate(body);
+  updateCompareSwipeHint();
 }
+
+// 상품이 화면에 다 들어오지 않을 때만 "옆으로 넘기기" 안내를 보여준다
+function updateCompareSwipeHint() {
+  const sc = document.querySelector('#compareResultBody .cmp-scroll');
+  const hint = document.querySelector('#compareResultBody .cmp-swipe-hint');
+  if (sc && hint) hint.hidden = sc.scrollWidth <= sc.clientWidth + 2;
+}
+window.addEventListener('resize', updateCompareSwipeHint);
 
 function escapeHtml(s) {
   if (!s) return '';
@@ -1801,6 +1901,8 @@ function openDetail(id) {
   $('d_size').value = t.size || '';
   $('d_serial').value = t.serial || '';
   $('d_material').value = t.material || '';
+  $('d_care').value = t.care || '';
+  renderCareChips();
   $('d_store').value = t.store || '';
   $('d_memo').value = t.memo || '';
   $('d_createdAt').textContent = new Date(t.createdAt).toLocaleString('ko-KR');
@@ -1871,6 +1973,16 @@ function bindEvents() {
     e.target.value = '';
   });
   $('detailSetCover').addEventListener('click', setDetailCover);
+
+  // 세탁법 버튼 (등록·상세 공용). 직접 입력한 내용에 맞춰 버튼 선택 상태도 갱신한다.
+  document.querySelectorAll('.care-chips').forEach((box) => {
+    box.addEventListener('click', (e) => {
+      const chip = e.target.closest('.care-chip');
+      if (chip) toggleCare(box.dataset.input, chip.dataset.care);
+    });
+    const input = $(box.dataset.input);
+    if (input) input.addEventListener('input', renderCareChips);
+  });
   $('detailDeletePhoto').addEventListener('click', deleteDetailPhoto);
 
   let reviewSaving = false;
@@ -1902,6 +2014,7 @@ function bindEvents() {
       size: $('size').value.trim(),
       serial: $('serial').value.trim(),
       material: $('material').value.trim(),
+      care: $('care').value.trim(),
       store: $('store').value.trim(),
       memo: $('memo').value.trim(),
     });
@@ -1921,7 +2034,7 @@ function bindEvents() {
     }
     currentReview = null;
     // 폼 리셋
-    ['brand', 'productName', 'price', 'size', 'serial', 'material', 'store', 'memo'].forEach((id) => {
+    ['brand', 'productName', 'price', 'size', 'serial', 'material', 'care', 'store', 'memo'].forEach((id) => {
       const el = $(id);
       if (el) el.value = '';
     });
@@ -2321,6 +2434,7 @@ function bindEvents() {
       size: $('d_size').value.trim(),
       serial: $('d_serial').value.trim(),
       material: $('d_material').value.trim(),
+      care: $('d_care').value.trim(),
       store: $('d_store').value.trim(),
       memo: $('d_memo').value.trim(),
     });

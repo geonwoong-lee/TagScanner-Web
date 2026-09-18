@@ -1038,6 +1038,44 @@ function extractFabricTags(lines) {
 }
 
 // ============================
+// 세탁법 (소재 사전의 care_label 용어 + 자주 쓰는 한글 금지 표현)
+// ============================
+// 사전 표준 용어 → 화면에 보여줄 이름. 원산지·제조연월은 세탁법이 아니라 뺀다.
+const CARE_LABELS = {
+  '손세탁': '손세탁',
+  '드라이클리닝': '드라이클리닝',
+  '세탁기사용가능': '세탁기 가능',
+  '표백제사용금지': '표백 금지',
+  '다림질주의': '다림질 주의',
+  '그늘건조': '그늘 건조',
+};
+// 사전에 없는 금지 표현. "세탁기"가 들어가도 금지면 '세탁기 가능'으로 잡히지 않게 먼저 본다.
+const CARE_PATTERNS = [
+  { re: /물\s*세탁\s*(불가|금지|하지)/, label: '물세탁 금지' },
+  { re: /세탁기\s*(사용\s*)?(불가|금지)/, label: '세탁기 금지' },
+];
+
+function extractCare(lines) {
+  const found = [];
+  const add = (label) => { if (label && !found.includes(label)) found.push(label); };
+  for (const line of lines) {
+    const text = String(line);
+    let negated = false;
+    for (const { re, label } of CARE_PATTERNS) {
+      if (re.test(text)) { add(label); negated = true; }
+    }
+    if (negated) continue;
+    const n = normalize(text);
+    for (const alias of FABRIC_ALIASES_SORTED) {
+      const info = FABRIC_LOOKUP.get(alias);
+      if (info.category !== 'care_label' || !CARE_LABELS[info.term] || alias.length < 3) continue;
+      if (n.includes(alias)) add(CARE_LABELS[info.term]);
+    }
+  }
+  return found.join(' · ');
+}
+
+// ============================
 // 브랜드 후보 제시 (브랜드 기준 데이터 대조)
 // 브랜드를 자동으로 못 잡았을 때 앱이 후보 버튼을 띄우는 데 쓴다
 // ============================
@@ -1093,6 +1131,7 @@ window.parseFields = function (lines, options = {}) {
     serial: '',
     material: '', // 혼용률 (예: 코튼 72% / 폴리에스터 28%)
     fabric: [], // 가공·조직 용어 (예: ['기모', '와플'])
+    care: '', // 세탁법 (예: 손세탁 · 표백 금지)
     category: '',
     brandSource: '', // 'logo' | 'dictionary' | 'profile' | 'signature' | 'fallback'
   };
@@ -1220,6 +1259,7 @@ window.parseFields = function (lines, options = {}) {
   // 7) 소재 (혼용률 + 가공·조직 용어)
   result.material = extractMaterial(lines);
   result.fabric = extractFabricTags(lines);
+  result.care = extractCare(lines);
 
   // 8) 카테고리 자동 감지 (상품명 + 브랜드 + 전체 텍스트)
   const searchText = [result.productName, result.brand, ...lines].join(' ');
