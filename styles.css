@@ -2049,3 +2049,284 @@ img.photo-missing {
   background: #fee2e2;
   border-color: #fecaca;
 }
+
+/* ---- 세탁법 선택 버튼 ---- */
+.care-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.care-chip {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-soft);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.care-chip.active {
+  background: var(--color-black);
+  border-color: var(--color-black);
+  color: #fff;
+}
+
+.detail-row-care .value {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* ---- 찜한 상품 한눈에 비교 (병렬 비교 대시보드) ---- */
+/* 넓은 화면(노트북, 발표 화면)에서는 비교 화면만 넓게 쓴다 */
+#compareResultScreen.screen {
+  max-width: min(1200px, 100%);
+}
+
+#compareResultScreen .compare-result-container {
+  overflow-x: visible;
+  padding: 16px 12px 32px;
+}
+
+.cmp-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cmp-kind-toggle {
+  display: inline-flex;
+  background: white;
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+.cmp-kind-toggle button {
+  border: none;
+  background: transparent;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.cmp-kind-toggle button.active {
+  background: var(--color-black);
+  color: #fff;
+}
+
+.cmp-count {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.cmp-swipe-hint {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 8px;
+}
+
+.cmp-scroll {
+  container-type: inline-size;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 휴대폰: 상품 2개가 한 화면에 온전히 보이는 폭 */
+.cmp-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(calc((100cqw - 1px) / 2), 1fr));
+}
+
+/* 넓은 화면: 모든 상품을 나란히 */
+@container (min-width: 720px) {
+  .cmp-grid {
+    grid-template-columns: repeat(var(--cols), minmax(220px, 1fr));
+  }
+}
+
+.cmp-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 12px 16px;
+  border: none;
+  border-right: 1px solid var(--color-border-soft);
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  scroll-snap-align: start;
+}
+
+.cmp-head:last-of-type {
+  border-right: none;
+}
+
+.cmp-photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  max-height: 280px; /* 넓은 화면에서 사진이 비교 항목을 화면 밖으로 밀어내지 않게 */
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg-soft);
+  margin-bottom: 8px;
+}
+
+.cmp-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cmp-photo-none {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.cmp-photo-count {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+
+.cmp-brand {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-iris-100);
+}
+
+.cmp-name {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 항목 이름: 표 전체 폭에 걸친 줄. 옆으로 넘겨도 글자는 왼쪽에 붙어 있다 */
+.cmp-label {
+  grid-column: 1 / -1;
+  background: var(--color-bg-soft);
+  border-top: 1px solid var(--color-border-soft);
+  padding: 8px 12px;
+}
+
+.cmp-label span {
+  position: sticky;
+  left: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.cmp-cell {
+  padding: 12px;
+  border-right: 1px solid var(--color-border-soft);
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+}
+
+/* 각 줄의 마지막 상품 칸은 오른쪽 테두리 없음 */
+.cmp-cell:has(+ .cmp-label),
+.cmp-cell:last-child {
+  border-right: none;
+}
+
+.cmp-text {
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--color-text-primary);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.cmp-cell-memo .cmp-text {
+  font-size: 15px;
+}
+
+.cmp-cell-price {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.cmp-price {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.cmp-badge.best {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-fuschia-60);
+  color: #9d174d;
+}
+
+.cmp-diff {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.cmp-chip {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  line-height: 1.3;
+}
+
+.cmp-chip.material {
+  background: #eef0ff;
+  color: #3730a3;
+}
+
+.cmp-chip.care {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.cmp-empty {
+  font-size: 15px;
+  color: var(--color-text-tertiary);
+}
+
+/* hidden 속성이 클래스의 display 값(flex 등)에 덮이지 않게 한다.
+   예: 사진을 고르지 않았는데 대표 지정/삭제 버튼이 보이던 문제 */
+[hidden] {
+  display: none !important;
+}

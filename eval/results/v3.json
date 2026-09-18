@@ -42,6 +42,7 @@
     "serial": "456821MMGA",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -74,6 +75,7 @@
      "메시",
      "플리스"
     ],
+    "care": "",
     "category": "",
     "brandSource": "logo"
    },
@@ -104,6 +106,7 @@
     "serial": "456864CME5",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -133,6 +136,7 @@
     "serial": "MMDTJOZ01-CG-OOL",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -166,6 +170,7 @@
     "fabric": [
      "플리스"
     ],
+    "care": "",
     "category": "",
     "brandSource": "logo"
    },
@@ -199,6 +204,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -228,6 +234,7 @@
     "serial": "SPTAF23W07-00",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "logo"
    },
@@ -261,6 +268,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -291,6 +299,7 @@
     "serial": "6045/350/400",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -322,6 +331,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -353,6 +363,7 @@
     "fabric": [
      "플리스"
     ],
+    "care": "",
     "category": "아우터",
     "brandSource": "logo"
    },
@@ -383,6 +394,7 @@
     "serial": "MMDJJ5Z02-CY-00M",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "아우터",
     "brandSource": "dictionary"
    },
@@ -416,6 +428,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -449,6 +462,7 @@
      "발수",
      "방풍"
     ],
+    "care": "",
     "category": "아우터",
     "brandSource": "signature"
    },
@@ -482,6 +496,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -512,6 +527,7 @@
     "serial": "2893/300/082",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -541,6 +557,7 @@
     "serial": "311-486819",
     "material": "나일론 100% / 폴리에스터 80% / 폴리에스터 20% / 폴리에스터 100%",
     "fabric": [],
+    "care": "",
     "category": "아우터",
     "brandSource": "logo"
    },
@@ -573,6 +590,7 @@
     "fabric": [
      "리브"
     ],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -606,6 +624,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -635,6 +654,7 @@
     "serial": "456941MC53",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -667,6 +687,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -699,6 +720,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -728,6 +750,7 @@
     "serial": "MMEJJ9C05-BK-00M",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -760,6 +783,7 @@
     "fabric": [
      "와플"
     ],
+    "care": "",
     "category": "상의",
     "brandSource": "dictionary"
    },
@@ -790,6 +814,7 @@
     "serial": "SPMTG12C02-04",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "logo"
    },
@@ -820,6 +845,7 @@
     "serial": "2893/334/816",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -849,6 +875,7 @@
     "serial": "SPWHF25G12-00",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "logo"
    },
@@ -879,6 +906,7 @@
     "serial": "SPJJE23G01-13",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "아우터",
     "brandSource": "logo"
    },
@@ -909,6 +937,7 @@
     "serial": "MMDTKOZ05-UB-OOL",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "상의",
     "brandSource": "dictionary"
    },
@@ -942,6 +971,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -974,6 +1004,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -1006,6 +1037,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -1037,6 +1069,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1066,6 +1099,7 @@
     "serial": "341-486106",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -1098,6 +1132,7 @@
     "fabric": [
      "플리스"
     ],
+    "care": "",
     "category": "하의",
     "brandSource": "logo"
    },
@@ -1128,6 +1163,7 @@
     "serial": "MMDDJAZ01-AH-00M",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "아우터",
     "brandSource": "dictionary"
    },
@@ -1159,6 +1195,7 @@
     "serial": "AC2WPA6A-085",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "상의",
     "brandSource": "signature"
    },
@@ -1189,6 +1226,7 @@
     "serial": "341-482297",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "logo"
    },
@@ -1220,6 +1258,7 @@
     "serial": "SPMTG12C02-04",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "logo"
    },
@@ -1251,6 +1290,7 @@
     "serial": "6264/704/105",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -1283,6 +1323,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -1315,6 +1356,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -1346,6 +1388,7 @@
     "fabric": [
      "멜란지"
     ],
+    "care": "",
     "category": "상의",
     "brandSource": "dictionary"
    },
@@ -1380,6 +1423,7 @@
      "케이블",
      "코듀로이"
     ],
+    "care": "",
     "category": "아우터",
     "brandSource": "signature"
    },
@@ -1413,6 +1457,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -1444,6 +1489,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1473,6 +1519,7 @@
     "serial": "5755/315/800",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -1502,6 +1549,7 @@
     "serial": "456841CM01",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1531,6 +1579,7 @@
     "serial": "456921MMF5",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1563,6 +1612,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -1594,6 +1644,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1624,6 +1675,7 @@
     "serial": "456864CME5",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1653,6 +1705,7 @@
     "serial": "356921CM1D",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1682,6 +1735,7 @@
     "serial": "456921CMAD",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1711,6 +1765,7 @@
     "serial": "456821CC6R",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1743,6 +1798,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -1772,6 +1828,7 @@
     "serial": "1195/331/981",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1803,6 +1860,7 @@
     "fabric": [
      "옥스포드"
     ],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -1833,6 +1891,7 @@
     "serial": "4015/640/721",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1865,6 +1924,7 @@
     "fabric": [
      "기모"
     ],
+    "care": "",
     "category": "상의",
     "brandSource": "signature"
    },
@@ -1896,6 +1956,7 @@
     "serial": "0935/713/812",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1925,6 +1986,7 @@
     "serial": "456921CM2P",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1956,6 +2018,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -1985,6 +2048,7 @@
     "serial": "SPTAE23W04-00",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "logo"
    },
@@ -2018,6 +2082,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2049,6 +2114,7 @@
     "fabric": [
      "플리스"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -2082,6 +2148,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2113,6 +2180,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -2144,6 +2212,7 @@
     "fabric": [
      "데님"
     ],
+    "care": "",
     "category": "하의",
     "brandSource": "dictionary"
    },
@@ -2177,6 +2246,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2206,6 +2276,7 @@
     "serial": "SPJAE12C01-03",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "아우터",
     "brandSource": "logo"
    },
@@ -2239,6 +2310,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2271,6 +2343,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2301,6 +2374,7 @@
     "serial": "MMCPC503-BE",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "dictionary"
    },
@@ -2330,6 +2404,7 @@
     "serial": "456864SC3Q",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -2361,6 +2436,7 @@
     "fabric": [
      "리브"
     ],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -2391,6 +2467,7 @@
     "serial": "SPRWG37G33-00",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "logo"
    },
@@ -2422,6 +2499,7 @@
     "serial": "AE13GA6A-059",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "signature"
    },
@@ -2455,6 +2533,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2486,6 +2565,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -2518,6 +2598,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2547,6 +2628,7 @@
     "serial": "456841SS1U",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -2579,6 +2661,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2611,6 +2694,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2641,6 +2725,7 @@
     "serial": "SPYWF37W04-00",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -2675,6 +2760,7 @@
      "발수",
      "방풍"
     ],
+    "care": "",
     "category": "아우터",
     "brandSource": "signature"
    },
@@ -2708,6 +2794,7 @@
      "메시",
      "플리스"
     ],
+    "care": "",
     "category": "상의",
     "brandSource": "dictionary"
    },
@@ -2740,6 +2827,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -2772,6 +2860,7 @@
     "fabric": [
      "케이블"
     ],
+    "care": "",
     "category": "하의",
     "brandSource": "signature"
    },
@@ -2802,6 +2891,7 @@
     "serial": "3992/430/800",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -2832,6 +2922,7 @@
     "serial": "5987/705/505",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -2862,6 +2953,7 @@
     "serial": "AE13GA6A-009",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "signature"
    },
@@ -2892,6 +2984,7 @@
     "serial": "SPJPF4TG03-05",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "아우터",
     "brandSource": "logo"
    },
@@ -2924,6 +3017,7 @@
     "fabric": [
      "플리스"
     ],
+    "care": "",
     "category": "아우터",
     "brandSource": "logo"
    },
@@ -2955,6 +3049,7 @@
     "serial": "AE13GA6A-009",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "signature"
    },
@@ -2985,6 +3080,7 @@
     "serial": "311-487348",
     "material": "나일론 100% / 폴리에스터 80% / 폴리에스터 20% / 폴리에스터 100%",
     "fabric": [],
+    "care": "",
     "category": "아우터",
     "brandSource": "logo"
    },
@@ -3018,6 +3114,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -3050,6 +3147,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -3079,6 +3177,7 @@
     "serial": "456841SS36",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3109,6 +3208,7 @@
     "serial": "AE11AA6A-089",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "signature"
    },
@@ -3140,6 +3240,7 @@
     "serial": "AE11AA6S-006",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "signature"
    },
@@ -3171,6 +3272,7 @@
     "serial": "AE13GA6A-008",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "signature"
    },
@@ -3203,6 +3305,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3235,6 +3338,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -3264,6 +3368,7 @@
     "serial": "341-486129",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -3298,6 +3403,7 @@
      "케이블",
      "코듀로이"
     ],
+    "care": "",
     "category": "아우터",
     "brandSource": "signature"
    },
@@ -3330,6 +3436,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3362,6 +3469,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -3392,6 +3500,7 @@
     "serial": "SPRWG37G33-00",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "logo"
    },
@@ -3423,6 +3532,7 @@
     "serial": "456821CC6R",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3454,6 +3564,7 @@
     "fabric": [
      "리브"
     ],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -3484,6 +3595,7 @@
     "serial": "4938/324/800",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3513,6 +3625,7 @@
     "serial": "7147/450/800",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3544,6 +3657,7 @@
     "fabric": [
      "리브"
     ],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -3576,6 +3690,7 @@
     "fabric": [
      "리브"
     ],
+    "care": "",
     "category": "하의",
     "brandSource": "dictionary"
    },
@@ -3606,6 +3721,7 @@
     "serial": "456839SM4Q",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3636,6 +3752,7 @@
     "serial": "341-488247",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "logo"
    },
@@ -3669,6 +3786,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -3700,6 +3818,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3729,6 +3848,7 @@
     "serial": "341-487962",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "logo"
    },
@@ -3761,6 +3881,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3791,6 +3912,7 @@
     "serial": "5987/705/300",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3822,6 +3944,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -3851,6 +3974,7 @@
     "serial": "SPYCE11W01-00",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -3883,6 +4007,7 @@
     "fabric": [
      "데님"
     ],
+    "care": "",
     "category": "아우터",
     "brandSource": "dictionary"
    },
@@ -3913,6 +4038,7 @@
     "serial": "341-486129",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "상의",
     "brandSource": "logo"
    },
@@ -3943,6 +4069,7 @@
     "serial": "MMDDJAZ01-MZ-00M",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "아우터",
     "brandSource": "dictionary"
    },
@@ -3974,6 +4101,7 @@
     "serial": "0327/700/802",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -4004,6 +4132,7 @@
     "serial": "AE11AA6A-019",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "signature"
    },
@@ -4034,6 +4163,7 @@
     "serial": "3411/320/800",
     "material": "",
     "fabric": [],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -4065,6 +4195,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "dictionary"
    },
@@ -4095,6 +4226,7 @@
     "serial": "AE11AA6A-009",
     "material": "코튼 100%",
     "fabric": [],
+    "care": "",
     "category": "하의",
     "brandSource": "signature"
    },
@@ -4127,6 +4259,7 @@
     "fabric": [
      "데님"
     ],
+    "care": "",
     "category": "아우터",
     "brandSource": "dictionary"
    },
@@ -4160,6 +4293,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
@@ -4192,6 +4326,7 @@
     "fabric": [
      "퍼"
     ],
+    "care": "",
     "category": "",
     "brandSource": "signature"
    },
