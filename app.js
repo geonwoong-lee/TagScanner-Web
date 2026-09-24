@@ -665,6 +665,66 @@ function updateTag(id, data) {
   scheduleSync();
 }
 
+// ============================================================
+// 구매 결정 기록
+// 이 앱은 "살까 말까"를 돕는 것이 목적이므로, 결정 자체가 남아야 효과를 말할 수 있다.
+// 비교를 거친 뒤 결정했는지, 결정까지 얼마나 걸렸는지를 같이 기록한다.
+// ============================================================
+const DECISIONS = [
+  { value: 'bought', label: '샀어요' },
+  { value: 'hold', label: '보류' },
+  { value: 'dropped', label: '안 사기로' },
+];
+
+const decisionLabel = (v) => (DECISIONS.find((d) => d.value === v) || {}).label || '';
+
+function setDecision(id, decision, source) {
+  const tags = loadTags();
+  const t = tags.find((x) => x.id === id);
+  if (!t) return;
+
+  // 같은 버튼을 다시 누르면 결정을 취소한다
+  const next = t.decision === decision ? '' : decision;
+  const previous = t.decision || '';
+
+  updateTag(id, {
+    decision: next,
+    decidedAt: next ? Date.now() : null,
+  });
+
+  const minutes = t.createdAt ? Math.round((Date.now() - t.createdAt) / 60000) : null;
+  logEvent(next ? 'decision_made' : 'decision_cleared', {
+    decision: next || previous,
+    previous,
+    source,                                   // 'compare' 또는 'detail'
+    compared_before: Number(t.comparedCount || 0) > 0,
+    compared_count: Number(t.comparedCount || 0),
+    minutes_since_saved: minutes,
+    price: parsePriceNumber(t.price) || 0,
+    brand: t.brand || '',
+  });
+}
+
+// 비교를 실행할 때, 그 자리에 올라온 상품마다 비교 횟수를 세어 둔다.
+// 나중에 "비교를 거친 상품과 아닌 상품의 결정률이 다른가"를 볼 수 있다.
+function markCompared(items) {
+  const ids = new Set(items.map((t) => t.id));
+  const tags = loadTags();
+  const now = Date.now();
+  let changed = false;
+  for (const t of tags) {
+    if (!ids.has(t.id)) continue;
+    t.comparedCount = Number(t.comparedCount || 0) + 1;
+    if (!t.firstComparedAt) t.firstComparedAt = now;
+    t.updatedAt = now;
+    changed = true;
+  }
+  if (changed) {
+    saveTags(tags);
+    scheduleSync();
+  }
+}
+
 function deleteTagById(id) {
   const tags = loadTags();
   const deletedTag = tags.find((t) => t.id === id);
@@ -1783,6 +1843,16 @@ function renderCompareResult() {
 
   const text = (v) => (v ? `<span class="cmp-text">${escapeHtml(v)}</span>` : empty());
 
+  // 비교하다가 바로 결정할 수 있게 한다. 비교 화면에서 누른 결정은 source가 compare로 남는다.
+  const decisionCell = (t) => `
+    <div class="cmp-decision">
+      ${DECISIONS.map((d) => `
+        <button type="button" class="cmp-decision-btn ${t.decision === d.value ? 'active ' + d.value : ''}"
+                data-id="${t.id}" data-decision="${d.value}">${d.label}</button>
+      `).join('')}
+    </div>
+  `;
+
   body.innerHTML = `
     <div class="cmp-toolbar">
       <div class="cmp-kind-toggle" role="tablist" aria-label="비교할 사진 종류">
@@ -1802,6 +1872,7 @@ function renderCompareResult() {
         ${section('세탁법', (t) => chips(splitCare(t.care), 'care'))}
         ${section('매장', (t) => text(t.store))}
         ${section('메모', (t) => text(t.memo), 'cmp-cell-memo')}
+        ${section('정했나요', decisionCell, 'cmp-cell-decision')}
       </div>
     </div>
   `;
@@ -1814,6 +1885,14 @@ function renderCompareResult() {
   });
   body.querySelectorAll('.cmp-head').forEach((el) => {
     el.addEventListener('click', () => openDetail(Number(el.dataset.id)));
+  });
+  body.querySelectorAll('.cmp-decision-btn').forEach((el) => {
+    el.addEventListener('click', () => {
+      setDecision(Number(el.dataset.id), el.dataset.decision, 'compare');
+      renderCompareResult();
+      const label = decisionLabel(el.dataset.decision);
+      showToast(loadTags().find((t) => t.id === Number(el.dataset.id))?.decision ? `${label}로 기록했어요` : '결정을 지웠어요');
+    });
   });
   PhotoStore.hydrate(body);
   updateCompareSwipeHint();
@@ -1835,6 +1914,27 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// 상세 화면의 결정 버튼
+function renderDetailDecision() {
+  const box = $('detailDecision');
+  if (!box) return;
+  const t = loadTags().find((x) => x.id === currentDetailId);
+  if (!t) return;
+
+  box.innerHTML = DECISIONS.map((d) => `
+    <button type="button" class="decision-btn ${t.decision === d.value ? 'active ' + d.value : ''}"
+            data-decision="${d.value}">${d.label}</button>
+  `).join('');
+
+  box.querySelectorAll('.decision-btn').forEach((el) => {
+    el.addEventListener('click', () => {
+      setDecision(currentDetailId, el.dataset.decision, 'detail');
+      renderDetailDecision();
+      renderList();
+    });
+  });
 }
 
 // ---- 상세 화면 사진 ----
@@ -1948,6 +2048,7 @@ function openDetail(id) {
   detailSelectedPhotoId = null;
 
   renderDetailPhotos();
+  renderDetailDecision();
   $('d_category').value = t.category || '';
   $('d_brand').value = t.brand || '';
   $('d_productName').value = t.productName || '';
@@ -2173,6 +2274,7 @@ function bindEvents() {
         showToast('비교하려면 2개 이상 찜이 필요합니다');
         return;
       }
+      markCompared(favs);
       renderCompareResult();
       showScreen('compareResult');
       logEvent('compare_run', {
