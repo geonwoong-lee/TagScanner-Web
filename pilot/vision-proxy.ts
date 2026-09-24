@@ -14,7 +14,7 @@ const DAILY_LIMIT = 80; // 참가자 1명이 하루에 호출할 수 있는 횟�
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 

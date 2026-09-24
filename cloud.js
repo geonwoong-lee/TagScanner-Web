@@ -127,17 +127,26 @@
     flushLogs().catch(() => {});
   }
 
+  // 전송이 겹치면 같은 로그가 두 번 올라가므로 한 번에 하나만 보낸다
+  let flushing = false;
+
   async function flushLogs() {
-    if (!client || !currentUser) return;
+    if (!client || !currentUser || flushing) return;
     const queue = readJson(LOG_QUEUE_KEY, []);
     if (queue.length === 0) return;
-    const rows = queue.map((q) => ({ ...q, user_id: currentUser.id }));
-    const { error } = await client.from('usage_events').insert(rows);
-    if (error) {
-      console.warn('로그 전송 실패 (다음에 다시 시도)', error.message);
-      return;
+    flushing = true;
+    try {
+      const rows = queue.map((q) => ({ ...q, user_id: currentUser.id }));
+      const { error } = await client.from('usage_events').insert(rows);
+      if (error) {
+        console.warn('로그 전송 실패 (다음에 다시 시도)', error.message);
+        return;
+      }
+      // 보내는 동안 새로 쌓인 로그는 남겨 둔다
+      writeJson(LOG_QUEUE_KEY, readJson(LOG_QUEUE_KEY, []).slice(queue.length));
+    } finally {
+      flushing = false;
     }
-    writeJson(LOG_QUEUE_KEY, []);
   }
 
   // ---- 동기화 ----
