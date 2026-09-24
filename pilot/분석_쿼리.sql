@@ -115,18 +115,32 @@ where p.participant_code is distinct from 'admin';
 -- 3. 참가자별 현황 (중간 점검용)
 -- ============================================================
 
+-- items와 usage_events를 한 번에 조인하면 행이 곱해져서 횟수가 부풀려진다.
+-- 각각 따로 센 뒤 붙인다.
 select
-  p.participant_code                                      as 참가자,
-  count(distinct i.id) filter (where not i.deleted)        as 저장상품,
-  count(distinct i.id) filter (where i.compared_count > 0) as 비교한상품,
-  count(distinct i.id) filter (where i.decision is not null) as 결정한상품,
-  count(e.id) filter (where e.event = 'compare_run')       as 비교횟수,
-  max(e.created_at)                                        as 마지막_사용
+  p.participant_code as 참가자,
+  coalesce(it.저장상품, 0)   as 저장상품,
+  coalesce(it.비교한상품, 0) as 비교한상품,
+  coalesce(it.결정한상품, 0) as 결정한상품,
+  coalesce(ev.비교횟수, 0)   as 비교횟수,
+  ev.마지막_사용
 from profiles p
-left join items i on i.user_id = p.id
-left join usage_events e on e.user_id = p.id
+left join (
+  select
+    user_id,
+    count(*) filter (where not deleted)                             as 저장상품,
+    count(*) filter (where compared_count > 0 and not deleted)      as 비교한상품,
+    count(*) filter (where decision is not null and not deleted)    as 결정한상품
+  from items group by user_id
+) it on it.user_id = p.id
+left join (
+  select
+    user_id,
+    count(*) filter (where event = 'compare_run') as 비교횟수,
+    max(created_at)                              as 마지막_사용
+  from usage_events group by user_id
+) ev on ev.user_id = p.id
 where p.participant_code is distinct from 'admin'
-group by p.participant_code
 order by p.participant_code;
 
 -- 3-2. 날짜별 사용량. 초반에만 쓰고 마는지 2주 내내 쓰는지 본다.
