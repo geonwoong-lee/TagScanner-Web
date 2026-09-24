@@ -2144,6 +2144,7 @@ function bindEvents() {
     navFav.addEventListener('click', () => {
       renderCompare();
       showScreen('compare');
+      logEvent('compare_list_opened', { favorites: loadTags().filter((t) => t.favorite).length });
     });
   }
 
@@ -2174,6 +2175,10 @@ function bindEvents() {
       }
       renderCompareResult();
       showScreen('compareResult');
+      logEvent('compare_run', {
+        count: favs.length,
+        brands: [...new Set(favs.map((t) => t.brand).filter(Boolean))].join(','),
+      });
     });
   }
 
