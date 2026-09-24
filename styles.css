@@ -176,6 +176,9 @@ button {
   justify-content: flex-end;
   padding: 16px 20px;
   height: 80px;
+  /* 홈 화면에서 실행하면 주소창이 없어서 노치 영역을 직접 피해야 한다 */
+  padding-top: calc(16px + env(safe-area-inset-top));
+  height: calc(80px + env(safe-area-inset-top));
 }
 
 .profile-circle {
@@ -290,6 +293,7 @@ button {
   grid-template-columns: 1fr 1fr 1fr;
   align-items: end;
   padding: 32px 24px 40px;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
   gap: 16px;
   justify-items: center; /* 모든 셀 안의 컨텐츠 가운데 */
 }
@@ -379,6 +383,7 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
+  padding-top: calc(14px + env(safe-area-inset-top));
   background: white;
   border-bottom: 1px solid var(--color-border-soft);
   position: sticky;
@@ -2329,4 +2334,174 @@ img.photo-missing {
    예: 사진을 고르지 않았는데 대표 지정/삭제 버튼이 보이던 문제 */
 [hidden] {
   display: none !important;
+}
+
+/* ---- 파일럿 로그인 화면 ---- */
+.auth-screen {
+  background: var(--color-bg-soft);
+  min-height: 100vh;
+  display: none;
+  padding: 0 20px;
+}
+
+.auth-screen.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 380px;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 28px 20px 22px;
+  margin: 32px 0;
+}
+
+.auth-title {
+  font-size: 26px;
+  font-weight: 800;
+  text-align: center;
+  margin: 0;
+}
+
+.auth-sub {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 6px 0 20px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  margin-bottom: 18px;
+}
+
+.auth-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.auth-tab.active {
+  background: var(--color-black);
+  color: #fff;
+}
+
+.auth-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.auth-consent input {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.auth-consent-detail {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.auth-consent-detail ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  line-height: 1.6;
+}
+
+.auth-error {
+  font-size: 14px;
+  color: #b91c1c;
+  background: #fee2e2;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 0 0 12px;
+}
+
+.auth-note {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  line-height: 1.5;
+  margin: 14px 0 0;
+}
+
+/* ---- 마이페이지 계정 영역 ---- */
+.account-box {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.account-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.account-label {
+  color: var(--color-text-secondary);
+}
+
+.account-value {
+  font-weight: 600;
+  text-align: right;
+  word-break: break-all;
+}
+
+.account-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.account-actions .secondary-btn {
+  margin-bottom: 0;
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* ---- 홈 화면 추가 안내 ---- */
+.install-box {
+  background: var(--color-fuschia-60);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.install-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.install-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  margin: 0;
 }

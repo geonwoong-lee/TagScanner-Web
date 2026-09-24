@@ -2,23 +2,32 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <!-- connect-src 주의: Hugging Face가 모델 파일을 cdn.hf.co로 리다이렉트하므로 *.hf.co 필요,
        촬영 사진을 data URL로 CLIP에 넘기므로 data: 도 필요 -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net;
+    script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com;
     style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
     font-src 'self' https://cdn.jsdelivr.net data:;
     img-src 'self' data: blob: https:;
-    connect-src 'self' https://vision.googleapis.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co blob: data:;
+    connect-src 'self' https://vision.googleapis.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com blob: data:;
     worker-src 'self' blob:;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
   ">
   <title>TagScanner — 옷 태그 OCR</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2026-09-24c">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1A1A1A">
+  <meta name="description" content="옷 태그를 찍으면 브랜드, 가격, 사이즈, 소재를 읽어 정리해 줍니다.">
+  <!-- 홈 화면에 추가했을 때 주소창 없이 앱처럼 뜨게 한다 (iOS는 아래 세 줄을 본다) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TagScanner">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" href="icons/favicon-64.png">
 </head>
 <body>
   <!-- 메인 캡처 화면 (다크 테마) -->
@@ -66,6 +75,57 @@
       </button>
     </div>
   </main>
+
+  <!-- 파일럿 로그인 화면 -->
+  <section id="authScreen" class="screen auth-screen">
+    <div class="auth-box">
+      <h1 class="auth-title">TagScanner</h1>
+      <p class="auth-sub">파일럿 테스트 참여자 로그인</p>
+
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-mode="signin">로그인</button>
+        <button type="button" class="auth-tab" data-mode="signup">회원가입</button>
+      </div>
+
+      <form id="authForm" class="form">
+        <div class="field">
+          <label for="authEmail">이메일</label>
+          <input type="email" id="authEmail" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="authPassword">비밀번호</label>
+          <input type="password" id="authPassword" autocomplete="current-password" minlength="6" required>
+        </div>
+        <div class="field" id="authCodeField" hidden>
+          <label for="authCode">참가자 번호</label>
+          <input type="text" id="authCode" placeholder="예: P01">
+        </div>
+
+        <div class="field" id="authConsentField" hidden>
+          <label class="auth-consent">
+            <input type="checkbox" id="authConsent">
+            <span>아래 내용을 읽었고 데이터 수집에 동의합니다</span>
+          </label>
+          <details class="auth-consent-detail">
+            <summary>무엇을 수집하나요?</summary>
+            <ul>
+              <li>저장한 상품 정보: 브랜드, 상품명, 가격, 사이즈, 소재, 세탁법, 매장, 메모</li>
+              <li>상품 사진: 택, 옷, 착용 사진</li>
+              <li>앱 사용 기록: 저장·비교·찜을 한 시각과 횟수</li>
+              <li>목적: 캡스톤디자인 과제의 사용성 분석</li>
+              <li>보관 기간: 과제 종료 시점까지, 이후 삭제</li>
+              <li>원하시면 언제든 계정과 데이터 삭제를 요청할 수 있습니다</li>
+            </ul>
+          </details>
+        </div>
+
+        <p class="auth-error" id="authError" hidden></p>
+        <button type="submit" class="primary-btn" id="authSubmit">로그인</button>
+      </form>
+
+      <p class="auth-note">테스트 기간에만 로그인이 필요합니다. 저장한 내용은 다른 기기에서도 이어서 볼 수 있습니다.</p>
+    </div>
+  </section>
 
   <!-- 리뷰/편집 화면 -->
   <section id="reviewScreen" class="screen">
@@ -459,6 +519,29 @@
       <h3 class="mypage-section-title">최근 저장 상품</h3>
       <div id="recentList" class="mypage-recent-list"></div>
 
+      <!-- 계정 (파일럿 테스트) -->
+      <h3 class="mypage-section-title">계정</h3>
+      <div class="account-box" id="accountBox">
+        <div class="account-row">
+          <span class="account-label">로그인</span>
+          <span class="account-value" id="accountEmail">로그인하지 않음</span>
+        </div>
+        <div class="account-row">
+          <span class="account-label">동기화</span>
+          <span class="account-value" id="syncStatus">-</span>
+        </div>
+        <div class="account-actions">
+          <button type="button" class="secondary-btn" id="btnSyncNow">지금 동기화</button>
+          <button type="button" class="secondary-btn" id="btnSignOut">로그아웃</button>
+        </div>
+      </div>
+
+      <!-- 홈 화면 추가 안내 (이미 홈 화면에서 실행 중이면 숨긴다) -->
+      <div class="install-box" id="installBox" hidden>
+        <p class="install-title">앱처럼 쓰기</p>
+        <p class="install-desc" id="installDesc"></p>
+      </div>
+
       <!-- 메뉴 -->
       <h3 class="mypage-section-title">설정</h3>
       <div class="mypage-menu">
@@ -541,12 +624,14 @@
 
   <!-- Tesseract.js (브라우저 OCR, 한국어+영어 지원) -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-  <script src="fabric_dict.js"></script>
-  <script src="brands.js"></script>
-  <script src="tag_profiles.js"></script>
-  <script src="parser.js"></script>
-  <script src="clip.js"></script>
-  <script src="photos.js"></script>
-  <script src="app.js"></script>
+  <script src="config.js?v=2026-09-24c"></script>
+  <script src="fabric_dict.js?v=2026-09-24c"></script>
+  <script src="brands.js?v=2026-09-24c"></script>
+  <script src="tag_profiles.js?v=2026-09-24c"></script>
+  <script src="parser.js?v=2026-09-24c"></script>
+  <script src="clip.js?v=2026-09-24c"></script>
+  <script src="photos.js?v=2026-09-24c"></script>
+  <script src="cloud.js?v=2026-09-24c"></script>
+  <script src="app.js?v=2026-09-24c"></script>
 </body>
 </html>
