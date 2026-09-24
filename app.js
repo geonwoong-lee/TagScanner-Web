@@ -27,6 +27,8 @@ function saveSettings(s) {
 }
 
 function pickEngine() {
+  // 로그인 상태면 서버가 대신 호출한다. 참가자가 각자 API 키를 넣지 않아도 된다.
+  if (window.Cloud && window.Cloud.enabled() && window.Cloud.user()) return 'server';
   const s = loadSettings();
   if (s.ocrEngine === 'google') return s.googleApiKey ? 'google' : 'tesseract';
   if (s.ocrEngine === 'tesseract') return 'tesseract';
@@ -54,6 +56,7 @@ const screens = {
   settings: $('settingsScreen'),
   compare: $('compareScreen'),
   compareResult: $('compareResultScreen'),
+  auth: $('authScreen'),
   myPage: $('myPageScreen'),
   filter: $('filterScreen'),
 };
@@ -249,7 +252,22 @@ async function runTesseractOcr(imageData, modeIndex = 0) {
 // rawData: 전처리 안 된 OCR 이미지 (Google Vision용)
 // processedData: 전처리된 OCR 이미지 (Tesseract용)
 // 반환: { text: string, logos: [] }  (Tesseract는 logos 항상 빈 배열)
+// 서버가 대신 Vision을 호출한다 (참가자가 API 키를 갖지 않아도 된다)
+async function runServerOcr(imageData) {
+  $('progressText').textContent = '서버에서 택을 읽는 중...';
+  $('progressFill').style.width = '40%';
+  const resp = await window.Cloud.visionOcr(imageData.replace(/^data:image\/\w+;base64,/, ''));
+  $('progressFill').style.width = '100%';
+  return {
+    text: resp.fullTextAnnotation?.text || '',
+    logos: (resp.logoAnnotations || []).map((l) => ({ description: l.description, score: l.score || 0 })),
+  };
+}
+
 async function runOcr({ rawData, processedData, engine, modeIndex = 0 }) {
+  if (engine === 'server') {
+    return await runServerOcr(rawData);
+  }
   if (engine === 'google') {
     return await runGoogleVisionOcr(rawData);
   }
@@ -497,11 +515,12 @@ function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, 
   renderReviewCategoryPills();
 
   // 엔진 표시 배지
-  const badge = engine === 'google' ? 'Google Vision' : 'Tesseract.js';
-  const badgeClass = engine === 'google' ? '' : 'tesseract';
+  const serverEngine = engine === 'server';
+  const badge = serverEngine ? 'Google Vision (서버)' : engine === 'google' ? 'Google Vision' : 'Tesseract.js';
+  const badgeClass = engine === 'google' || serverEngine ? '' : 'tesseract';
   const retryBtn = $('retryOcr');
   if (retryBtn) {
-    if (engine === 'google') {
+    if (engine === 'google' || serverEngine) {
       retryBtn.innerHTML = `🔄 OCR 다시 시도 <span class="engine-badge">${badge}</span>`;
     } else {
       retryBtn.innerHTML = `🔄 OCR 다른 모드로 다시 시도 <span class="engine-badge ${badgeClass}">${badge}</span>`;
@@ -576,11 +595,27 @@ function saveTags(tags) {
   }
 }
 
+// ---- 서버 연동 도우미 ----
+// 로그인하지 않았거나 서버 설정이 없으면 아무 일도 하지 않는다 (앱은 그대로 동작)
+function logEvent(event, payload) {
+  if (window.Cloud && window.Cloud.enabled()) window.Cloud.log(event, payload || {});
+}
+
+let syncTimer = null;
+function scheduleSync() {
+  if (!(window.Cloud && window.Cloud.enabled() && window.Cloud.user())) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    window.Cloud.syncNow().then(renderSyncStatus).catch((e) => console.warn('동기화 실패', e));
+  }, 2000);
+}
+
 function addTag(data) {
   const tags = loadTags();
   const tag = {
     id: Date.now(),
     createdAt: Date.now(),
+    updatedAt: Date.now(),
     ...data,
   };
   tags.unshift(tag);
@@ -600,6 +635,15 @@ function addTag(data) {
     }
     return null;
   }
+  logEvent('item_saved', {
+    brand: tag.brand || '',
+    category: tag.category || '',
+    price: parsePriceNumber(tag.price) || 0,
+    photo_count: tagPhotos(tag).length,
+    has_material: Boolean(tag.material),
+    has_care: Boolean(tag.care),
+  });
+  scheduleSync();
   return tag;
 }
 
@@ -607,7 +651,7 @@ function updateTag(id, data) {
   const tags = loadTags();
   const idx = tags.findIndex((t) => t.id === id);
   if (idx < 0) return;
-  tags[idx] = { ...tags[idx], ...data };
+  tags[idx] = { ...tags[idx], ...data, updatedAt: Date.now() };
   const r = saveTags(tags);
   if (!r.ok) {
     if (r.isQuota) {
@@ -615,7 +659,10 @@ function updateTag(id, data) {
     } else {
       alert('수정 저장 실패: ' + (r.error?.message || '알 수 없는 오류'));
     }
+    return;
   }
+  logEvent('item_updated', { fields: Object.keys(data).join(',') });
+  scheduleSync();
 }
 
 function deleteTagById(id) {
@@ -623,6 +670,9 @@ function deleteTagById(id) {
   const deletedTag = tags.find((t) => t.id === id);
   const remaining = tags.filter((t) => t.id !== id);
   saveTags(remaining);
+  if (window.Cloud && window.Cloud.enabled()) window.Cloud.addTombstone(id);
+  logEvent('item_deleted', { brand: deletedTag?.brand || '' });
+  scheduleSync();
   return deletedTag;
 }
 
@@ -910,7 +960,10 @@ function toggleFavorite(id) {
   const idx = tags.findIndex((t) => t.id === id);
   if (idx < 0) return;
   tags[idx].favorite = !tags[idx].favorite;
+  tags[idx].updatedAt = Date.now();
   saveTags(tags);
+  logEvent(tags[idx].favorite ? 'favorite_on' : 'favorite_off', { brand: tags[idx].brand || '' });
+  scheduleSync();
 }
 
 // ---- 비교 화면 렌더링 ----
@@ -1972,6 +2025,32 @@ function bindEvents() {
     await addDetailPhotos(e.target.files, pendingPhotoKind);
     e.target.value = '';
   });
+  // 파일럿 로그인 화면
+  document.querySelectorAll('.auth-tab').forEach((btn) => {
+    btn.addEventListener('click', () => setAuthMode(btn.dataset.mode));
+  });
+  $('authForm').addEventListener('submit', handleAuthSubmit);
+  $('btnSyncNow').addEventListener('click', async () => {
+    if (!(window.Cloud && window.Cloud.user())) {
+      showToast('먼저 로그인해 주세요');
+      return;
+    }
+    $('syncStatus').textContent = '맞추는 중...';
+    const result = await window.Cloud.syncNow();
+    renderSyncStatus(result);
+    renderList();
+    renderMyPage();
+    showToast(result && result.error ? '동기화 실패' : '동기화 완료');
+  });
+  $('btnSignOut').addEventListener('click', async () => {
+    if (!confirm('로그아웃할까요? 이 기기에 저장된 상품은 그대로 남습니다.')) return;
+    logEvent('signed_out', {});
+    await window.Cloud.signOut();
+    renderSyncStatus();
+    applyPilotGate();
+    showToast('로그아웃했습니다');
+  });
+
   $('detailSetCover').addEventListener('click', setDetailCover);
 
   // 세탁법 버튼 (등록·상세 공용). 직접 입력한 내용에 맞춰 버튼 선택 상태도 갱신한다.
@@ -2462,11 +2541,107 @@ function bindEvents() {
   });
 }
 
+// ============================================================
+// 파일럿 테스트: 로그인, 동의, 동기화 상태
+// ============================================================
+let authMode = 'signin'; // 'signin' | 'signup'
+
+function setAuthMode(mode) {
+  authMode = mode;
+  document.querySelectorAll('.auth-tab').forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+  const signup = mode === 'signup';
+  $('authCodeField').hidden = !signup;
+  $('authConsentField').hidden = !signup;
+  $('authSubmit').textContent = signup ? '가입하고 시작하기' : '로그인';
+  $('authPassword').autocomplete = signup ? 'new-password' : 'current-password';
+  $('authError').hidden = true;
+}
+
+function showAuthError(message) {
+  const el = $('authError');
+  el.textContent = message;
+  el.hidden = false;
+}
+
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  const email = $('authEmail').value.trim();
+  const password = $('authPassword').value;
+  const btn = $('authSubmit');
+  $('authError').hidden = true;
+
+  if (authMode === 'signup' && !$('authConsent').checked) {
+    showAuthError('데이터 수집에 동의해야 가입할 수 있습니다.');
+    return;
+  }
+
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = '처리 중...';
+  try {
+    if (authMode === 'signup') {
+      await window.Cloud.signUp(email, password, $('authCode').value.trim());
+      await window.Cloud.setConsent();
+      logEvent('signed_up', {});
+    } else {
+      await window.Cloud.signIn(email, password);
+      logEvent('signed_in', {});
+    }
+    $('authPassword').value = '';
+    showScreen('main');
+    showToast(authMode === 'signup' ? '가입되었습니다' : '로그인되었습니다');
+    window.Cloud.syncNow().then(renderSyncStatus);
+  } catch (err) {
+    const message = String(err.message || err);
+    if (/Invalid login credentials/i.test(message)) showAuthError('이메일 또는 비밀번호가 맞지 않습니다.');
+    else if (/User already registered/i.test(message)) showAuthError('이미 가입된 이메일입니다. 로그인을 눌러 주세요.');
+    else if (/Password should be/i.test(message)) showAuthError('비밀번호는 6자 이상이어야 합니다.');
+    else showAuthError(message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
+function renderSyncStatus(result) {
+  const emailEl = $('accountEmail');
+  const statusEl = $('syncStatus');
+  if (!emailEl || !statusEl) return;
+  const user = window.Cloud && window.Cloud.enabled() ? window.Cloud.user() : null;
+  emailEl.textContent = user ? user.email : '로그인하지 않음';
+  if (!user) {
+    statusEl.textContent = '로그인하면 다른 기기와 맞춰집니다';
+    return;
+  }
+  if (result && result.error) statusEl.textContent = '동기화 실패 (인터넷 연결을 확인해 주세요)';
+  else if (result) statusEl.textContent = `방금 맞춤 (올린 사진 ${result.photosUp || 0}장, 받은 상품 ${result.pulled || 0}개)`;
+  else statusEl.textContent = '연결됨';
+}
+
+// 파일럿 기간에는 로그인해야 앱을 쓸 수 있게 한다
+function applyPilotGate() {
+  const cfg = window.APP_CONFIG || {};
+  if (!cfg.pilotMode || !(window.Cloud && window.Cloud.enabled())) return;
+  if (!window.Cloud.user()) showScreen('auth');
+  else if (document.querySelector('.screen.active')?.id === 'authScreen') showScreen('main');
+}
+
 // ---- 시작 ----
 document.addEventListener('DOMContentLoaded', async () => {
   bindEvents();
   initBrandOptions();
   showScreen('main');
+
+  // 서버 연동 (설정이 없으면 건너뛴다)
+  if (window.Cloud && window.Cloud.enabled()) {
+    // 저장된 로그인 정보를 먼저 확인한 뒤 화면을 정한다 (로그인 화면이 깜빡이지 않게)
+    await window.Cloud.init();
+    window.Cloud.onAuthChange(() => {
+      applyPilotGate();
+      renderSyncStatus();
+    });
+  }
+
   try {
     const moved = await migrateLegacyPhotos();
     if (moved > 0) console.info(`사진 ${moved}장을 새 저장소로 옮겼습니다`);
