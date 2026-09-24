@@ -176,6 +176,9 @@ button {
   justify-content: flex-end;
   padding: 16px 20px;
   height: 80px;
+  /* 홈 화면에서 실행하면 주소창이 없어서 노치 영역을 직접 피해야 한다 */
+  padding-top: calc(16px + env(safe-area-inset-top));
+  height: calc(80px + env(safe-area-inset-top));
 }
 
 .profile-circle {
@@ -290,6 +293,7 @@ button {
   grid-template-columns: 1fr 1fr 1fr;
   align-items: end;
   padding: 32px 24px 40px;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
   gap: 16px;
   justify-items: center; /* 모든 셀 안의 컨텐츠 가운데 */
 }
@@ -379,6 +383,7 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
+  padding-top: calc(14px + env(safe-area-inset-top));
   background: white;
   border-bottom: 1px solid var(--color-border-soft);
   position: sticky;
@@ -2478,4 +2483,25 @@ img.photo-missing {
   margin-bottom: 0;
   padding: 10px;
   font-size: 14px;
+}
+
+/* ---- 홈 화면 추가 안내 ---- */
+.install-box {
+  background: var(--color-fuschia-60);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.install-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.install-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  margin: 0;
 }

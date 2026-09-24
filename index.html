@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <!-- connect-src 주의: Hugging Face가 모델 파일을 cdn.hf.co로 리다이렉트하므로 *.hf.co 필요,
        촬영 사진을 data URL로 CLIP에 넘기므로 data: 도 필요 -->
   <meta http-equiv="Content-Security-Policy" content="
@@ -18,7 +18,16 @@
     form-action 'self';
   ">
   <title>TagScanner — 옷 태그 OCR</title>
-  <link rel="stylesheet" href="styles.css?v=2026-09-24b">
+  <link rel="stylesheet" href="styles.css?v=2026-09-24c">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1A1A1A">
+  <meta name="description" content="옷 태그를 찍으면 브랜드, 가격, 사이즈, 소재를 읽어 정리해 줍니다.">
+  <!-- 홈 화면에 추가했을 때 주소창 없이 앱처럼 뜨게 한다 (iOS는 아래 세 줄을 본다) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TagScanner">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" href="icons/favicon-64.png">
 </head>
 <body>
   <!-- 메인 캡처 화면 (다크 테마) -->
@@ -527,6 +536,12 @@
         </div>
       </div>
 
+      <!-- 홈 화면 추가 안내 (이미 홈 화면에서 실행 중이면 숨긴다) -->
+      <div class="install-box" id="installBox" hidden>
+        <p class="install-title">앱처럼 쓰기</p>
+        <p class="install-desc" id="installDesc"></p>
+      </div>
+
       <!-- 메뉴 -->
       <h3 class="mypage-section-title">설정</h3>
       <div class="mypage-menu">
@@ -609,14 +624,14 @@
 
   <!-- Tesseract.js (브라우저 OCR, 한국어+영어 지원) -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-  <script src="config.js?v=2026-09-24b"></script>
-  <script src="fabric_dict.js?v=2026-09-24b"></script>
-  <script src="brands.js?v=2026-09-24b"></script>
-  <script src="tag_profiles.js?v=2026-09-24b"></script>
-  <script src="parser.js?v=2026-09-24b"></script>
-  <script src="clip.js?v=2026-09-24b"></script>
-  <script src="photos.js?v=2026-09-24b"></script>
-  <script src="cloud.js?v=2026-09-24b"></script>
-  <script src="app.js?v=2026-09-24b"></script>
+  <script src="config.js?v=2026-09-24c"></script>
+  <script src="fabric_dict.js?v=2026-09-24c"></script>
+  <script src="brands.js?v=2026-09-24c"></script>
+  <script src="tag_profiles.js?v=2026-09-24c"></script>
+  <script src="parser.js?v=2026-09-24c"></script>
+  <script src="clip.js?v=2026-09-24c"></script>
+  <script src="photos.js?v=2026-09-24c"></script>
+  <script src="cloud.js?v=2026-09-24c"></script>
+  <script src="app.js?v=2026-09-24c"></script>
 </body>
 </html>

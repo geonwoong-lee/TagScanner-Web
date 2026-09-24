@@ -1519,6 +1519,7 @@ async function renderStyleAnalysis() {
 
 // ---- 마이페이지 통계/렌더링 ----
 function renderMyPage() {
+  renderInstallHint();
   const tags = loadTags();
   const total = tags.length;
   const favCount = tags.filter((t) => t.favorite).length;
@@ -2616,6 +2617,33 @@ function renderSyncStatus(result) {
   if (result && result.error) statusEl.textContent = '동기화 실패 (인터넷 연결을 확인해 주세요)';
   else if (result) statusEl.textContent = `방금 맞춤 (올린 사진 ${result.photosUp || 0}장, 받은 상품 ${result.pulled || 0}개)`;
   else statusEl.textContent = '연결됨';
+}
+
+// 홈 화면에 추가하면 주소창 없이 앱처럼 뜬다. 이미 그렇게 실행 중이면 안내를 숨긴다.
+function renderInstallHint() {
+  const box = $('installBox');
+  const desc = $('installDesc');
+  if (!box || !desc) return;
+
+  const standalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+  if (standalone) {
+    box.hidden = true;
+    return;
+  }
+
+  const ua = navigator.userAgent;
+  const isIos = /iPhone|iPad|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
+
+  if (isIos) {
+    desc.textContent = '사파리 아래쪽 공유 버튼을 누르고 "홈 화면에 추가"를 고르면, 아이콘이 생기고 주소창 없이 앱처럼 열립니다.';
+  } else if (isAndroid) {
+    desc.textContent = '크롬 오른쪽 위 점 세 개 메뉴에서 "홈 화면에 추가"를 고르면, 아이콘이 생기고 앱처럼 열립니다.';
+  } else {
+    desc.textContent = '휴대폰 브라우저에서 이 주소를 열고 홈 화면에 추가하면 아이콘이 생기고 앱처럼 열립니다.';
+  }
+  box.hidden = false;
 }
 
 // 파일럿 기간에는 로그인해야 앱을 쓸 수 있게 한다
