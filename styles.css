@@ -2505,3 +2505,58 @@ img.photo-missing {
   color: var(--color-text-primary);
   margin: 0;
 }
+
+/* ---- 구매 결정 ---- */
+.decision-box {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.decision-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.decision-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.decision-btn, .cmp-decision-btn {
+  border: 1px solid var(--color-border);
+  background: white;
+  border-radius: var(--radius-pill);
+  padding: 10px 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.decision-btn.active, .cmp-decision-btn.active {
+  color: white;
+  border-color: transparent;
+}
+
+.decision-btn.bought, .cmp-decision-btn.bought { background: var(--color-fuschia-100); }
+.decision-btn.hold, .cmp-decision-btn.hold { background: var(--color-iris-80); }
+.decision-btn.dropped, .cmp-decision-btn.dropped { background: var(--color-text-secondary); }
+
+/* 비교 화면 안의 결정 버튼은 칸이 좁으므로 세로로 쌓는다 */
+.cmp-decision {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.cmp-decision-btn {
+  padding: 8px 4px;
+  font-size: 13px;
+}

@@ -31,6 +31,10 @@ create table if not exists public.items (
   memo text,
   category text,
   favorite boolean not null default false,
+  decision text check (decision is null or decision in ('bought', 'hold', 'dropped')),
+  decided_at timestamptz,             -- 결정한 시각
+  compared_count integer not null default 0,  -- 비교 화면에 올라간 횟수
+  first_compared_at timestamptz,
   cover_photo_id text,
   deleted boolean not null default false,
   created_at timestamptz not null default now(),
