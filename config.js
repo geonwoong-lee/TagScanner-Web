@@ -8,7 +8,7 @@ window.APP_CONFIG = {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dXhxbmplYXd1amtidWRoeGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMTUxMTcsImV4cCI6MjEwNTc5MTExN30.VQE1VvuCVYzyS9nD52xk-l5yb-rZ-6qo3eMEVn3vhwo',
 
   // Google Analytics 4 측정 ID (G-로 시작). 비워 두면 GA 전송을 건너뛴다.
-  gaMeasurementId: '',
+  gaMeasurementId: 'G-Q19Q7TEWGL',
 
   // 파일럿 기간에만 로그인을 요구한다. false면 예전처럼 로그인 없이 쓸 수 있다.
   pilotMode: true,
