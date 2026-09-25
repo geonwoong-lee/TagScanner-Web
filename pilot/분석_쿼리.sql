@@ -43,6 +43,46 @@ join profiles p on p.id = e.user_id
 where p.participant_code is distinct from 'admin';
 
 
+-- 1-4. 참가자 기기에서 인식이 실제로 몇 초 걸렸는가.
+--      개발 환경에서 잰 값이 아니라 현장 값이라 발표에 쓸 수 있다.
+select
+  e.payload->>'engine'                                     as 엔진,
+  count(*)                                                 as 건수,
+  round(avg((e.payload->>'seconds')::numeric), 2)          as 평균초,
+  round((percentile_cont(0.5) within group (
+    order by (e.payload->>'seconds')::numeric))::numeric, 2) as 중앙값,
+  round(max((e.payload->>'seconds')::numeric), 2)          as 최대초,
+  count(*) filter (where (e.payload->>'seconds')::numeric <= 5) as 오초이내
+from usage_events e
+join profiles p on p.id = e.user_id
+where e.event = 'ocr_done'
+  and p.participant_code is distinct from 'admin'
+group by 1;
+
+-- 1-5. 항목별 인식 성공률. 자동으로 채워 넣은 비율이다.
+--      1-2의 수정률과 함께 보면 "채웠는데 틀렸다"와 "아예 못 채웠다"를 나눌 수 있다.
+select
+  count(*)                                                       as 촬영,
+  round(100.0 * count(*) filter (where (e.payload->>'found_brand')::boolean) / count(*), 1)    as 브랜드,
+  round(100.0 * count(*) filter (where (e.payload->>'found_price')::boolean) / count(*), 1)    as 가격,
+  round(100.0 * count(*) filter (where (e.payload->>'found_size')::boolean) / count(*), 1)     as 사이즈,
+  round(100.0 * count(*) filter (where (e.payload->>'found_material')::boolean) / count(*), 1) as 소재
+from usage_events e
+join profiles p on p.id = e.user_id
+where e.event = 'ocr_done'
+  and p.participant_code is distinct from 'admin';
+
+-- 1-6. 인식 실패 사유
+select
+  e.payload->>'reason' as 사유,
+  count(*)             as 횟수
+from usage_events e
+join profiles p on p.id = e.user_id
+where e.event = 'ocr_failed'
+  and p.participant_code is distinct from 'admin'
+group by 1 order by 2 desc;
+
+
 -- ============================================================
 -- 2. 비교 기능이 의사결정에 쓰였는가
 -- ============================================================

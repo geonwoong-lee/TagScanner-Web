@@ -320,6 +320,7 @@ async function handleImageSelected(file) {
 
     const engine = pickEngine();
     ocrAttempts = 0;
+    const startedAt = performance.now();
     const ocrResult = await runOcr({ rawData, processedData, engine, modeIndex: ocrAttempts });
     finishOcr({
       photoData,
@@ -329,9 +330,12 @@ async function handleImageSelected(file) {
       logos: ocrResult.logos,
       engine,
       primaryKind,
+      ocrSeconds: Math.round((performance.now() - startedAt) / 100) / 10,
     });
   } catch (e) {
     console.error(e);
+    // 실패도 기록한다. 참가자 환경에서 무엇이 왜 실패하는지가 발표 근거가 된다.
+    logEvent('ocr_failed', { reason: String(e.message || e).slice(0, 100) });
     showToast('OCR 실패: ' + (e.message || e));
     showScreen('main');
   }
@@ -472,9 +476,23 @@ async function addReviewPhotos(files, kind) {
   }
 }
 
-function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, primaryKind = 'tag', extraPhotos = [] }) {
+function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, primaryKind = 'tag', extraPhotos = [], ocrSeconds = null }) {
   const lines = window.splitLines(rawText);
   const fields = window.parseFields(lines, { logos: logos || [] });
+
+  // 참가자 기기와 통신 환경에서 실제로 몇 초 걸리는지, 어떤 항목을 찾아냈는지 남긴다.
+  // 서버에만 남는 ocr_called과 달리 이 기록은 GA에도 올라가 퍼널의 시작점이 된다.
+  if (ocrSeconds !== null) {
+    logEvent('ocr_done', {
+      engine,
+      seconds: ocrSeconds,
+      text_length: (rawText || '').length,
+      found_brand: Boolean(fields.brand),
+      found_price: Boolean(fields.price),
+      found_size: Boolean(fields.size),
+      found_material: Boolean(fields.material),
+    });
+  }
 
   currentReview = {
     photoData, rawData, processedData, rawText, logos: logos || [], fields, engine,
