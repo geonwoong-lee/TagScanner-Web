@@ -10,7 +10,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const VISION_URL = 'https://vision.googleapis.com/v1/images:annotate';
-const DAILY_LIMIT = 80; // 참가자 1명이 하루에 호출할 수 있는 횟수
+const DAILY_LIMIT = 20; // 참가자 1명이 하루에 호출할 수 있는 횟수 (무료 한도와 비용을 지키기 위한 상한)
 
 const cors = {
   'Access-Control-Allow-Origin': '*',

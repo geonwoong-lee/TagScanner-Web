@@ -52,6 +52,7 @@
       client.auth.onAuthStateChange((_event, session) => {
         currentUser = session?.user ?? null;
         notify();
+        setAnalyticsUser();
       });
       notify();
       initAnalytics();
@@ -64,6 +65,7 @@
   }
 
   // ---- GA4 ----
+  // 태그는 한 번만 싣는다
   function initAnalytics() {
     if (!cfg.gaMeasurementId || window.gtag) return;
     const s = document.createElement('script');
@@ -73,8 +75,21 @@
     window.dataLayer = window.dataLayer || [];
     window.gtag = function () { window.dataLayer.push(arguments); };
     window.gtag('js', new Date());
-    // 참가자는 번호로만 구분한다 (이메일 같은 개인정보는 보내지 않는다)
-    window.gtag('config', cfg.gaMeasurementId, { user_id: currentUser?.id, anonymize_ip: true });
+    window.gtag('config', cfg.gaMeasurementId, { anonymize_ip: true, send_page_view: true });
+    setAnalyticsUser();
+  }
+
+  // 로그인하거나 계정이 바뀔 때마다 누구인지 다시 알려준다.
+  // 참가자는 번호로만 구분한다. 이메일 같은 개인정보는 보내지 않는다.
+  function setAnalyticsUser() {
+    if (!window.gtag || !cfg.gaMeasurementId) return;
+    window.gtag('config', cfg.gaMeasurementId, {
+      user_id: currentUser?.id || undefined,
+      anonymize_ip: true,
+      send_page_view: false,
+    });
+    const code = currentUser?.user_metadata?.participant_code;
+    window.gtag('set', 'user_properties', { participant_code: code ? String(code) : undefined });
   }
 
   // ---- 계정 ----
@@ -116,11 +131,13 @@
 
   // ---- 사용 로그 ----
   // 서버에 한 줄씩 쌓고, GA4에도 같은 이름으로 보낸다. 오프라인이면 모아 두었다가 나중에 올린다.
-  function log(event, payload = {}) {
+  // gaOnly: 화면 전환처럼 자주 일어나는 기록은 GA에만 보낸다.
+  // 서버에는 분석에 실제로 쓰는 기록만 남겨 요청 수를 줄인다.
+  function log(event, payload = {}, { gaOnly = false } = {}) {
     if (window.gtag && cfg.gaMeasurementId) {
       try { window.gtag('event', event, payload); } catch (e) { console.warn('GA 전송 실패', e); }
     }
-    if (!enabled()) return;
+    if (gaOnly || !enabled()) return;
     const queue = readJson(LOG_QUEUE_KEY, []);
     queue.push({ event, payload, client_ts: new Date().toISOString() });
     writeJson(LOG_QUEUE_KEY, queue.slice(-500));
@@ -295,6 +312,8 @@
       localStorage.setItem(LAST_PULL_KEY, new Date().toISOString());
       return result;
     } catch (e) {
+      // 조용히 실패하면 그 참가자 데이터만 통째로 비게 된다. 실패 자체를 남긴다.
+      log('sync_failed', { reason: String(e.message || e).slice(0, 120) });
       if (!silent) throw e;
       console.warn('동기화 실패', e);
       return { error: e };

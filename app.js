@@ -75,10 +75,20 @@ let activeFilters = defaultFilters();
 let brandShowAll = false; // "더보기" 토글 상태
 let reviewSelectedCategory = ''; // 등록 화면에서 선택된 카테고리
 
+const SCREEN_TITLES = {
+  main: '촬영', review: '상품 등록', list: '상품 목록', detail: '상품 상세',
+  settings: '설정', compare: '찜 목록', compareResult: '비교 결과',
+  auth: '로그인', myPage: '마이페이지', filter: '필터',
+};
+
 function showScreen(name) {
   Object.values(screens).forEach((s) => s.classList.remove('active'));
   screens[name].classList.add('active');
   window.scrollTo(0, 0);
+  // 화면 전환이 주소 변경 없이 일어나므로 직접 알려야 GA가 경로와 체류 시간을 잰다
+  if (window.Cloud && window.Cloud.enabled()) {
+    window.Cloud.log('screen_view', { screen_name: SCREEN_TITLES[name] || name }, { gaOnly: true });
+  }
 }
 
 // ---- 이미지 로드 ----
@@ -320,6 +330,7 @@ async function handleImageSelected(file) {
 
     const engine = pickEngine();
     ocrAttempts = 0;
+    const startedAt = performance.now();
     const ocrResult = await runOcr({ rawData, processedData, engine, modeIndex: ocrAttempts });
     finishOcr({
       photoData,
@@ -329,9 +340,12 @@ async function handleImageSelected(file) {
       logos: ocrResult.logos,
       engine,
       primaryKind,
+      ocrSeconds: Math.round((performance.now() - startedAt) / 100) / 10,
     });
   } catch (e) {
     console.error(e);
+    // 실패도 기록한다. 참가자 환경에서 무엇이 왜 실패하는지가 발표 근거가 된다.
+    logEvent('ocr_failed', { reason: String(e.message || e).slice(0, 100) });
     showToast('OCR 실패: ' + (e.message || e));
     showScreen('main');
   }
@@ -472,9 +486,23 @@ async function addReviewPhotos(files, kind) {
   }
 }
 
-function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, primaryKind = 'tag', extraPhotos = [] }) {
+function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, primaryKind = 'tag', extraPhotos = [], ocrSeconds = null }) {
   const lines = window.splitLines(rawText);
   const fields = window.parseFields(lines, { logos: logos || [] });
+
+  // 참가자 기기와 통신 환경에서 실제로 몇 초 걸리는지, 어떤 항목을 찾아냈는지 남긴다.
+  // 서버에만 남는 ocr_called과 달리 이 기록은 GA에도 올라가 퍼널의 시작점이 된다.
+  if (ocrSeconds !== null) {
+    logEvent('ocr_done', {
+      engine,
+      seconds: ocrSeconds,
+      text_length: (rawText || '').length,
+      found_brand: Boolean(fields.brand),
+      found_price: Boolean(fields.price),
+      found_size: Boolean(fields.size),
+      found_material: Boolean(fields.material),
+    });
+  }
 
   currentReview = {
     photoData, rawData, processedData, rawText, logos: logos || [], fields, engine,
@@ -587,6 +615,12 @@ function saveTags(tags) {
       e.name === 'QuotaExceededError' ||
       e.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
       /quota/i.test(e.message || '');
+    // 참가자 기기에서 저장이 막히면 데이터가 통째로 사라진다. 조용히 넘기지 않는다.
+    logEvent('storage_failed', {
+      is_quota: isQuota,
+      reason: String(e.name || e.message || e).slice(0, 80),
+      item_count: Array.isArray(tags) ? tags.length : 0,
+    });
     return {
       ok: false,
       error: e,
@@ -2760,6 +2794,34 @@ function applyPilotGate() {
   if (!window.Cloud.user()) showScreen('auth');
   else if (document.querySelector('.screen.active')?.id === 'authScreen') showScreen('main');
 }
+
+// 참가자 기기에서 터진 오류를 남긴다.
+// 2주 동안 남의 휴대폰에서 혼자 도는 앱이라, 제보를 기다리면 대부분 그냥 묻힌다.
+let errorsLogged = 0;
+
+function logClientError(kind, message, source) {
+  if (errorsLogged >= 10) return; // 같은 오류가 반복될 때 로그가 폭주하지 않게 막는다
+  errorsLogged++;
+  try {
+    logEvent('js_error', {
+      kind,
+      message: String(message || '').slice(0, 150),
+      source: String(source || '').slice(0, 100),
+      screen: document.querySelector('.screen.active')?.id || '',
+    });
+  } catch (e) {
+    console.warn('오류 기록 실패', e);
+  }
+}
+
+window.addEventListener('error', (e) => {
+  logClientError('error', e.message, `${e.filename || ''}:${e.lineno || 0}`);
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  const reason = e.reason;
+  logClientError('promise', reason?.message || reason, (reason && reason.stack ? reason.stack.split('\n')[1] : '') || '');
+});
 
 // ---- 시작 ----
 document.addEventListener('DOMContentLoaded', async () => {
