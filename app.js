@@ -81,6 +81,14 @@ const SCREEN_TITLES = {
   auth: '로그인', myPage: '마이페이지', filter: '필터',
 };
 
+// 오류 객체가 null이거나 문자열일 수도 있다. 사파리는 저장이 막히면 null을 주기도 한다.
+// 오류를 다루다가 또 터지면 원인이 통째로 사라지므로 여기서 한 번에 처리한다.
+function errText(e, fallback = '알 수 없는 오류') {
+  if (!e) return fallback;
+  if (typeof e === 'string') return e;
+  return e.message || e.name || fallback;
+}
+
 function showScreen(name) {
   Object.values(screens).forEach((s) => s.classList.remove('active'));
   screens[name].classList.add('active');
@@ -345,8 +353,8 @@ async function handleImageSelected(file) {
   } catch (e) {
     console.error(e);
     // 실패도 기록한다. 참가자 환경에서 무엇이 왜 실패하는지가 발표 근거가 된다.
-    logEvent('ocr_failed', { reason: String(e.message || e).slice(0, 100) });
-    showToast('OCR 실패: ' + (e.message || e));
+    logEvent('ocr_failed', { reason: errText(e).slice(0, 100) });
+    showToast('OCR 실패: ' + errText(e));
     showScreen('main');
   }
 }
@@ -482,7 +490,7 @@ async function addReviewPhotos(files, kind) {
     renderReviewPhotos();
     if (files.length > room) showToast(`${room}장만 추가했어요 (상품당 최대 ${MAX_PHOTOS}장)`);
   } catch (e) {
-    showToast('사진을 불러오지 못했어요: ' + (e.message || e));
+    showToast('사진을 불러오지 못했어요: ' + errText(e));
   }
 }
 
@@ -589,7 +597,7 @@ async function retryOcr() {
     showToast('재시도 완료');
   } catch (e) {
     console.error(e);
-    showToast('재시도 실패: ' + (e.message || e));
+    showToast('재시도 실패: ' + errText(e));
     $('ocrProgress').style.display = 'none';
     $('reviewForm').hidden = false;
   }
@@ -614,11 +622,11 @@ function saveTags(tags) {
     const isQuota =
       e.name === 'QuotaExceededError' ||
       e.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
-      /quota/i.test(e.message || '');
+      /quota/i.test(errText(e, ''));
     // 참가자 기기에서 저장이 막히면 데이터가 통째로 사라진다. 조용히 넘기지 않는다.
     logEvent('storage_failed', {
       is_quota: isQuota,
-      reason: String(e.name || e.message || e).slice(0, 80),
+      reason: String((e && e.name) || errText(e)).slice(0, 80),
       item_count: Array.isArray(tags) ? tags.length : 0,
     });
     return {
@@ -665,7 +673,7 @@ function addTag(data) {
         '※ 브라우저 localStorage 한계 (보통 5~10MB)'
       );
     } else {
-      alert('저장 실패: ' + (r.error?.message || '알 수 없는 오류'));
+      alert('저장 실패: ' + errText(r.error));
     }
     return null;
   }
@@ -691,7 +699,7 @@ function updateTag(id, data) {
     if (r.isQuota) {
       alert('⚠️ 저장 공간이 가득 찼습니다. 오래된 항목을 삭제하거나 데이터를 내보내세요.');
     } else {
-      alert('수정 저장 실패: ' + (r.error?.message || '알 수 없는 오류'));
+      alert('수정 저장 실패: ' + errText(r.error));
     }
     return;
   }
@@ -1453,7 +1461,7 @@ async function renderSimilarClothes(currentTag) {
         if (text) text.textContent = `옷 사진 분석 중 (${i}/${n})`;
       });
     } catch (e) {
-      container.innerHTML = `<p class="similar-hint">❌ 분석 실패: ${escapeHtml(e.message || String(e))}</p>`;
+      container.innerHTML = `<p class="similar-hint">❌ 분석 실패: ${escapeHtml(errText(e))}</p>`;
       return;
     } finally {
       window.CLIP.setProgressCallback(null);
@@ -1606,7 +1614,7 @@ async function renderStyleAnalysis() {
         </div>
       `;
     } catch (e) {
-      container.innerHTML = `<p class="style-hint">❌ 분석 실패: ${escapeHtml(e.message || String(e))}</p>`;
+      container.innerHTML = `<p class="style-hint">❌ 분석 실패: ${escapeHtml(errText(e))}</p>`;
     }
   });
 }
@@ -1769,7 +1777,7 @@ function importDataFromFile(file) {
         if (r.isQuota) {
           alert('⚠️ 저장 공간 부족으로 일부만 가져올 수 있습니다. 기존 데이터를 정리한 후 다시 시도하세요.');
         } else {
-          alert('가져오기 실패: ' + (r.error?.message || '알 수 없는 오류'));
+          alert('가져오기 실패: ' + errText(r.error));
         }
         return;
       }
@@ -2036,7 +2044,7 @@ async function addDetailPhotos(files, kind) {
     showToast(files.length > room ? `${room}장만 추가했어요 (최대 ${MAX_PHOTOS}장)` : `사진 ${stored.length}장을 추가했어요`);
     afterDetailPhotosChanged(prevGarment);
   } catch (e) {
-    showToast('사진 추가 실패: ' + (e.message || e));
+    showToast('사진 추가 실패: ' + errText(e));
   }
 }
 
@@ -2216,16 +2224,24 @@ function bindEvents() {
     reviewSaving = true;
     const review = currentReview;
 
-    let photos;
+    let photos = [];
+    // 오류 객체 자체가 null로 올 수 있으므로 실패 여부는 따로 둔다
+    let photoFailed = false;
     try {
       photos = await storePhotos([
         { kind: review.primaryKind, dataUrl: review.photoData },
         ...review.extraPhotos,
       ]);
     } catch (err) {
-      reviewSaving = false;
-      showToast('사진 저장 실패: ' + (err.message || err));
-      return;
+      // 기기 저장소가 막혀 있어도 입력한 내용까지 날리지는 않는다.
+      // 사진 없이 저장하고 무엇이 문제였는지 남긴다.
+      photoFailed = true;
+      photos = [];
+      logEvent('photo_store_failed', {
+        reason: errText(err).slice(0, 120),
+        name: String((err && err.name) || '').slice(0, 40),
+      });
+      console.warn('사진 저장 실패:', err);
     }
 
     const saved = addTag({
@@ -2263,7 +2279,9 @@ function bindEvents() {
       if (el) el.value = '';
     });
     reviewSelectedCategory = '';
-    showToast('저장되었습니다');
+    showToast(photoFailed
+      ? '사진은 저장하지 못했지만 상품 정보는 저장했습니다'
+      : '저장되었습니다');
     renderList();
     showScreen('list');
   });
@@ -2645,7 +2663,7 @@ function bindEvents() {
         showToast(msg);
       }
     } catch (e) {
-      showToast('❌ ' + (e.message || e));
+      showToast('❌ ' + errText(e));
     }
   });
 
@@ -2743,7 +2761,7 @@ async function handleAuthSubmit(e) {
     showToast(authMode === 'signup' ? '가입되었습니다' : '로그인되었습니다');
     window.Cloud.syncNow().then(renderSyncStatus);
   } catch (err) {
-    const message = String(err.message || err);
+    const message = errText(err);
     if (/Invalid login credentials/i.test(message)) showAuthError('이메일 또는 비밀번호가 맞지 않습니다.');
     else if (/User already registered/i.test(message)) showAuthError('이미 가입된 이메일입니다. 로그인을 눌러 주세요.');
     else if (/Password should be/i.test(message)) showAuthError('비밀번호는 6자 이상이어야 합니다.');
@@ -2849,6 +2867,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
+    // 이 기기에서 사진 저장이 되는지 먼저 확인한다. 안 되면 원인을 기록해 둔다.
+    const check = await PhotoStore.probe();
+    if (!check.ok) {
+      logEvent('photo_store_unavailable', {
+        name: String(check.name || '').slice(0, 40),
+        reason: String(check.message || '').slice(0, 120),
+        standalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true,
+      });
+      console.warn('사진 저장소를 쓸 수 없습니다:', check);
+    }
     const moved = await migrateLegacyPhotos();
     if (moved > 0) console.info(`사진 ${moved}장을 새 저장소로 옮겼습니다`);
     await cleanupOrphanPhotos();
