@@ -51,6 +51,7 @@
         <span class="corner br"></span>
       </div>
       <p class="guide-text">상품 태그를 가이드 안에 맞춰주세요</p>
+      <button type="button" class="gallery-btn" id="navGallery">갤러리에서 사진 고르기</button>
 
       <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
       <input type="file" id="fileInput" accept="image/*" hidden>
@@ -213,8 +214,7 @@
     </div>
 
     <div class="action-bar">
-      <button type="button" form="reviewForm" id="reviewSubmit" class="primary-btn"
-        onclick="document.getElementById('reviewForm').requestSubmit();">
+      <button type="submit" form="reviewForm" id="reviewSubmit" class="primary-btn">
         등록 / 수정 완료
       </button>
     </div>

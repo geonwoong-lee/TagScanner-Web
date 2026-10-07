@@ -2145,6 +2145,15 @@ function bindEvents() {
     e.target.value = '';
   });
 
+  // 갤러리에서 고르기. 이미 찍어둔 사진을 쓰거나 카메라 권한을 막아둔 경우에 쓴다.
+  const navGallery = $('navGallery');
+  if (navGallery) {
+    navGallery.addEventListener('click', () => {
+      logEvent('gallery_opened', { mode: captureMode });
+      $('fileInput').click();
+    });
+  }
+
   // 사진 추가 버튼 (등록 화면·상세 화면 공용): 누른 버튼의 종류를 기억했다가 파일 선택 후 반영
   let pendingPhotoKind = 'garment';
   document.querySelectorAll('.photo-add-btn').forEach((btn) => {
