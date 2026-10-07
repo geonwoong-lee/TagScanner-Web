@@ -151,6 +151,42 @@ join profiles p on p.id = e.user_id
 where p.participant_code is distinct from 'admin';
 
 
+-- 2-6. 사람 단위로 본 결정. 앞의 쿼리들은 상품 단위라 이것과 따로 본다.
+--      "10명 중 몇 명이 이 기능으로 실제 결정까지 갔는가"에 답한다.
+select
+  count(distinct p.id)                                          as 전체_참가자,
+  count(distinct e.user_id) filter (where e.event = 'compare_run')   as 비교한_사람,
+  count(distinct e.user_id) filter (where e.event = 'decision_made') as 결정한_사람
+from profiles p
+left join usage_events e on e.user_id = p.id
+where p.participant_code is distinct from 'admin';
+
+-- 2-7. 참가자별 최종 결정 현황. items의 현재 상태만 본다(되돌린 것은 빠진다).
+select
+  p.participant_code                             as 참가자,
+  count(*) filter (where i.decision = 'bought')  as 구매,
+  count(*) filter (where i.decision = 'hold')    as 보류,
+  count(*) filter (where i.decision = 'dropped') as 안삼,
+  count(*) filter (where i.decision is null)     as 미정
+from items i
+join profiles p on p.id = i.user_id
+where not i.deleted
+  and p.participant_code is distinct from 'admin'
+group by 1 order by 1;
+
+-- 2-8. 마음을 바꾼 경우. previous에 값이 있으면 이전 결정을 뒤집은 것이다.
+select
+  e.payload->>'previous' as 이전결정,
+  e.payload->>'decision' as 바꾼결정,
+  count(*)               as 횟수
+from usage_events e
+join profiles p on p.id = e.user_id
+where e.event = 'decision_made'
+  and coalesce(e.payload->>'previous', '') <> ''
+  and p.participant_code is distinct from 'admin'
+group by 1, 2 order by 3 desc;
+
+
 -- ============================================================
 -- 3. 참가자별 현황 (중간 점검용)
 -- ============================================================

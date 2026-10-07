@@ -2560,3 +2560,21 @@ img.photo-missing {
   padding: 8px 4px;
   font-size: 13px;
 }
+
+/* ---- 갤러리에서 고르기 ---- */
+.gallery-btn {
+  margin-top: 14px;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.gallery-btn:active {
+  background: rgba(255, 255, 255, 0.24);
+}
