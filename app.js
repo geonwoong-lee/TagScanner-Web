@@ -902,6 +902,11 @@ async function migrateLegacyPhotos() {
 
 // 어느 상품에도 연결되지 않은 사진 정리 (삭제 후 되돌리기 시간이 지난 사진 등)
 async function cleanupOrphanPhotos() {
+  // 동기화 중에는 사진을 먼저 받고 상품을 나중에 저장한다.
+  // 그 사이에 지우면 다른 기기에서 받아온 사진이 바로 사라진다.
+  // 받아온 사진은 id에 찍힌 시각이 예전이라 아래 10분 유예로도 보호되지 않는다.
+  if (window.Cloud && window.Cloud.isSyncing && window.Cloud.isSyncing()) return 0;
+
   const used = new Set(loadTags().flatMap((t) => tagPhotos(t).map((p) => p.id)));
   // 저장 중인 사진(사진을 먼저 넣고 상품을 나중에 저장)을 지우지 않도록 최근 10분 사진은 남긴다
   const createdAt = (id) => parseInt(String(id).slice(1, -6), 36) || 0;
@@ -2872,8 +2877,21 @@ function renderInstallHint() {
 function applyPilotGate() {
   const cfg = window.APP_CONFIG || {};
   if (!cfg.pilotMode || !(window.Cloud && window.Cloud.enabled())) return;
-  if (!window.Cloud.user()) showScreen('auth');
-  else if (document.querySelector('.screen.active')?.id === 'authScreen') showScreen('main');
+
+  if (!window.Cloud.user()) {
+    // 서버에 닿지 못한 경우, 이 기기에서 전에 로그인한 적이 있으면 그대로 쓰게 둔다.
+    // 매장에서 신호가 약할 때 로그인 화면에 갇히면 아무것도 기록할 수 없다.
+    // 올리는 일은 연결된 뒤에 하므로 다른 계정 자료가 섞일 일은 없다.
+    if (!window.Cloud.isReady() && window.Cloud.lastOwner()) {
+      logEvent('offline_start', {});
+      if (document.querySelector('.screen.active')?.id === 'authScreen') showScreen('main');
+      showToast('지금은 서버에 연결되지 않았습니다. 저장은 되고, 연결되면 올라갑니다');
+      return;
+    }
+    showScreen('auth');
+    return;
+  }
+  if (document.querySelector('.screen.active')?.id === 'authScreen') showScreen('main');
 }
 
 // 참가자 기기에서 터진 오류를 남긴다.

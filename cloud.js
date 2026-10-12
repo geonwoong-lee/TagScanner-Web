@@ -21,6 +21,7 @@
   let syncing = false;
   // 앞 계정 자료가 기기에 남아 있으면 동기화를 멈춘다. 멈춘 이유를 담아 둔다.
   let blockedReason = '';
+  let ready = false; // 서버에 연결됐는지 (오프라인이면 false)
   const listeners = [];
 
   const enabled = () => Boolean(cfg.supabaseUrl && cfg.supabaseAnonKey);
@@ -103,6 +104,7 @@
       initAnalytics();
       // 올리기 전에 반드시 먼저 확인한다
       await guardOwner();
+      ready = true;
       if (currentUser) syncNow().catch((e) => console.warn('첫 동기화 실패', e));
       return { enabled: true, user: currentUser };
     } catch (e) {
@@ -384,6 +386,8 @@
   window.Cloud = {
     enabled, init, user, signUp, signIn, signOut, setConsent, forgetOwner,
     blocked: () => blockedReason,
+    isReady: () => ready,
+    lastOwner: () => localStorage.getItem(OWNER_KEY),
     log, syncNow, visionOcr, addTombstone,
     onAuthChange: (fn) => { listeners.push(fn); if (currentUser !== undefined) fn(currentUser); },
     isSyncing: () => syncing,
