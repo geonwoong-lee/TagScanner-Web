@@ -14,6 +14,7 @@
   const LAST_PULL_KEY = 'tagscanner.lastPull.v1';
   const LOG_QUEUE_KEY = 'tagscanner.logQueue.v1';
   const TOMBSTONE_KEY = 'tagscanner.deleted.v1';
+  const OWNER_KEY = 'tagscanner.owner.v1'; // 이 기기에 남은 내용이 누구 것인지
 
   let client = null;
   let currentUser = null;
@@ -39,6 +40,30 @@
     writeJson(TOMBSTONE_KEY, list);
   }
 
+  // 한 기기를 여러 계정이 쓰는 경우를 막는다.
+  // 기기에 남은 상품은 앞서 로그인한 계정 것이므로, 다른 계정이 들어오면 지운다.
+  // 안 그러면 다음 동기화 때 앞 사람 상품이 뒤 사람 계정으로 올라간다.
+  async function guardOwner() {
+    if (!currentUser) return;
+    const previous = localStorage.getItem(OWNER_KEY);
+    if (previous && previous !== currentUser.id) {
+      try {
+        if (typeof window.clearLocalUserData === 'function') await window.clearLocalUserData();
+      } catch (e) {
+        console.warn('이전 계정 자료 정리 실패', e);
+      }
+      localStorage.removeItem(LAST_PULL_KEY);
+      writeJson(LOG_QUEUE_KEY, []);
+      writeJson(TOMBSTONE_KEY, []);
+      log('account_switched_on_device', {});
+    }
+    localStorage.setItem(OWNER_KEY, currentUser.id);
+  }
+
+  function forgetOwner() {
+    localStorage.removeItem(OWNER_KEY);
+  }
+
   // ---- 시작 ----
   async function init() {
     if (!enabled()) return { enabled: false };
@@ -50,12 +75,18 @@
       const { data } = await client.auth.getSession();
       currentUser = data.session?.user ?? null;
       client.auth.onAuthStateChange((_event, session) => {
+        const before = currentUser?.id || null;
         currentUser = session?.user ?? null;
+        if (currentUser && currentUser.id !== before) {
+          guardOwner().catch((e) => console.warn('계정 확인 실패', e));
+        }
         notify();
         setAnalyticsUser();
       });
       notify();
       initAnalytics();
+      // 올리기 전에 반드시 먼저 확인한다
+      await guardOwner();
       if (currentUser) syncNow().catch((e) => console.warn('첫 동기화 실패', e));
       return { enabled: true, user: currentUser };
     } catch (e) {
@@ -333,7 +364,7 @@
   }
 
   window.Cloud = {
-    enabled, init, user, signUp, signIn, signOut, setConsent,
+    enabled, init, user, signUp, signIn, signOut, setConsent, forgetOwner,
     log, syncNow, visionOcr, addTombstone,
     onAuthChange: (fn) => { listeners.push(fn); if (currentUser !== undefined) fn(currentUser); },
     isSyncing: () => syncing,

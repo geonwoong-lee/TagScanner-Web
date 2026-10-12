@@ -778,6 +778,21 @@ function deleteTagById(id) {
   return deletedTag;
 }
 
+// 이 기기에 남은 사용자 자료를 비운다.
+// 계정이 바뀔 때와 로그아웃할 때 쓴다. 서버 자료는 건드리지 않는다.
+window.clearLocalUserData = async function clearLocalUserData() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    console.warn('상품 정리 실패', e);
+  }
+  try {
+    await window.PhotoStore.clear();
+  } catch (e) {
+    console.warn('사진 정리 실패', e);
+  }
+};
+
 // ---- 상품 사진 ----
 // 상품 하나에 사진 여러 장: photos = [{ id, kind: 'tag' | 'garment' | 'wearing', createdAt }]
 // 사진 파일은 PhotoStore(IndexedDB)에 있고 상품 정보에는 id만 저장한다.
@@ -2196,9 +2211,25 @@ function bindEvents() {
     showToast(result && result.error ? '동기화 실패' : '동기화 완료');
   });
   $('btnSignOut').addEventListener('click', async () => {
-    if (!confirm('로그아웃할까요? 이 기기에 저장된 상품은 그대로 남습니다.')) return;
+    if (!confirm('로그아웃할까요?\n\n저장한 내용은 서버에 올린 뒤 이 기기에서는 지웁니다.\n다시 로그인하면 그대로 돌아옵니다.')) return;
+
+    // 올리지 못한 내용이 있는 채로 지우면 그대로 사라진다
+    $('syncStatus').textContent = '서버에 올리는 중...';
+    const result = await window.Cloud.syncNow();
+    if (result && result.error) {
+      const go = confirm('서버에 올리지 못한 내용이 있습니다. 인터넷 연결을 확인해 주세요.\n\n그래도 로그아웃하면 올리지 못한 내용은 사라집니다. 계속할까요?');
+      if (!go) {
+        renderSyncStatus(result);
+        return;
+      }
+    }
+
     logEvent('signed_out', {});
     await window.Cloud.signOut();
+    // 다음 사람이 앞 사람 상품을 보지 않도록 이 기기에서는 비운다
+    await window.clearLocalUserData();
+    window.Cloud.forgetOwner();
+    renderList();
     renderSyncStatus();
     applyPilotGate();
     showToast('로그아웃했습니다');
