@@ -780,17 +780,32 @@ function deleteTagById(id) {
 
 // 이 기기에 남은 사용자 자료를 비운다.
 // 계정이 바뀔 때와 로그아웃할 때 쓴다. 서버 자료는 건드리지 않는다.
+// 지웠다고 넘겨짚지 않는다. 정말 비었는지 확인하고 결과를 돌려준다.
 window.clearLocalUserData = async function clearLocalUserData() {
+  const result = { ok: true, tags: true, photos: true, reason: '' };
+
   try {
     localStorage.removeItem(STORAGE_KEY);
+    if (localStorage.getItem(STORAGE_KEY)) throw new Error('상품이 지워지지 않았습니다');
   } catch (e) {
+    result.ok = false;
+    result.tags = false;
+    result.reason = errText(e);
     console.warn('상품 정리 실패', e);
   }
+
   try {
     await window.PhotoStore.clear();
+    const left = await window.PhotoStore.listIds();
+    if (left && left.length) throw new Error(`사진 ${left.length}장이 남았습니다`);
   } catch (e) {
+    result.ok = false;
+    result.photos = false;
+    result.reason = result.reason || errText(e);
     console.warn('사진 정리 실패', e);
   }
+
+  return result;
 };
 
 // ---- 상품 사진 ----
@@ -2227,8 +2242,11 @@ function bindEvents() {
     logEvent('signed_out', {});
     await window.Cloud.signOut();
     // 다음 사람이 앞 사람 상품을 보지 않도록 이 기기에서는 비운다
-    await window.clearLocalUserData();
+    const cleared = await window.clearLocalUserData();
     window.Cloud.forgetOwner();
+    if (!cleared.ok) {
+      alert('이 기기에서 자료를 완전히 지우지 못했습니다.\n다음 사람이 쓰기 전에 마이페이지에서 전체 데이터 삭제를 해주세요.');
+    }
     renderList();
     renderSyncStatus();
     applyPilotGate();
@@ -2811,6 +2829,11 @@ function renderSyncStatus(result) {
   emailEl.textContent = user ? user.email : '로그인하지 않음';
   if (!user) {
     statusEl.textContent = '로그인하면 다른 기기와 맞춰집니다';
+    return;
+  }
+  // 앞 계정 자료가 남아 있어 멈춘 상태면 그대로 알린다
+  if (window.Cloud.blocked && window.Cloud.blocked()) {
+    statusEl.textContent = '멈춤: 이전 계정 자료가 남아 있습니다. 전체 데이터 삭제 후 다시 로그인해 주세요';
     return;
   }
   if (result && result.error) statusEl.textContent = '동기화 실패 (인터넷 연결을 확인해 주세요)';

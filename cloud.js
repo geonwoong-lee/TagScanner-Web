@@ -19,6 +19,8 @@
   let client = null;
   let currentUser = null;
   let syncing = false;
+  // 앞 계정 자료가 기기에 남아 있으면 동기화를 멈춘다. 멈춘 이유를 담아 둔다.
+  let blockedReason = '';
   const listeners = [];
 
   const enabled = () => Boolean(cfg.supabaseUrl && cfg.supabaseAnonKey);
@@ -47,16 +49,30 @@
     if (!currentUser) return;
     const previous = localStorage.getItem(OWNER_KEY);
     if (previous && previous !== currentUser.id) {
+      let cleared = { ok: false, reason: '정리 함수를 찾지 못했습니다' };
       try {
-        if (typeof window.clearLocalUserData === 'function') await window.clearLocalUserData();
+        if (typeof window.clearLocalUserData === 'function') {
+          cleared = await window.clearLocalUserData();
+        }
       } catch (e) {
-        console.warn('이전 계정 자료 정리 실패', e);
+        cleared = { ok: false, reason: String((e && e.message) || e) };
       }
+
+      if (!cleared.ok) {
+        // 앞 계정 자료가 남아 있는데 올리면 그대로 이 계정 것이 된다.
+        // 올리지도 받지도 않고 멈춘다.
+        blockedReason = cleared.reason || '이전 계정 자료를 지우지 못했습니다';
+        log('account_switch_clear_failed', { reason: String(blockedReason).slice(0, 120) });
+        console.warn('이전 계정 자료를 지우지 못해 동기화를 멈춥니다:', blockedReason);
+        return;
+      }
+
       localStorage.removeItem(LAST_PULL_KEY);
       writeJson(LOG_QUEUE_KEY, []);
       writeJson(TOMBSTONE_KEY, []);
       log('account_switched_on_device', {});
     }
+    blockedReason = '';
     localStorage.setItem(OWNER_KEY, currentUser.id);
   }
 
@@ -150,6 +166,7 @@
     if (!client) return;
     await client.auth.signOut();
     currentUser = null;
+    blockedReason = '';
     localStorage.removeItem(LAST_PULL_KEY);
     notify();
   }
@@ -247,6 +264,7 @@
   });
 
   async function syncNow({ silent = true } = {}) {
+    if (blockedReason) return { blocked: true, error: new Error(blockedReason) };
     if (!client || !currentUser || syncing) return { skipped: true };
     syncing = true;
     const uid = currentUser.id;
@@ -365,6 +383,7 @@
 
   window.Cloud = {
     enabled, init, user, signUp, signIn, signOut, setConsent, forgetOwner,
+    blocked: () => blockedReason,
     log, syncNow, visionOcr, addTombstone,
     onAuthChange: (fn) => { listeners.push(fn); if (currentUser !== undefined) fn(currentUser); },
     isSyncing: () => syncing,

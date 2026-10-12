@@ -1,6 +1,17 @@
 -- 파일럿 결과 분석용 쿼리 모음
 -- Supabase 대시보드 > SQL Editor 에 붙여넣고 Run.
--- 본인 테스트 계정(participant_code = 'admin')은 전부 제외한다.
+--
+-- 아래 쿼리들은 pilot_participants 를 쓴다. 맨 처음 한 번만 아래 문장을 실행해 두면 된다.
+-- 테스트 계정을 이메일로 걸러내므로, 참가자 번호를 바꾸지 않아도 된다.
+-- 테스트 계정이 늘어나면 이 문장만 다시 실행해서 조건을 고치면 전체 쿼리에 반영된다.
+--
+-- create or replace view pilot_participants as
+-- select p.id, p.participant_code, p.created_at, p.consented_at
+-- from profiles p
+-- join auth.users u on u.id = p.id
+-- where u.email not like 'abcd@%'          -- 개발 중 만든 계정
+--   and u.email not like 'psu%@naver.com'  -- 팀 내부 테스트 계정
+--   and u.email <> 'asldfj@asddf.com';     -- 연동 확인용 계정
 
 -- ============================================================
 -- 1. 인식 정확도: 자동 인식 결과를 참가자가 얼마나 고쳤는가
@@ -13,8 +24,7 @@ select
   round(100.0 * count(*) filter (where e.event = 'item_updated')
         / nullif(count(*) filter (where e.event = 'item_saved'), 0), 1) as 수정률
 from usage_events e
-join profiles p on p.id = e.user_id
-where p.participant_code is distinct from 'admin';
+join pilot_participants p on p.id = e.user_id;
 
 -- 1-2. 어떤 항목이 자주 틀리는가. 이게 인식 정확도의 실질 지표다.
 --      brand가 많이 나오면 브랜드 사전을, size가 많이 나오면 파서를 손봐야 한다.
@@ -23,10 +33,9 @@ select
   count(*)                    as 수정_횟수,
   count(distinct e.user_id)   as 수정한_사람수
 from usage_events e
-join profiles p on p.id = e.user_id
+join pilot_participants p on p.id = e.user_id
 cross join lateral unnest(string_to_array(e.payload->>'fields', ',')) as field
 where e.event = 'item_updated'
-  and p.participant_code is distinct from 'admin'
   and field not in ('decision', 'decidedAt', 'favorite')
 group by field
 order by 수정_횟수 desc;
@@ -39,8 +48,7 @@ select
   round(100.0 * count(*) filter (where event = 'item_saved')
         / nullif(count(*) filter (where event = 'ocr_called'), 0), 1) as 저장률
 from usage_events e
-join profiles p on p.id = e.user_id
-where p.participant_code is distinct from 'admin';
+join pilot_participants p on p.id = e.user_id;
 
 
 -- 1-4. 참가자 기기에서 인식이 실제로 몇 초 걸렸는가.
@@ -54,9 +62,8 @@ select
   round(max((e.payload->>'seconds')::numeric), 2)          as 최대초,
   count(*) filter (where (e.payload->>'seconds')::numeric <= 5) as 오초이내
 from usage_events e
-join profiles p on p.id = e.user_id
+join pilot_participants p on p.id = e.user_id
 where e.event = 'ocr_done'
-  and p.participant_code is distinct from 'admin'
 group by 1;
 
 -- 1-5. 항목별 인식 성공률. 자동으로 채워 넣은 비율이다.
@@ -68,18 +75,16 @@ select
   round(100.0 * count(*) filter (where (e.payload->>'found_size')::boolean) / count(*), 1)     as 사이즈,
   round(100.0 * count(*) filter (where (e.payload->>'found_material')::boolean) / count(*), 1) as 소재
 from usage_events e
-join profiles p on p.id = e.user_id
-where e.event = 'ocr_done'
-  and p.participant_code is distinct from 'admin';
+join pilot_participants p on p.id = e.user_id
+where e.event = 'ocr_done';
 
 -- 1-6. 인식 실패 사유
 select
   e.payload->>'reason' as 사유,
   count(*)             as 횟수
 from usage_events e
-join profiles p on p.id = e.user_id
+join pilot_participants p on p.id = e.user_id
 where e.event = 'ocr_failed'
-  and p.participant_code is distinct from 'admin'
 group by 1 order by 2 desc;
 
 
@@ -99,9 +104,8 @@ select
   count(*) filter (where i.decision = 'hold')           as 보류,
   count(*) filter (where i.decision = 'dropped')        as 안삼
 from items i
-join profiles p on p.id = i.user_id
+join pilot_participants p on p.id = i.user_id
 where not i.deleted
-  and p.participant_code is distinct from 'admin'
 group by 1;
 
 -- 2-2. 결정까지 걸린 시간. 비교를 쓰면 더 빨리 정하는가
@@ -112,9 +116,8 @@ select
   round((percentile_cont(0.5) within group (
     order by extract(epoch from (i.decided_at - i.created_at)) / 3600))::numeric, 1) as 중앙값_시간
 from items i
-join profiles p on p.id = i.user_id
+join pilot_participants p on p.id = i.user_id
 where i.decision is not null and not i.deleted
-  and p.participant_code is distinct from 'admin'
 group by 1;
 
 -- 2-3. 결정이 어느 화면에서 나왔는가.
@@ -124,9 +127,8 @@ select
   e.payload->>'decision'                     as 결정,
   count(*)                                   as 횟수
 from usage_events e
-join profiles p on p.id = e.user_id
+join pilot_participants p on p.id = e.user_id
 where e.event = 'decision_made'
-  and p.participant_code is distinct from 'admin'
 group by 1, 2
 order by 1, 3 desc;
 
@@ -135,9 +137,8 @@ select
   (e.payload->>'count')::int as 비교한_상품수,
   count(*)                   as 횟수
 from usage_events e
-join profiles p on p.id = e.user_id
+join pilot_participants p on p.id = e.user_id
 where e.event = 'compare_run'
-  and p.participant_code is distinct from 'admin'
 group by 1 order by 1;
 
 -- 2-5. 찜 목록을 열고 실제 비교까지 간 비율
@@ -147,8 +148,7 @@ select
   round(100.0 * count(*) filter (where event = 'compare_run')
         / nullif(count(*) filter (where event = 'compare_list_opened'), 0), 1) as 실행률
 from usage_events e
-join profiles p on p.id = e.user_id
-where p.participant_code is distinct from 'admin';
+join pilot_participants p on p.id = e.user_id;
 
 
 -- 2-6. 사람 단위로 본 결정. 앞의 쿼리들은 상품 단위라 이것과 따로 본다.
@@ -157,9 +157,8 @@ select
   count(distinct p.id)                                          as 전체_참가자,
   count(distinct e.user_id) filter (where e.event = 'compare_run')   as 비교한_사람,
   count(distinct e.user_id) filter (where e.event = 'decision_made') as 결정한_사람
-from profiles p
-left join usage_events e on e.user_id = p.id
-where p.participant_code is distinct from 'admin';
+from pilot_participants p
+left join usage_events e on e.user_id = p.id;
 
 -- 2-7. 참가자별 최종 결정 현황. items의 현재 상태만 본다(되돌린 것은 빠진다).
 select
@@ -169,9 +168,8 @@ select
   count(*) filter (where i.decision = 'dropped') as 안삼,
   count(*) filter (where i.decision is null)     as 미정
 from items i
-join profiles p on p.id = i.user_id
+join pilot_participants p on p.id = i.user_id
 where not i.deleted
-  and p.participant_code is distinct from 'admin'
 group by 1 order by 1;
 
 -- 2-8. 마음을 바꾼 경우. previous에 값이 있으면 이전 결정을 뒤집은 것이다.
@@ -180,10 +178,9 @@ select
   e.payload->>'decision' as 바꾼결정,
   count(*)               as 횟수
 from usage_events e
-join profiles p on p.id = e.user_id
+join pilot_participants p on p.id = e.user_id
 where e.event = 'decision_made'
   and coalesce(e.payload->>'previous', '') <> ''
-  and p.participant_code is distinct from 'admin'
 group by 1, 2 order by 3 desc;
 
 
@@ -200,7 +197,7 @@ select
   coalesce(it.결정한상품, 0) as 결정한상품,
   coalesce(ev.비교횟수, 0)   as 비교횟수,
   ev.마지막_사용
-from profiles p
+from pilot_participants p
 left join (
   select
     user_id,
@@ -216,7 +213,6 @@ left join (
     max(created_at)                              as 마지막_사용
   from usage_events group by user_id
 ) ev on ev.user_id = p.id
-where p.participant_code is distinct from 'admin'
 order by p.participant_code;
 
 -- 3-2. 날짜별 사용량. 초반에만 쓰고 마는지 2주 내내 쓰는지 본다.
@@ -226,6 +222,5 @@ select
   count(*) filter (where e.event = 'item_saved')  as 저장,
   count(*) filter (where e.event = 'compare_run') as 비교
 from usage_events e
-join profiles p on p.id = e.user_id
-where p.participant_code is distinct from 'admin'
+join pilot_participants p on p.id = e.user_id
 group by 1 order by 1;
