@@ -1827,13 +1827,33 @@ function importDataFromFile(file) {
 }
 
 // ---- 전체 데이터 삭제 ----
-function clearAllData() {
-  if (!confirm('정말 전체 태그 데이터를 삭제할까요?\n이 작업은 되돌릴 수 없습니다.')) return;
+async function clearAllData() {
+  const loggedIn = Boolean(window.Cloud && window.Cloud.enabled() && window.Cloud.user());
+  const first = loggedIn
+    ? '정말 전체 상품을 삭제할까요?\n이 기기뿐 아니라 서버에 올린 내용도 함께 지워집니다.'
+    : '정말 전체 태그 데이터를 삭제할까요?\n이 작업은 되돌릴 수 없습니다.';
+  if (!confirm(first)) return;
   if (!confirm('한 번 더 확인합니다. 모든 사진과 정보가 삭제됩니다. 계속할까요?')) return;
+
+  // 기기에서만 지우면 다음 로그인 때 서버에서 도로 내려온다.
+  // 서버에도 지웠다고 알린 뒤 비운다.
+  const ids = loadTags().map((t) => t.id);
+  if (loggedIn) ids.forEach((id) => window.Cloud.addTombstone(id));
+
   localStorage.removeItem(STORAGE_KEY);
   PhotoStore.clear().catch((e) => console.warn('사진 삭제 실패:', e));
-  showToast('전체 데이터를 삭제했습니다');
+  logEvent('all_data_cleared', { count: ids.length });
+
+  if (loggedIn) {
+    const result = await window.Cloud.syncNow();
+    showToast(result && result.error
+      ? '기기에서 지웠습니다. 서버 반영은 연결되면 이어서 합니다'
+      : '전체 데이터를 삭제했습니다');
+  } else {
+    showToast('전체 데이터를 삭제했습니다');
+  }
   renderMyPage();
+  renderList();
 }
 
 // ---- 비교 결과 (한눈에 보기) 렌더링 ----
