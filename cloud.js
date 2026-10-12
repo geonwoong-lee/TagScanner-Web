@@ -49,7 +49,16 @@
   async function guardOwner() {
     if (!currentUser) return;
     const previous = localStorage.getItem(OWNER_KEY);
-    if (previous && previous !== currentUser.id) {
+
+    // 주인이 적혀 있지 않은데 상품이 남아 있는 기기.
+    // 파일럿에서는 로그인해야 쓸 수 있으므로, 로그인 전에 쌓인 상품은 있을 수 없다.
+    // 개발이나 점검하면서 남은 것이라고 보고, 이 계정 것으로 올리지 않는다.
+    const strayLocal = !previous
+      && Boolean(cfg.pilotMode)
+      && typeof window.loadTags === 'function'
+      && window.loadTags().length > 0;
+
+    if ((previous && previous !== currentUser.id) || strayLocal) {
       let cleared = { ok: false, reason: '정리 함수를 찾지 못했습니다' };
       try {
         if (typeof window.clearLocalUserData === 'function') {
@@ -71,7 +80,7 @@
       localStorage.removeItem(LAST_PULL_KEY);
       writeJson(LOG_QUEUE_KEY, []);
       writeJson(TOMBSTONE_KEY, []);
-      log('account_switched_on_device', {});
+      log(strayLocal ? 'stray_local_data_cleared' : 'account_switched_on_device', {});
     }
     blockedReason = '';
     localStorage.setItem(OWNER_KEY, currentUser.id);
