@@ -101,3 +101,15 @@ order by count(*) desc;
 --   join profiles p on p.id = i.user_id
 --   where i.created_at < p.created_at
 -- );
+
+
+-- 6-4. 정리가 끝났는지 다시 확인. 결과가 비어 있으면 섞인 자료가 없다.
+select
+  p.participant_code as 참가자,
+  i.brand, i.product_name,
+  i.created_at       as 상품생성,
+  p.created_at       as 계정생성
+from items i
+join profiles p on p.id = i.user_id
+where not i.deleted
+  and i.created_at < p.created_at;
