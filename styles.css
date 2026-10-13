@@ -2578,3 +2578,141 @@ img.photo-missing {
 .gallery-btn:active {
   background: rgba(255, 255, 255, 0.24);
 }
+
+/* 상세 화면 하단 버튼 세 개가 한 줄에 들어가도록 */
+#detailForm .action-bar {
+  display: flex;
+  gap: 8px;
+}
+
+#detailForm .action-bar button {
+  flex: 1;
+  margin-bottom: 0;
+  padding: 14px 10px;
+}
+
+/* ---- 구매 결정 참고 정보 ---- */
+.decide-hints {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.decide-hints:empty { display: none; }
+
+.hint-card {
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.hint-card.spend {
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+}
+
+.hint-card.hold {
+  background: var(--color-fuschia-60);
+}
+
+.hint-title {
+  font-weight: 700;
+  font-size: 13px;
+  margin: 0 0 4px;
+}
+
+.hint-amount {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.hint-sub {
+  color: var(--color-text-secondary);
+}
+
+.hold-hint-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-fuschia-100);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ---- 중복 경고 ---- */
+.dup-warn {
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dup-warn strong { font-weight: 700; }
+
+/* ---- 온라인 최저가 ---- */
+.price-box {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.price-title {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 2px;
+}
+
+.price-amount {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.price-sub {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+
+.price-verdict {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.price-verdict.cheaper { color: var(--color-fuschia-100); }
+.price-verdict.pricier { color: var(--color-iris-100); }
+
+.price-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-iris-100);
+}
+
+.price-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  line-height: 1.5;
+}
+
+.price-loading {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}

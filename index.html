@@ -18,7 +18,7 @@
     form-action 'self';
   ">
   <title>TagScanner — 옷 태그 OCR</title>
-  <link rel="stylesheet" href="styles.css?v=2026-10-13b">
+  <link rel="stylesheet" href="styles.css?v=2026-10-14a">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1A1A1A">
   <meta name="description" content="옷 태그를 찍으면 브랜드, 가격, 사이즈, 소재를 읽어 정리해 줍니다.">
@@ -240,6 +240,12 @@
     </div>
 
     <div class="list-container">
+      <!-- 구매 결정에 참고할 정보 (해당될 때만 보인다) -->
+      <div class="decide-hints">
+        <div class="hint-card spend" id="spendHint" hidden></div>
+        <div class="hint-card hold" id="holdHint" hidden></div>
+      </div>
+
       <div id="emptyState" class="empty">
         <p>아직 저장된 태그가 없습니다.</p>
         <button id="emptyCapture" class="primary-btn" style="background: var(--color-fuschia-100);">
@@ -393,6 +399,8 @@
         <input type="file" id="detailPhotoInput" accept="image/*" multiple hidden>
       </div>
 
+      <div class="dup-warn" id="duplicateWarn" hidden></div>
+
       <!-- 구매 결정. 이 앱의 목적이 "살까 말까"를 돕는 것이라 결정을 남겨둔다 -->
       <div class="decision-box">
         <p class="decision-title">이 옷, 어떻게 하셨어요?</p>
@@ -459,6 +467,7 @@
         </div>
 
         <div class="external-actions">
+          <div class="price-box" id="priceBox" hidden></div>
           <button type="button" id="btnSearchPrice" class="primary-btn">
             🔍 온라인 최저가 검색
           </button>
@@ -478,6 +487,7 @@
         <p class="meta">저장: <span id="d_createdAt"></span></p>
 
         <div class="action-bar">
+          <button type="button" id="shareDetail" class="secondary-btn">공유</button>
           <button type="button" id="deleteDetail" class="danger-btn">삭제</button>
           <button type="submit" class="primary-btn">수정 저장</button>
         </div>
@@ -630,14 +640,14 @@
 
   <!-- Tesseract.js (브라우저 OCR, 한국어+영어 지원) -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-  <script src="config.js?v=2026-10-13b"></script>
-  <script src="fabric_dict.js?v=2026-10-13b"></script>
-  <script src="brands.js?v=2026-10-13b"></script>
-  <script src="tag_profiles.js?v=2026-10-13b"></script>
-  <script src="parser.js?v=2026-10-13b"></script>
-  <script src="clip.js?v=2026-10-13b"></script>
-  <script src="photos.js?v=2026-10-13b"></script>
-  <script src="cloud.js?v=2026-10-13b"></script>
-  <script src="app.js?v=2026-10-13b"></script>
+  <script src="config.js?v=2026-10-14a"></script>
+  <script src="fabric_dict.js?v=2026-10-14a"></script>
+  <script src="brands.js?v=2026-10-14a"></script>
+  <script src="tag_profiles.js?v=2026-10-14a"></script>
+  <script src="parser.js?v=2026-10-14a"></script>
+  <script src="clip.js?v=2026-10-14a"></script>
+  <script src="photos.js?v=2026-10-14a"></script>
+  <script src="cloud.js?v=2026-10-14a"></script>
+  <script src="app.js?v=2026-10-14a"></script>
 </body>
 </html>
