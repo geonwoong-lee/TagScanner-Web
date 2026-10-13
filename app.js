@@ -2953,10 +2953,16 @@ function bindEvents() {
       logEvent('price_search_opened', { brand: t.brand || '', where });
       // 검색하러 나갔다가 돌아오면 그때 가격을 물어본다 (아래 visibilitychange)
       pendingPriceAsk = t.id;
+
+      // 휴대폰에 그 쇼핑몰 앱이 깔려 있으면 앱이 링크를 가로채고,
+      // 검색어는 전달되지 않아 빈 검색창이 뜬다. 그때 붙여넣을 수 있게 미리 복사해 둔다.
+      try { navigator.clipboard.writeText(q); } catch (e) { /* 복사가 막혀도 그냥 진행 */ }
+
       // 바로 열면 아이폰이 사파리 대신 해당 앱을 연다.
       // 우리 쪽 페이지를 한 번 거쳐 넘기면 사파리 안에 머문다.
       const target = PRICE_SEARCH[where](q);
       window.open(`redirect.html?u=${encodeURIComponent(target)}`, '_blank', 'noopener,noreferrer');
+      showToast('검색창이 비어 있으면 붙여넣기 하세요');
     });
   });
 
