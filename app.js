@@ -2931,28 +2931,32 @@ function bindEvents() {
   }
 
   // 외부 검색 CTAs (상세 화면)
-  // 가격 검색: 네이버가 외부 링크 접속을 막는 경우가 있어 구글도 같이 둔다
-  const openPriceSearch = (where) => {
-    const t = loadTags().find((x) => x.id === currentDetailId);
-    if (!t) return;
-    const q = [t.brand, t.productName].filter(Boolean).join(' ');
-    if (!q) {
-      showToast('브랜드나 상품명이 있어야 검색할 수 있어요');
-      return;
-    }
-    logEvent('price_search_opened', { brand: t.brand || '', where });
-    // 검색하러 나갔다가 돌아오면 그때 가격을 물어본다 (아래 visibilitychange)
-    pendingPriceAsk = t.id;
-    const url = where === 'google'
-      ? `https://www.google.com/search?q=${encodeURIComponent(q + ' 최저가')}&tbm=shop`
-      : `https://msearch.shopping.naver.com/search/all?query=${encodeURIComponent(q)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+  // 가격 검색 보낼 곳.
+  // 쇼핑 전용 주소(search.shopping.naver.com)는 외부 링크로 들어가면 막히므로
+  // 네이버는 통합검색으로 보낸다. 통합검색 결과에도 쇼핑 가격이 함께 나온다.
+  // 옷은 구글 쇼핑에 안 걸리는 경우가 많아 무신사와 쿠팡을 같이 둔다.
+  const PRICE_SEARCH = {
+    naver: (q) => `https://search.naver.com/search.naver?query=${encodeURIComponent(q)}`,
+    musinsa: (q) => `https://www.musinsa.com/search/goods?keyword=${encodeURIComponent(q)}`,
+    coupang: (q) => `https://m.coupang.com/nm/search?q=${encodeURIComponent(q)}`,
   };
 
-  const btnNaver = $('btnSearchNaver');
-  if (btnNaver) btnNaver.addEventListener('click', () => openPriceSearch('naver'));
-  const btnGoogle = $('btnSearchGoogle');
-  if (btnGoogle) btnGoogle.addEventListener('click', () => openPriceSearch('google'));
+  document.querySelectorAll('.price-search-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const where = btn.dataset.where;
+      const t = loadTags().find((x) => x.id === currentDetailId);
+      if (!t) return;
+      const q = [t.brand, t.productName].filter(Boolean).join(' ');
+      if (!q) {
+        showToast('브랜드나 상품명이 있어야 검색할 수 있어요');
+        return;
+      }
+      logEvent('price_search_opened', { brand: t.brand || '', where });
+      // 검색하러 나갔다가 돌아오면 그때 가격을 물어본다 (아래 visibilitychange)
+      pendingPriceAsk = t.id;
+      window.open(PRICE_SEARCH[where](q), '_blank', 'noopener,noreferrer');
+    });
+  });
 
   const priceSave = $('onlinePriceSave');
   if (priceSave) priceSave.addEventListener('click', saveOnlinePrice);
