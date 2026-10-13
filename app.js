@@ -2931,24 +2931,28 @@ function bindEvents() {
   }
 
   // 외부 검색 CTAs (상세 화면)
-  const btnSearchPrice = $('btnSearchPrice');
-  if (btnSearchPrice) {
-    btnSearchPrice.addEventListener('click', () => {
-      const tags = loadTags();
-      const t = tags.find((x) => x.id === currentDetailId);
-      if (!t) return;
-      const q = [t.brand, t.productName, t.size].filter(Boolean).join(' ');
-      if (!q) {
-        showToast('검색어가 부족합니다');
-        return;
-      }
-      logEvent('price_search_opened', { brand: t.brand || '' });
-      // 검색하러 나갔다가 돌아오면 그때 가격을 물어본다 (아래 visibilitychange)
-      pendingPriceAsk = t.id;
-      const url = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(q)}`;
-      window.open(url, '_blank', 'noopener,noreferrer');
-    });
-  }
+  // 가격 검색: 네이버가 외부 링크 접속을 막는 경우가 있어 구글도 같이 둔다
+  const openPriceSearch = (where) => {
+    const t = loadTags().find((x) => x.id === currentDetailId);
+    if (!t) return;
+    const q = [t.brand, t.productName].filter(Boolean).join(' ');
+    if (!q) {
+      showToast('브랜드나 상품명이 있어야 검색할 수 있어요');
+      return;
+    }
+    logEvent('price_search_opened', { brand: t.brand || '', where });
+    // 검색하러 나갔다가 돌아오면 그때 가격을 물어본다 (아래 visibilitychange)
+    pendingPriceAsk = t.id;
+    const url = where === 'google'
+      ? `https://www.google.com/search?q=${encodeURIComponent(q + ' 최저가')}&tbm=shop`
+      : `https://msearch.shopping.naver.com/search/all?query=${encodeURIComponent(q)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const btnNaver = $('btnSearchNaver');
+  if (btnNaver) btnNaver.addEventListener('click', () => openPriceSearch('naver'));
+  const btnGoogle = $('btnSearchGoogle');
+  if (btnGoogle) btnGoogle.addEventListener('click', () => openPriceSearch('google'));
 
   const priceSave = $('onlinePriceSave');
   if (priceSave) priceSave.addEventListener('click', saveOnlinePrice);
