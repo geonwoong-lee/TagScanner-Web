@@ -950,7 +950,58 @@ function restoreTag(tag) {
 }
 
 // ---- 목록 렌더링 (2-column 카드 그리드) ----
+// 목록 위에 이번 달 지출과 보류 재알림을 보여준다
+function renderDecideHints() {
+  const spendEl = $('spendHint');
+  const holdEl = $('holdHint');
+  if (!spendEl || !holdEl) return;
+
+  const { bought, pending, boughtCount, pendingCount } = monthlySpend();
+  if (boughtCount === 0 && pendingCount === 0) {
+    spendEl.hidden = true;
+  } else {
+    const month = new Date().getMonth() + 1;
+    spendEl.innerHTML = `
+      <p class="hint-title">${month}월에 쓴 돈</p>
+      <span class="hint-amount">${formatWon(bought)}</span>
+      <span class="hint-sub"> (${boughtCount}벌)</span>
+      ${pendingCount > 0
+        ? `<div class="hint-sub">고민 중인 ${pendingCount}벌을 다 사면 ${formatWon(bought + pending)}</div>`
+        : ''}
+    `;
+    spendEl.hidden = false;
+  }
+
+  const holds = staleHolds();
+  if (holds.length === 0) {
+    holdEl.hidden = true;
+  } else {
+    const first = holds[0];
+    const days = Math.floor((Date.now() - first.decidedAt) / (24 * 60 * 60 * 1000));
+    const name = [first.brand, first.productName].filter(Boolean).join(' ') || '보류한 옷';
+    holdEl.innerHTML = `
+      <p class="hint-title">${days}일 전에 보류한 옷이 있어요</p>
+      <div>${escapeHtml(name)}${holds.length > 1 ? ` 외 ${holds.length - 1}벌` : ''}</div>
+      <div class="hint-sub">시간이 지나도 생각나면 사도 좋은 옷입니다.</div>
+      <button type="button" class="hold-hint-btn" id="holdHintOpen">다시 보기</button>
+    `;
+    holdEl.hidden = false;
+    const btn = $('holdHintOpen');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        logEvent('hold_reminder_opened', { days, count: holds.length });
+        openDetail(first.id);
+      });
+    }
+    if (!holdEl.dataset.logged) {
+      holdEl.dataset.logged = '1';
+      logEvent('hold_reminder_shown', { days, count: holds.length });
+    }
+  }
+}
+
 function renderList() {
+  renderDecideHints();
   const allTags = loadTags();
   const listEl = $('tagList');
   const emptyEl = $('emptyState');
@@ -2109,6 +2160,90 @@ async function shareDetail() {
   }
 }
 
+// 상세 화면 위쪽에 "이미 비슷한 옷이 있다" 경고를 둔다
+async function renderDuplicateWarning(tag) {
+  const box = $('duplicateWarn');
+  if (!box) return;
+  box.hidden = true;
+  const dup = await checkDuplicate(tag);
+  if (!dup || currentDetailId !== tag.id) return;
+
+  const name = [dup.tag.brand, dup.tag.productName].filter(Boolean).join(' ') || '저장해 둔 옷';
+  const price = dup.tag.price ? ` (${dup.tag.price})` : '';
+  box.innerHTML = `
+    <strong>옷장에 비슷한 옷이 있어요</strong><br>
+    ${escapeHtml(name)}${escapeHtml(price)} · 닮은 정도 ${Math.round(dup.similarity * 100)}%
+  `;
+  box.hidden = false;
+  box.onclick = () => {
+    logEvent('duplicate_opened', {});
+    openDetail(dup.tag.id);
+  };
+}
+
+// 온라인 최저가를 앱 안에서 보여 준다.
+// 매장가와 나란히 두어야 "여기서 살지 말지"에 쓸 수 있다.
+async function lookupOnlinePrice(tag, query) {
+  const box = $('priceBox');
+  if (!box) return;
+
+  const canAsk = window.Cloud && window.Cloud.enabled() && window.Cloud.user();
+  if (!canAsk) {
+    // 서버를 못 쓰면 예전처럼 검색 결과를 새 창으로 연다
+    const url = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(query)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  box.hidden = false;
+  box.innerHTML = '<p class="price-loading">온라인 가격을 찾는 중...</p>';
+
+  try {
+    const res = await window.Cloud.lookupPrice({
+      brand: tag.brand, productName: tag.productName, size: tag.size,
+    });
+    if (currentDetailId !== tag.id) return;
+
+    if (!res.lowest) {
+      box.innerHTML = '<p class="price-loading">온라인에서 같은 상품을 찾지 못했어요.</p>';
+      return;
+    }
+
+    const store = parsePriceNumber(tag.price);
+    const online = res.lowest.price;
+    const diff = store ? store - online : null;
+
+    let verdict = '';
+    if (diff !== null && diff > 0) {
+      verdict = `<p class="price-verdict cheaper">온라인이 ${formatWon(diff)} 더 쌉니다</p>`;
+    } else if (diff !== null && diff < 0) {
+      verdict = `<p class="price-verdict pricier">매장이 ${formatWon(-diff)} 더 쌉니다</p>`;
+    } else if (diff === 0) {
+      verdict = '<p class="price-verdict">가격이 같습니다</p>';
+    }
+
+    box.innerHTML = `
+      <p class="price-title">온라인 최저가</p>
+      <p class="price-amount">${formatWon(online)}</p>
+      <p class="price-sub">${escapeHtml(res.lowest.mall || '')} · ${escapeHtml(res.lowest.title || '')}</p>
+      ${verdict}
+      <a class="price-link" href="${escapeHtml(res.lowest.link)}" target="_blank" rel="noopener noreferrer">판매처 열기</a>
+      <p class="price-note">상품명으로 찾은 결과라 다른 상품일 수 있습니다. 참고용으로 보세요.</p>
+    `;
+
+    logEvent('price_shown', {
+      brand: tag.brand || '',
+      store_price: store || 0,
+      online_price: online,
+      diff: diff === null ? 0 : diff,
+      found: res.count,
+    });
+  } catch (e) {
+    if (currentDetailId !== tag.id) return;
+    box.innerHTML = `<p class="price-loading">가격을 가져오지 못했어요: ${escapeHtml(errText(e))}</p>`;
+  }
+}
+
 // 상세 화면의 결정 버튼
 function renderDetailDecision() {
   const box = $('detailDecision');
@@ -2128,6 +2263,59 @@ function renderDetailDecision() {
       renderList();
     });
   });
+}
+
+// ============================================================
+// 구매 결정을 돕는 정보
+//  - 옷장에 비슷한 옷이 이미 있는지
+//  - 이번 달에 옷에 얼마를 썼는지
+//  - 보류해 둔 지 오래된 것이 있는지
+// ============================================================
+
+// 이미 비슷한 옷을 가지고 있으면 저장 직후에 알린다.
+// "비슷한 거 이미 있잖아"가 사람이 구매를 멈추는 가장 흔한 이유다.
+const DUPLICATE_THRESHOLD = 0.88; // 이 값보다 비슷하면 알린다
+
+async function checkDuplicate(tag) {
+  try {
+    if (!window.CLIP || !hasValidEmbedding(tag)) return null;
+    const others = loadTags().filter((t) => t.id !== tag.id && hasValidEmbedding(t));
+    if (others.length === 0) return null;
+    const [top] = window.CLIP.findSimilar(tag.embedding, others, tag.id, 1);
+    if (!top || top.similarity < DUPLICATE_THRESHOLD) return null;
+    return top;
+  } catch (e) {
+    console.warn('중복 확인 실패', e);
+    return null;
+  }
+}
+
+function monthStart(d = new Date()) {
+  return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+}
+
+// 이번 달에 저장한 상품 가운데 사기로 한 것의 합계.
+// 아직 안 정한 것은 "고민 중인 금액"으로 따로 센다.
+function monthlySpend() {
+  const since = monthStart();
+  const tags = loadTags().filter((t) => (t.createdAt || 0) >= since);
+  let bought = 0, pending = 0, boughtCount = 0, pendingCount = 0;
+  for (const t of tags) {
+    const price = parsePriceNumber(t.price) || 0;
+    if (t.decision === 'bought') { bought += price; boughtCount++; }
+    else if (!t.decision || t.decision === 'hold') { pending += price; pendingCount++; }
+  }
+  return { bought, pending, boughtCount, pendingCount };
+}
+
+// 보류한 지 오래된 상품. 시간이 지나도 생각나는지 다시 물어본다.
+const HOLD_REMINDER_DAYS = 3;
+
+function staleHolds(days = HOLD_REMINDER_DAYS) {
+  const limit = Date.now() - days * 24 * 60 * 60 * 1000;
+  return loadTags()
+    .filter((t) => t.decision === 'hold' && (t.decidedAt || 0) > 0 && t.decidedAt <= limit)
+    .sort((a, b) => a.decidedAt - b.decidedAt);
 }
 
 // ---- 상세 화면 사진 ----
@@ -2242,6 +2430,9 @@ function openDetail(id) {
 
   renderDetailPhotos();
   renderDetailDecision();
+  renderDuplicateWarning(t);
+  const priceBox = $('priceBox');
+  if (priceBox) { priceBox.hidden = true; priceBox.innerHTML = ''; }
   $('d_category').value = t.category || '';
   $('d_brand').value = t.brand || '';
   $('d_productName').value = t.productName || '';
@@ -2439,11 +2630,25 @@ function bindEvents() {
     }
 
     // 옷 사진이 있으면 백그라운드에서 CLIP embedding 생성 (실패해도 앱 진행에 영향 없음)
+    // 끝나면 옷장에 이미 비슷한 옷이 있는지 확인해서 알려 준다
     const garmentId = garmentPhotoId(saved);
     if (garmentId) {
-      generateEmbeddingForTag(saved.id, garmentId).catch((err) =>
-        console.warn('embedding 생성 실패:', err)
-      );
+      generateEmbeddingForTag(saved.id, garmentId)
+        .then(async () => {
+          const fresh = loadTags().find((t) => t.id === saved.id);
+          if (!fresh) return;
+          const dup = await checkDuplicate(fresh);
+          if (!dup) return;
+          logEvent('duplicate_warned', {
+            similarity: Math.round(dup.similarity * 100),
+            brand: fresh.brand || '',
+            other_brand: dup.tag.brand || '',
+          });
+          const name = [dup.tag.brand, dup.tag.productName].filter(Boolean).join(' ') || '저장해 둔 옷';
+          showToast(`옷장에 비슷한 옷이 있어요: ${name}`);
+          renderList();
+        })
+        .catch((err) => console.warn('embedding 생성 실패:', err));
     }
     currentReview = null;
     // 폼 리셋
@@ -2723,8 +2928,7 @@ function bindEvents() {
         showToast('검색어가 부족합니다');
         return;
       }
-      const url = `https://www.google.com/search?q=${encodeURIComponent(q + ' 최저가')}&tbm=shop`;
-      window.open(url, '_blank', 'noopener,noreferrer');
+      lookupOnlinePrice(t, q);
     });
   }
   const btnVisitOfficial = $('btnVisitOfficial');

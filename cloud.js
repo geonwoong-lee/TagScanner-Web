@@ -395,13 +395,25 @@
     return data;
   }
 
+  // ---- 온라인 최저가 조회 ----
+  // 서버가 네이버 쇼핑 검색 API를 대신 부른다. 참가자는 키를 몰라도 된다.
+  async function lookupPrice({ brand, productName, size }) {
+    if (!client || !currentUser) throw new Error('로그인이 필요합니다');
+    const { data, error } = await client.functions.invoke('price', {
+      body: { brand, productName, size },
+    });
+    if (error) throw new Error(error.message || '가격 조회 실패');
+    if (data?.error) throw new Error(data.error);
+    return data;
+  }
+
   window.Cloud = {
     enabled, init, user, signUp, signIn, signOut, setConsent, forgetOwner,
     blocked: () => blockedReason,
     isReady: () => ready,
     onSync: (fn) => { syncListeners.push(fn); },
     lastOwner: () => localStorage.getItem(OWNER_KEY),
-    log, syncNow, visionOcr, addTombstone,
+    log, syncNow, visionOcr, lookupPrice, addTombstone,
     onAuthChange: (fn) => { listeners.push(fn); if (currentUser !== undefined) fn(currentUser); },
     isSyncing: () => syncing,
   };
