@@ -2578,3 +2578,15 @@ img.photo-missing {
 .gallery-btn:active {
   background: rgba(255, 255, 255, 0.24);
 }
+
+/* 상세 화면 하단 버튼 세 개가 한 줄에 들어가도록 */
+#detailForm .action-bar {
+  display: flex;
+  gap: 8px;
+}
+
+#detailForm .action-bar button {
+  flex: 1;
+  margin-bottom: 0;
+  padding: 14px 10px;
+}

@@ -720,6 +720,28 @@ const DECISIONS = [
 
 const decisionLabel = (v) => (DECISIONS.find((d) => d.value === v) || {}).label || '';
 
+// 비교하다가 하나를 고르면 나머지는 자동으로 보류가 된다.
+// 고르는 순간이 곧 나머지를 내려놓는 순간이라, 일일이 누르게 하지 않는다.
+// 이미 직접 정해 둔 것은 건드리지 않는다.
+function holdOthers(chosenId, others) {
+  const tags = loadTags();
+  const changed = [];
+  for (const t of tags) {
+    if (t.id === chosenId || !others.includes(t.id)) continue;
+    if (t.decision) continue; // 이미 정한 것은 그대로 둔다
+    t.decision = 'hold';
+    t.decidedAt = Date.now();
+    t.updatedAt = Date.now();
+    changed.push(t.id);
+  }
+  if (changed.length) {
+    saveTags(tags);
+    logEvent('auto_held', { count: changed.length, source: 'compare' });
+    scheduleSync();
+  }
+  return changed.length;
+}
+
 function setDecision(id, decision, source) {
   const tags = loadTags();
   const t = tags.find((x) => x.id === id);
@@ -1991,10 +2013,20 @@ function renderCompareResult() {
   });
   body.querySelectorAll('.cmp-decision-btn').forEach((el) => {
     el.addEventListener('click', () => {
-      setDecision(Number(el.dataset.id), el.dataset.decision, 'compare');
+      const id = Number(el.dataset.id);
+      const choice = el.dataset.decision;
+      setDecision(id, choice, 'compare');
+
+      const now = loadTags().find((t) => t.id === id)?.decision;
+      let held = 0;
+      // 하나를 사기로 했으면 같이 보던 나머지는 보류로 넘긴다
+      if (now === 'bought') held = holdOthers(id, favs.map((t) => t.id));
+
       renderCompareResult();
-      const label = decisionLabel(el.dataset.decision);
-      showToast(loadTags().find((t) => t.id === Number(el.dataset.id))?.decision ? `${label}로 기록했어요` : '결정을 지웠어요');
+      const label = decisionLabel(choice);
+      if (!now) showToast('결정을 지웠어요');
+      else if (held > 0) showToast(`${label}로 기록하고 나머지 ${held}개는 보류로 넘겼어요`);
+      else showToast(`${label}로 기록했어요`);
     });
   });
   PhotoStore.hydrate(body);
@@ -2017,6 +2049,64 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// 상품을 카카오톡 같은 앱으로 넘긴다.
+// 휴대폰 기본 공유창을 띄우므로 따로 연동할 것이 없고, 설치된 앱이 모두 나온다.
+// 공유창을 못 쓰는 환경에서는 글만 복사해 둔다.
+function shareText(t) {
+  const lines = [];
+  lines.push([t.brand, t.productName].filter(Boolean).join(' ') || '옷 정보');
+  if (t.price) lines.push('가격: ' + t.price);
+  if (t.size) lines.push('사이즈: ' + t.size);
+  if (t.material) lines.push('소재: ' + t.material);
+  if (t.care) lines.push('세탁: ' + t.care);
+  if (t.store) lines.push('매장: ' + t.store);
+  if (t.memo) lines.push('메모: ' + t.memo);
+  lines.push('');
+  lines.push('TagScanner로 기록');
+  return lines.join('\n');
+}
+
+async function shareDetail() {
+  const t = loadTags().find((x) => x.id === currentDetailId);
+  if (!t) return;
+
+  const text = shareText(t);
+  const title = [t.brand, t.productName].filter(Boolean).join(' ') || '옷 정보';
+
+  // 대표 사진이 있으면 같이 보낸다
+  let files = [];
+  try {
+    const id = coverPhotoId(t);
+    const blob = id ? await PhotoStore.get(id) : null;
+    if (blob) {
+      const file = new File([blob], 'tagscanner.jpg', { type: blob.type || 'image/jpeg' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) files = [file];
+    }
+  } catch (e) {
+    console.warn('사진 첨부 실패', e);
+  }
+
+  if (navigator.share) {
+    try {
+      await navigator.share(files.length ? { title, text, files } : { title, text });
+      logEvent('item_shared', { brand: t.brand || '', with_photo: files.length > 0 });
+      return;
+    } catch (e) {
+      // 사용자가 공유창을 닫은 경우는 실패가 아니다
+      if (e && e.name === 'AbortError') return;
+      console.warn('공유 실패', e);
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    logEvent('item_shared', { brand: t.brand || '', with_photo: false, fallback: 'clipboard' });
+    showToast('내용을 복사했어요. 붙여넣기 하세요');
+  } catch (e) {
+    showToast('이 브라우저에서는 공유를 쓸 수 없어요');
+  }
 }
 
 // 상세 화면의 결정 버튼
@@ -2285,6 +2375,9 @@ function bindEvents() {
   });
 
   $('detailSetCover').addEventListener('click', setDetailCover);
+
+  const shareBtn = $('shareDetail');
+  if (shareBtn) shareBtn.addEventListener('click', shareDetail);
 
   // 세탁법 버튼 (등록·상세 공용). 직접 입력한 내용에 맞춰 버튼 선택 상태도 갱신한다.
   document.querySelectorAll('.care-chips').forEach((box) => {
