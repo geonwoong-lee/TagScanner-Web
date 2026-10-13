@@ -224,3 +224,48 @@ select
 from usage_events e
 join pilot_participants p on p.id = e.user_id
 group by 1 order by 1;
+
+
+-- ============================================================
+-- 4. 온라인 가격이 결정에 영향을 주었는가
+-- ============================================================
+
+-- 4-1. 온라인 가격을 적어 둔 상품의 결정 분포.
+--      온라인이 쌀수록 매장에서 안 사기로 하는지 본다.
+select
+  case
+    when i.online_price is null then '안 적음'
+    when i.price_num is null then '매장가 모름'
+    when i.price_num - i.online_price > 10000 then '온라인이 1만원 넘게 쌈'
+    when i.price_num - i.online_price > 0 then '온라인이 조금 쌈'
+    else '매장이 같거나 쌈'
+  end                                            as 구분,
+  count(*)                                       as 상품수,
+  count(*) filter (where i.decision = 'bought')  as 구매,
+  count(*) filter (where i.decision = 'dropped') as 안삼,
+  count(*) filter (where i.decision = 'hold')    as 보류
+from items i
+join pilot_participants p on p.id = i.user_id
+where not i.deleted
+group by 1 order by 1;
+
+-- 4-2. 가격을 적어 둔 뒤 결정까지 걸린 시간
+select
+  count(*)                                                  as 적어둔상품,
+  count(*) filter (where i.decision is not null)            as 결정한상품,
+  round(avg(i.price_num - i.online_price)::numeric, 0)      as 평균차액
+from items i
+join pilot_participants p on p.id = i.user_id
+where not i.deleted and i.online_price is not null and i.price_num is not null;
+
+-- 4-3. 새로 넣은 기능들이 실제로 쓰였는가
+select
+  e.event  as 기능,
+  count(*) as 횟수,
+  count(distinct e.user_id) as 쓴사람
+from usage_events e
+join pilot_participants p on p.id = e.user_id
+where e.event in ('duplicate_warned', 'duplicate_opened', 'hold_reminder_shown',
+                  'hold_reminder_opened', 'auto_held', 'item_shared',
+                  'price_search_opened', 'online_price_entered')
+group by 1 order by 2 desc;
