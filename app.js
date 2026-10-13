@@ -1028,6 +1028,12 @@ function renderList() {
   if (tags.length === 0) {
     listEl.innerHTML = '';
     emptyEl.style.display = 'block';
+    // 아직 서버에서 받아오는 중이면 없다고 단정하지 않는다
+    const loading = window.Cloud && window.Cloud.isSyncing && window.Cloud.isSyncing();
+    if (loading) {
+      emptyEl.querySelector('p').textContent = '저장한 상품을 불러오는 중입니다...';
+      return;
+    }
     if (favoriteFilter) {
       emptyEl.querySelector('p').textContent = '찜한 태그가 없습니다.';
     } else if (searchQuery.trim()) {
@@ -2952,6 +2958,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.Cloud && window.Cloud.enabled()) {
     // 저장된 로그인 정보를 먼저 확인한 뒤 화면을 정한다 (로그인 화면이 깜빡이지 않게)
     await window.Cloud.init();
+    // 서버에서 받아오는 데 시간이 걸린다. 다 받으면 화면을 다시 그린다.
+    window.Cloud.onSync((result) => {
+      renderList();
+      renderSyncStatus(result);
+      const active = document.querySelector('.screen.active')?.id;
+      if (active === 'myPageScreen') renderMyPage();
+      if (active === 'compareScreen') renderCompare();
+    });
     window.Cloud.onAuthChange(() => {
       applyPilotGate();
       renderSyncStatus();

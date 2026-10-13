@@ -23,6 +23,7 @@
   let blockedReason = '';
   let ready = false; // 서버에 연결됐는지 (오프라인이면 false)
   const listeners = [];
+  const syncListeners = []; // 동기화가 끝나면 화면을 다시 그리도록 알린다
 
   const enabled = () => Boolean(cfg.supabaseUrl && cfg.supabaseAnonKey);
   const user = () => currentUser;
@@ -370,6 +371,8 @@
       }
 
       localStorage.setItem(LAST_PULL_KEY, new Date().toISOString());
+      // 받아온 내용이 화면에 바로 보이도록 알린다
+      syncListeners.forEach((fn) => { try { fn(result); } catch (e) { console.warn(e); } });
       return result;
     } catch (e) {
       // 조용히 실패하면 그 참가자 데이터만 통째로 비게 된다. 실패 자체를 남긴다.
@@ -396,6 +399,7 @@
     enabled, init, user, signUp, signIn, signOut, setConsent, forgetOwner,
     blocked: () => blockedReason,
     isReady: () => ready,
+    onSync: (fn) => { syncListeners.push(fn); },
     lastOwner: () => localStorage.getItem(OWNER_KEY),
     log, syncNow, visionOcr, addTombstone,
     onAuthChange: (fn) => { listeners.push(fn); if (currentUser !== undefined) fn(currentUser); },
