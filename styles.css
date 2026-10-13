@@ -2743,3 +2743,23 @@ img.photo-missing {
   font-family: inherit;
   cursor: pointer;
 }
+
+.price-search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.price-search-btn {
+  flex: 1;
+  padding: 13px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: white;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.price-search-btn:active { background: var(--color-bg-soft); }
