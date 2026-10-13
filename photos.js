@@ -86,17 +86,35 @@
     return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   }
 
+  // 사파리는 Blob을 그대로 넣으면 실패하는 경우가 있다.
+  // 바이트 배열로 바꿔서 넣고, 읽을 때 다시 Blob으로 되돌린다.
   async function put(id, blob) {
-    await run('readwrite', (store) => { store.put(blob, id); });
+    const record = { buf: await blob.arrayBuffer(), type: blob.type || 'image/jpeg' };
+    try {
+      await run('readwrite', (store) => { store.put(record, id); });
+    } catch (e) {
+      // 연결이 끊긴 뒤 첫 시도가 실패하는 경우가 있어 한 번 다시 연다
+      dbPromise = null;
+      await run('readwrite', (store) => { store.put(record, id); });
+    }
     const old = urlCache.get(id);
     if (old) { URL.revokeObjectURL(old); urlCache.delete(id); }
     return id;
   }
 
+  // 예전에 Blob으로 저장해 둔 것도 그대로 읽을 수 있어야 한다
+  function toBlob(value) {
+    if (!value) return null;
+    if (value instanceof Blob) return value;
+    if (value.buf) return new Blob([value.buf], { type: value.type || 'image/jpeg' });
+    if (value instanceof ArrayBuffer) return new Blob([value], { type: 'image/jpeg' });
+    return null;
+  }
+
   async function get(id) {
     const db = await openDB();
     const tx = db.transaction(STORE, 'readonly');
-    return (await request(tx.objectStore(STORE).get(id))) || null;
+    return toBlob(await request(tx.objectStore(STORE).get(id)));
   }
 
   async function remove(ids) {
@@ -167,6 +185,8 @@
     const id = '__probe__';
     try {
       await put(id, new Blob(['x'], { type: 'text/plain' }));
+      const back = await get(id);
+      if (!back) throw new Error('넣은 사진을 다시 읽지 못했습니다');
       await remove(id);
       return { ok: true };
     } catch (e) {
