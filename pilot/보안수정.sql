@@ -17,13 +17,23 @@ drop view if exists public.pilot_participants;
 create schema if not exists analytics;
 
 -- 3) 같은 내용을 그 안에 다시 만든다
+-- 걸러내는 계정은 "나눠주지 않을 것"만 하나씩 적는다.
+-- 범위로 묶으면(psu로 시작하는 전부 같은 식) 참가자에게 나눠준 계정까지
+-- 같이 빠져서 분석에서 사라진다.
 create or replace view analytics.pilot_participants as
 select p.id, p.participant_code, p.created_at, p.consented_at
 from public.profiles p
 join auth.users u on u.id = p.id
-where u.email not like 'abcd@%'          -- 개발 중 만든 계정
-  and u.email not like 'psu%@naver.com'  -- 팀 내부 테스트 계정
-  and u.email <> 'asldfj@asddf.com';     -- 연동 확인용 계정
+where u.email not in (
+  'abcd@abcd.com',      -- 개발 중 만든 계정
+  'abcd@bcda.com',      -- 개발 중 만든 계정
+  'abcd@bcdaa.con',     -- 개발 중 만든 계정
+  'abcd@abcde.com',     -- 점검용 Test 계정
+  'asldfj@asddf.com',   -- 연동 확인용 계정
+  'psu6288@naver.com'   -- 팀 내부 계정 (P02)
+);
+-- psu100~psu500@naver.com 은 참가자에게 나눠줄 계정이라 빼지 않는다.
+-- dlrjsdnd@naver.com(143)이 본인 계정이면 위 목록에 한 줄 추가하면 된다.
 
 -- 4) 앱에서 쓰는 두 역할은 이 스키마에 손도 못 대게 한다
 revoke all on schema analytics from anon, authenticated;
