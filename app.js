@@ -2981,7 +2981,9 @@ function bindEvents() {
       } else {
         window.open(target, '_blank', 'noopener');
       }
-      showToast('검색창이 비어 있으면 붙여넣기 하세요');
+      showToast(where === 'musinsa'
+        ? '검색어를 복사했어요. 무신사 검색창에 붙여넣어 주세요'
+        : '검색창이 비어 있으면 붙여넣기 하세요');
     });
   });
 

@@ -23,7 +23,7 @@
     // 그러면 안에 적힌 app.js 주소도 예전 것이라 수정사항이 통째로 반영되지 않는다.
     // 배포된 버전을 확인해서 다르면 주소에 값을 붙여 한 번만 다시 받는다.
     (function () {
-      var LOADED = '2026-10-14k';
+      var LOADED = '2026-10-14l';
       if (location.search.indexOf('fresh=') !== -1) return;
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
@@ -35,7 +35,7 @@
         .catch(function () { /* 확인 못 하면 그냥 쓴다 */ });
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=2026-10-14k">
+  <link rel="stylesheet" href="styles.css?v=2026-10-14l">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1A1A1A">
   <meta name="description" content="옷 태그를 찍으면 브랜드, 가격, 사이즈, 소재를 읽어 정리해 줍니다.">
@@ -671,14 +671,14 @@
 
   <!-- Tesseract.js (브라우저 OCR, 한국어+영어 지원) -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-  <script src="config.js?v=2026-10-14k"></script>
-  <script src="fabric_dict.js?v=2026-10-14k"></script>
-  <script src="brands.js?v=2026-10-14k"></script>
-  <script src="tag_profiles.js?v=2026-10-14k"></script>
-  <script src="parser.js?v=2026-10-14k"></script>
-  <script src="clip.js?v=2026-10-14k"></script>
-  <script src="photos.js?v=2026-10-14k"></script>
-  <script src="cloud.js?v=2026-10-14k"></script>
-  <script src="app.js?v=2026-10-14k"></script>
+  <script src="config.js?v=2026-10-14l"></script>
+  <script src="fabric_dict.js?v=2026-10-14l"></script>
+  <script src="brands.js?v=2026-10-14l"></script>
+  <script src="tag_profiles.js?v=2026-10-14l"></script>
+  <script src="parser.js?v=2026-10-14l"></script>
+  <script src="clip.js?v=2026-10-14l"></script>
+  <script src="photos.js?v=2026-10-14l"></script>
+  <script src="cloud.js?v=2026-10-14l"></script>
+  <script src="app.js?v=2026-10-14l"></script>
 </body>
 </html>
