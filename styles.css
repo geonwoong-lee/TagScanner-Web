@@ -2716,3 +2716,30 @@ img.photo-missing {
   font-size: 14px;
   color: var(--color-text-secondary);
 }
+
+.price-input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.price-input-row input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.price-save-btn {
+  padding: 12px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-black);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}

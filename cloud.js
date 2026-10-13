@@ -234,6 +234,7 @@
     product_name: t.productName || null,
     price: t.price || null,
     price_num: window.parsePriceNumber ? window.parsePriceNumber(t.price) : null,
+    online_price: t.onlinePrice || null,
     size: t.size || null,
     serial: t.serial || null,
     material: t.material || null,
@@ -259,6 +260,7 @@
     brand: row.brand || '',
     productName: row.product_name || '',
     price: row.price || '',
+    onlinePrice: row.online_price || null,
     size: row.size || '',
     serial: row.serial || '',
     material: row.material || '',
@@ -395,25 +397,13 @@
     return data;
   }
 
-  // ---- 온라인 최저가 조회 ----
-  // 서버가 네이버 쇼핑 검색 API를 대신 부른다. 참가자는 키를 몰라도 된다.
-  async function lookupPrice({ brand, productName, size }) {
-    if (!client || !currentUser) throw new Error('로그인이 필요합니다');
-    const { data, error } = await client.functions.invoke('price', {
-      body: { brand, productName, size },
-    });
-    if (error) throw new Error(error.message || '가격 조회 실패');
-    if (data?.error) throw new Error(data.error);
-    return data;
-  }
-
   window.Cloud = {
     enabled, init, user, signUp, signIn, signOut, setConsent, forgetOwner,
     blocked: () => blockedReason,
     isReady: () => ready,
     onSync: (fn) => { syncListeners.push(fn); },
     lastOwner: () => localStorage.getItem(OWNER_KEY),
-    log, syncNow, visionOcr, lookupPrice, addTombstone,
+    log, syncNow, visionOcr, addTombstone,
     onAuthChange: (fn) => { listeners.push(fn); if (currentUser !== undefined) fn(currentUser); },
     isSyncing: () => syncing,
   };

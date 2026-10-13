@@ -18,7 +18,7 @@
     form-action 'self';
   ">
   <title>TagScanner — 옷 태그 OCR</title>
-  <link rel="stylesheet" href="styles.css?v=2026-10-14a">
+  <link rel="stylesheet" href="styles.css?v=2026-10-14b">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1A1A1A">
   <meta name="description" content="옷 태그를 찍으면 브랜드, 가격, 사이즈, 소재를 읽어 정리해 줍니다.">
@@ -467,7 +467,16 @@
         </div>
 
         <div class="external-actions">
-          <div class="price-box" id="priceBox" hidden></div>
+          <!-- 온라인 가격: 검색은 네이버 쇼핑으로 보내고, 본 가격은 직접 적어 둔다 -->
+          <div class="price-box" id="priceBox">
+            <p class="price-title">온라인에서 본 가격</p>
+            <div class="price-input-row">
+              <input type="text" id="onlinePriceInput" inputmode="numeric" placeholder="예: 39,900">
+              <button type="button" id="onlinePriceSave" class="price-save-btn">저장</button>
+            </div>
+            <p class="price-verdict" id="priceVerdict" hidden></p>
+            <p class="price-note">아래 검색 버튼으로 가격을 확인한 뒤 적어 두면, 매장가와 얼마나 차이 나는지 보여 드립니다.</p>
+          </div>
           <button type="button" id="btnSearchPrice" class="primary-btn">
             🔍 온라인 최저가 검색
           </button>
@@ -640,14 +649,14 @@
 
   <!-- Tesseract.js (브라우저 OCR, 한국어+영어 지원) -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-  <script src="config.js?v=2026-10-14a"></script>
-  <script src="fabric_dict.js?v=2026-10-14a"></script>
-  <script src="brands.js?v=2026-10-14a"></script>
-  <script src="tag_profiles.js?v=2026-10-14a"></script>
-  <script src="parser.js?v=2026-10-14a"></script>
-  <script src="clip.js?v=2026-10-14a"></script>
-  <script src="photos.js?v=2026-10-14a"></script>
-  <script src="cloud.js?v=2026-10-14a"></script>
-  <script src="app.js?v=2026-10-14a"></script>
+  <script src="config.js?v=2026-10-14b"></script>
+  <script src="fabric_dict.js?v=2026-10-14b"></script>
+  <script src="brands.js?v=2026-10-14b"></script>
+  <script src="tag_profiles.js?v=2026-10-14b"></script>
+  <script src="parser.js?v=2026-10-14b"></script>
+  <script src="clip.js?v=2026-10-14b"></script>
+  <script src="photos.js?v=2026-10-14b"></script>
+  <script src="cloud.js?v=2026-10-14b"></script>
+  <script src="app.js?v=2026-10-14b"></script>
 </body>
 </html>

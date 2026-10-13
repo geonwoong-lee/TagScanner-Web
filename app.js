@@ -2181,67 +2181,60 @@ async function renderDuplicateWarning(tag) {
   };
 }
 
-// 온라인 최저가를 앱 안에서 보여 준다.
-// 매장가와 나란히 두어야 "여기서 살지 말지"에 쓸 수 있다.
-async function lookupOnlinePrice(tag, query) {
-  const box = $('priceBox');
-  if (!box) return;
+// 온라인 가격은 참가자가 직접 적는다.
+// 네이버가 쇼핑 검색 API 공개를 중단해서 자동으로 가져올 길이 없다.
+// 적어 둔 값과 매장가의 차이가 "여기서 살지 말지"의 근거가 되고, 그대로 기록에 남는다.
+function renderOnlinePrice(tag) {
+  const input = $('onlinePriceInput');
+  const verdict = $('priceVerdict');
+  if (!input || !verdict) return;
 
-  const canAsk = window.Cloud && window.Cloud.enabled() && window.Cloud.user();
-  if (!canAsk) {
-    // 서버를 못 쓰면 예전처럼 검색 결과를 새 창으로 연다
-    const url = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(query)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+  input.value = tag.onlinePrice ? Number(tag.onlinePrice).toLocaleString('ko-KR') : '';
+  showPriceVerdict(tag);
+}
+
+function showPriceVerdict(tag) {
+  const verdict = $('priceVerdict');
+  if (!verdict) return;
+  const store = parsePriceNumber(tag.price);
+  const online = Number(tag.onlinePrice) || 0;
+  if (!store || !online) {
+    verdict.hidden = true;
+    return;
+  }
+  const diff = store - online;
+  verdict.className = 'price-verdict' + (diff > 0 ? ' cheaper' : diff < 0 ? ' pricier' : '');
+  verdict.textContent = diff > 0
+    ? `온라인이 ${formatWon(diff)} 더 쌉니다`
+    : diff < 0
+      ? `매장이 ${formatWon(-diff)} 더 쌉니다`
+      : '가격이 같습니다';
+  verdict.hidden = false;
+}
+
+function saveOnlinePrice() {
+  const input = $('onlinePriceInput');
+  if (!input || !currentDetailId) return;
+  const raw = input.value.trim();
+  const value = raw ? parsePriceNumber(raw) : 0;
+  if (raw && !value) {
+    showToast('숫자로 적어 주세요');
     return;
   }
 
-  box.hidden = false;
-  box.innerHTML = '<p class="price-loading">온라인 가격을 찾는 중...</p>';
+  updateTag(currentDetailId, { onlinePrice: value || null });
+  const tag = loadTags().find((t) => t.id === currentDetailId);
+  showPriceVerdict(tag);
+  input.value = value ? value.toLocaleString('ko-KR') : '';
 
-  try {
-    const res = await window.Cloud.lookupPrice({
-      brand: tag.brand, productName: tag.productName, size: tag.size,
-    });
-    if (currentDetailId !== tag.id) return;
-
-    if (!res.lowest) {
-      box.innerHTML = '<p class="price-loading">온라인에서 같은 상품을 찾지 못했어요.</p>';
-      return;
-    }
-
-    const store = parsePriceNumber(tag.price);
-    const online = res.lowest.price;
-    const diff = store ? store - online : null;
-
-    let verdict = '';
-    if (diff !== null && diff > 0) {
-      verdict = `<p class="price-verdict cheaper">온라인이 ${formatWon(diff)} 더 쌉니다</p>`;
-    } else if (diff !== null && diff < 0) {
-      verdict = `<p class="price-verdict pricier">매장이 ${formatWon(-diff)} 더 쌉니다</p>`;
-    } else if (diff === 0) {
-      verdict = '<p class="price-verdict">가격이 같습니다</p>';
-    }
-
-    box.innerHTML = `
-      <p class="price-title">온라인 최저가</p>
-      <p class="price-amount">${formatWon(online)}</p>
-      <p class="price-sub">${escapeHtml(res.lowest.mall || '')} · ${escapeHtml(res.lowest.title || '')}</p>
-      ${verdict}
-      <a class="price-link" href="${escapeHtml(res.lowest.link)}" target="_blank" rel="noopener noreferrer">판매처 열기</a>
-      <p class="price-note">상품명으로 찾은 결과라 다른 상품일 수 있습니다. 참고용으로 보세요.</p>
-    `;
-
-    logEvent('price_shown', {
-      brand: tag.brand || '',
-      store_price: store || 0,
-      online_price: online,
-      diff: diff === null ? 0 : diff,
-      found: res.count,
-    });
-  } catch (e) {
-    if (currentDetailId !== tag.id) return;
-    box.innerHTML = `<p class="price-loading">가격을 가져오지 못했어요: ${escapeHtml(errText(e))}</p>`;
-  }
+  const store = parsePriceNumber(tag.price) || 0;
+  logEvent('online_price_entered', {
+    brand: tag.brand || '',
+    store_price: store,
+    online_price: value || 0,
+    diff: store && value ? store - value : 0,
+  });
+  showToast(value ? '온라인 가격을 적어 두었어요' : '온라인 가격을 지웠어요');
 }
 
 // 상세 화면의 결정 버튼
@@ -2431,8 +2424,7 @@ function openDetail(id) {
   renderDetailPhotos();
   renderDetailDecision();
   renderDuplicateWarning(t);
-  const priceBox = $('priceBox');
-  if (priceBox) { priceBox.hidden = true; priceBox.innerHTML = ''; }
+  renderOnlinePrice(t);
   $('d_category').value = t.category || '';
   $('d_brand').value = t.brand || '';
   $('d_productName').value = t.productName || '';
@@ -2928,9 +2920,14 @@ function bindEvents() {
         showToast('검색어가 부족합니다');
         return;
       }
-      lookupOnlinePrice(t, q);
+      logEvent('price_search_opened', { brand: t.brand || '' });
+      const url = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(q)}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
     });
   }
+
+  const priceSave = $('onlinePriceSave');
+  if (priceSave) priceSave.addEventListener('click', saveOnlinePrice);
   const btnVisitOfficial = $('btnVisitOfficial');
   if (btnVisitOfficial) {
     btnVisitOfficial.addEventListener('click', () => {

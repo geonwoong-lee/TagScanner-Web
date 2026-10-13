@@ -23,6 +23,7 @@ create table if not exists public.items (
   product_name text,
   price text,                         -- 화면에 보이는 그대로 (예: ₩39,900)
   price_num integer,                  -- 분석용 숫자
+  online_price integer,               -- 참가자가 적어 둔 온라인 가격
   size text,
   serial text,
   material text,
