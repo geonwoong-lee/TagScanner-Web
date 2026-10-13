@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이동 중</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      background: #F5F5F7;
+      color: #6B7280;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <p id="msg">검색 결과로 이동 중...</p>
+  <script>
+    // 아이폰은 google.com 같은 주소를 누르면 사파리 대신 해당 앱을 연다.
+    // 앱으로 넘어가면 가격만 보고 돌아오기가 번거롭다.
+    // 이 페이지를 한 번 거쳐 자바스크립트로 이동하면 사파리 안에 머문다.
+    // 다른 곳으로 보내는 데 쓰이지 않도록 아래 주소만 허용한다.
+    var ALLOWED = [
+      'search.naver.com',
+      'www.musinsa.com',
+      'www.google.com',
+    ];
+
+    try {
+      var raw = new URLSearchParams(location.search).get('u') || '';
+      var target = new URL(raw);
+      var ok = (target.protocol === 'https:') && ALLOWED.indexOf(target.hostname) !== -1;
+      if (ok) {
+        location.replace(target.href);
+      } else {
+        document.getElementById('msg').textContent = '이동할 수 없는 주소입니다.';
+      }
+    } catch (e) {
+      document.getElementById('msg').textContent = '이동할 수 없는 주소입니다.';
+    }
+  </script>
+</body>
+</html>

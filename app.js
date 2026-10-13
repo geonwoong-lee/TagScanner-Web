@@ -2931,28 +2931,34 @@ function bindEvents() {
   }
 
   // 외부 검색 CTAs (상세 화면)
-  // 가격 검색: 네이버가 외부 링크 접속을 막는 경우가 있어 구글도 같이 둔다
-  const openPriceSearch = (where) => {
-    const t = loadTags().find((x) => x.id === currentDetailId);
-    if (!t) return;
-    const q = [t.brand, t.productName].filter(Boolean).join(' ');
-    if (!q) {
-      showToast('브랜드나 상품명이 있어야 검색할 수 있어요');
-      return;
-    }
-    logEvent('price_search_opened', { brand: t.brand || '', where });
-    // 검색하러 나갔다가 돌아오면 그때 가격을 물어본다 (아래 visibilitychange)
-    pendingPriceAsk = t.id;
-    const url = where === 'google'
-      ? `https://www.google.com/search?q=${encodeURIComponent(q + ' 최저가')}&tbm=shop`
-      : `https://msearch.shopping.naver.com/search/all?query=${encodeURIComponent(q)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+  // 가격 검색 보낼 곳.
+  // 네이버는 쇼핑 전용 주소가 외부 링크를 막으므로 통합검색의 쇼핑 탭으로 보낸다.
+  // 구글 쇼핑은 국내 의류가 잘 안 걸리지만 해외 브랜드에는 쓸모가 있어 남겨 둔다.
+  const PRICE_SEARCH = {
+    naver: (q) => `https://search.naver.com/search.naver?where=shop&query=${encodeURIComponent(q)}`,
+    musinsa: (q) => `https://www.musinsa.com/search/goods?keyword=${encodeURIComponent(q)}`,
+    google: (q) => `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q)}`,
   };
 
-  const btnNaver = $('btnSearchNaver');
-  if (btnNaver) btnNaver.addEventListener('click', () => openPriceSearch('naver'));
-  const btnGoogle = $('btnSearchGoogle');
-  if (btnGoogle) btnGoogle.addEventListener('click', () => openPriceSearch('google'));
+  document.querySelectorAll('.price-search-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const where = btn.dataset.where;
+      const t = loadTags().find((x) => x.id === currentDetailId);
+      if (!t) return;
+      const q = [t.brand, t.productName].filter(Boolean).join(' ');
+      if (!q) {
+        showToast('브랜드나 상품명이 있어야 검색할 수 있어요');
+        return;
+      }
+      logEvent('price_search_opened', { brand: t.brand || '', where });
+      // 검색하러 나갔다가 돌아오면 그때 가격을 물어본다 (아래 visibilitychange)
+      pendingPriceAsk = t.id;
+      // 바로 열면 아이폰이 사파리 대신 해당 앱을 연다.
+      // 우리 쪽 페이지를 한 번 거쳐 넘기면 사파리 안에 머문다.
+      const target = PRICE_SEARCH[where](q);
+      window.open(`redirect.html?u=${encodeURIComponent(target)}`, '_blank', 'noopener,noreferrer');
+    });
+  });
 
   const priceSave = $('onlinePriceSave');
   if (priceSave) priceSave.addEventListener('click', saveOnlinePrice);
