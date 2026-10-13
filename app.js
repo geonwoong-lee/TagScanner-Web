@@ -2941,7 +2941,9 @@ function bindEvents() {
   // 검색 결과를 띄웠다가 지워 버린다.
   const PRICE_SEARCH = {
     musinsa: {
-      url: (q) => `https://www.musinsa.com/search/goods?keyword=${encodeURIComponent(q)}`,
+      // 무신사가 쓰는 정식 주소는 띄어쓰기를 +로 적는다.
+      // %20으로 보내면 아이폰에서 검색어를 떼고 빈 검색 화면으로 넘겨 버린다.
+      url: (q) => `https://www.musinsa.com/search/goods?keyword=${encodeURIComponent(q).replace(/%20/g, '+')}&keywordType=keyword`,
       viaRedirect: false,
     },
     google: {
