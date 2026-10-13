@@ -2934,10 +2934,24 @@ function bindEvents() {
   // 가격 검색 보낼 곳.
   // 네이버는 쇼핑 전용 주소가 외부 링크를 막으므로 통합검색의 쇼핑 탭으로 보낸다.
   // 구글 쇼핑은 국내 의류가 잘 안 걸리지만 해외 브랜드에는 쓸모가 있어 남겨 둔다.
+  // viaRedirect: 중간 페이지를 거칠지 여부.
+  // 구글은 바로 열면 아이폰이 사파리 대신 구글 앱을 열어서 거쳐 가야 한다.
+  // 무신사와 네이버는 앱이 가로채지 않으므로 바로 연다.
+  // 중간 페이지를 거치면 어디서 왔는지 정보가 지워져서, 그걸 확인하는 사이트는
+  // 검색 결과를 띄웠다가 지워 버린다.
   const PRICE_SEARCH = {
-    naver: (q) => `https://search.naver.com/search.naver?where=shop&query=${encodeURIComponent(q)}`,
-    musinsa: (q) => `https://www.musinsa.com/search/goods?keyword=${encodeURIComponent(q)}`,
-    google: (q) => `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q)}`,
+    musinsa: {
+      url: (q) => `https://www.musinsa.com/search/goods?keyword=${encodeURIComponent(q)}`,
+      viaRedirect: false,
+    },
+    google: {
+      url: (q) => `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q)}`,
+      viaRedirect: true,
+    },
+    naver: {
+      url: (q) => `https://search.naver.com/search.naver?where=shop&query=${encodeURIComponent(q)}`,
+      viaRedirect: false,
+    },
   };
 
   document.querySelectorAll('.price-search-btn').forEach((btn) => {
@@ -2958,10 +2972,13 @@ function bindEvents() {
       // 검색어는 전달되지 않아 빈 검색창이 뜬다. 그때 붙여넣을 수 있게 미리 복사해 둔다.
       try { navigator.clipboard.writeText(q); } catch (e) { /* 복사가 막혀도 그냥 진행 */ }
 
-      // 바로 열면 아이폰이 사파리 대신 해당 앱을 연다.
-      // 우리 쪽 페이지를 한 번 거쳐 넘기면 사파리 안에 머문다.
-      const target = PRICE_SEARCH[where](q);
-      window.open(`redirect.html?u=${encodeURIComponent(target)}`, '_blank', 'noopener,noreferrer');
+      const site = PRICE_SEARCH[where];
+      const target = site.url(q);
+      if (site.viaRedirect) {
+        window.open(`redirect.html?u=${encodeURIComponent(target)}`, '_blank', 'noopener,noreferrer');
+      } else {
+        window.open(target, '_blank', 'noopener');
+      }
       showToast('검색창이 비어 있으면 붙여넣기 하세요');
     });
   });
