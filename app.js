@@ -2181,6 +2181,28 @@ async function renderDuplicateWarning(tag) {
   };
 }
 
+// 검색하러 나갔다가 돌아온 순간이 가격을 적기 가장 쉬운 때다.
+// 나중에 상세 화면에서 따로 적게 하면 대부분 그냥 넘긴다.
+let pendingPriceAsk = null;
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden || !pendingPriceAsk) return;
+  const id = pendingPriceAsk;
+  pendingPriceAsk = null;
+  if (currentDetailId !== id) return;
+
+  const tag = loadTags().find((t) => t.id === id);
+  if (!tag || tag.onlinePrice) return;
+
+  const input = $('onlinePriceInput');
+  if (!input) return;
+  const box = $('priceBox');
+  if (box) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  input.focus();
+  showToast('방금 본 가격을 적어 주세요');
+  logEvent('price_ask_shown', {});
+});
+
 // 온라인 가격은 참가자가 직접 적는다.
 // 네이버가 쇼핑 검색 API 공개를 중단해서 자동으로 가져올 길이 없다.
 // 적어 둔 값과 매장가의 차이가 "여기서 살지 말지"의 근거가 되고, 그대로 기록에 남는다.
@@ -2921,6 +2943,8 @@ function bindEvents() {
         return;
       }
       logEvent('price_search_opened', { brand: t.brand || '' });
+      // 검색하러 나갔다가 돌아오면 그때 가격을 물어본다 (아래 visibilitychange)
+      pendingPriceAsk = t.id;
       const url = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(q)}`;
       window.open(url, '_blank', 'noopener,noreferrer');
     });
@@ -2928,6 +2952,13 @@ function bindEvents() {
 
   const priceSave = $('onlinePriceSave');
   if (priceSave) priceSave.addEventListener('click', saveOnlinePrice);
+
+  const priceInput = $('onlinePriceInput');
+  if (priceInput) {
+    priceInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); saveOnlinePrice(); }
+    });
+  }
   const btnVisitOfficial = $('btnVisitOfficial');
   if (btnVisitOfficial) {
     btnVisitOfficial.addEventListener('click', () => {
