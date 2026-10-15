@@ -543,6 +543,8 @@ button {
   display: flex;
   gap: 10px;
   padding: 16px 20px 24px;
+  /* 홈 화면에서 실행하면 화면 맨 아래 홈 바가 이 줄을 덮는다 */
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
   background: #fff;
 }
 
@@ -582,6 +584,9 @@ button {
   justify-content: space-between;
   padding: 16px 20px;
   background: var(--color-bg-soft);
+  /* 홈 화면에서 실행하면 주소창이 없어서 상태바가 이 줄을 덮는다.
+     덮인 부분은 눌러도 반응하지 않으므로 그만큼 아래로 내린다. */
+  padding-top: calc(16px + env(safe-area-inset-top));
 }
 
 .list-header h2 {
@@ -787,6 +792,10 @@ button {
   background: white;
   padding: 0;
   position: relative;
+}
+
+.filter-sheet {
+  padding-top: env(safe-area-inset-top);
 }
 
 .filter-handle {
@@ -2725,15 +2734,19 @@ img.photo-missing {
 
 .price-input-row input {
   flex: 1;
+  /* 이게 없으면 입력칸이 줄어들지 않아 옆 버튼을 찌그러뜨린다 */
+  min-width: 0;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 15px;
+  font-size: 16px; /* 16px 미만이면 아이폰이 입력할 때 화면을 확대한다 */
   font-family: inherit;
 }
 
 .price-save-btn {
-  padding: 12px 18px;
+  flex: 0 0 auto;        /* 글자 길이만큼만 차지하고 줄어들지 않는다 */
+  white-space: nowrap;   /* "저장"이 두 줄로 쪼개지지 않게 */
+  padding: 12px 16px;
   border: none;
   border-radius: var(--radius-sm);
   background: var(--color-black);
@@ -2751,8 +2764,10 @@ img.photo-missing {
 }
 
 .price-search-btn {
-  flex: 1;
-  padding: 13px 10px;
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+  padding: 13px 6px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: white;
@@ -2763,3 +2778,12 @@ img.photo-missing {
 }
 
 .price-search-btn:active { background: var(--color-bg-soft); }
+
+/* 외부 검색·공식몰 버튼 묶음과 다음 영역 사이 간격 */
+.external-actions {
+  margin-bottom: 16px;
+}
+
+.external-actions .primary-btn:last-child {
+  margin-bottom: 0;
+}
