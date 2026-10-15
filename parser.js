@@ -256,7 +256,9 @@ const CATEGORY_KEYWORDS = {
 
 // 노이즈 라인 판별 (상품명/브랜드 후보에서 제외할 것들)
 const NOISE_PATTERNS = [
-  /^RFID$/i,
+  // RFID는 택마다 적는 모양이 다르다. "RFID", "+RFID", "RFID TAG", "RFID 태그 부착" 등.
+  // 어떤 모양이든 상품 정보가 아니므로 통째로 걸러낸다.
+  /^[+\-*·\s]*RFID/i,
   /^제조[년월]/,
   /^\d{4}년\s?\d{1,2}월/,
   /^호칭$/,
@@ -821,7 +823,11 @@ function dropContainedBadges(parts) {
 function cleanName(text) {
   return text
     .replace(/\((?:[A-Z0-9]{8,12})\s?RE\)/g, '') // SPAO 리오더 코드 (SPYWE25C41 RE)
+    // 유니클로 택은 RFID 표기가 상품명과 같은 줄에 찍히기도 한다.
+    // 줄 단위로 거르지 못하므로 여기서 떼어낸다.
+    .replace(/[+\-*·]?\s*RFID\s*(TAG|태그)?\s*(부착|있음)?/gi, ' ')
     .replace(/\s+/g, ' ')
+    .replace(/^[\s,./-]+|[\s,./-]+$/g, '')
     .trim();
 }
 
