@@ -359,6 +359,55 @@ async function handleImageSelected(file) {
   }
 }
 
+// 택 글자가 안 읽혀 브랜드를 못 찾았을 때, 택 사진 모양으로 후보를 제안한다.
+// 자동으로 채우지 않는다. 기준에 없는 브랜드를 자신 있게 틀리게 답할 수 있어서다.
+// 사용자가 눌러서 고르면 그때 들어간다.
+async function renderBrandImageSuggest(tagPhotoDataUrl) {
+  const box = $('brandImageSuggest');
+  if (!box) return;
+  box.hidden = true;
+  box.innerHTML = '';
+
+  // 사전에서 제대로 찾은 경우에만 나서지 않는다 (호출하는 쪽에서 이미 걸렀다)
+  if (!window.CLIP || !window.BRAND_VECTORS || !tagPhotoDataUrl) return;
+
+  box.hidden = false;
+  box.innerHTML = '<p class="brand-image-hint">택 모양으로 브랜드를 찾는 중...</p>';
+
+  try {
+    const picks = await window.CLIP.suggestBrandByTagImage(tagPhotoDataUrl, 2);
+    if (!picks.length) { box.hidden = true; return; }
+
+    logEvent('brand_image_suggested', {
+      top: picks[0].brand,
+      score: Math.round(picks[0].similarity * 100),
+    });
+
+    box.innerHTML = `
+      <p class="brand-image-hint">글자를 읽지 못했어요. 택 모양이 비슷한 브랜드입니다.</p>
+      <div class="brand-image-chips">
+        ${picks.map((p) => `
+          <button type="button" class="brand-image-chip" data-brand="${escapeHtml(p.brand)}">
+            ${escapeHtml(p.brand)}<span class="brand-image-score">${Math.round(p.similarity * 100)}</span>
+          </button>
+        `).join('')}
+      </div>
+      <p class="brand-image-note">9개 브랜드 안에서만 찾습니다. 맞지 않으면 직접 입력해 주세요.</p>
+    `;
+
+    box.querySelectorAll('.brand-image-chip').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        $('brand').value = btn.dataset.brand;
+        logEvent('brand_image_accepted', { brand: btn.dataset.brand });
+        box.hidden = true;
+      });
+    });
+  } catch (e) {
+    console.warn('택 모양 브랜드 추정 실패', e);
+    box.hidden = true;
+  }
+}
+
 // ---- 소재·원단 표시 ----
 // 파서가 사전에서 찾은 가공·조직 용어를 칩으로 보여 준다 (누르면 소재 칸에 추가)
 function renderFabricTags(tags) {
@@ -529,6 +578,11 @@ function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, 
   renderCareChips();
   renderFabricTags(fields.fabric);
   renderBrandSuggest(fields, lines);
+  // 글자로 브랜드를 못 찾았거나, 사전에 없어 그냥 한 줄을 집어온 경우
+  // 택 사진 모양으로 후보를 제안한다
+  const brandIsGuess = !fields.brand || !fields.brandSource || fields.brandSource === 'fallback';
+  if (brandIsGuess) renderBrandImageSuggest(photoData);
+  else { const box = $('brandImageSuggest'); if (box) { box.hidden = true; box.innerHTML = ''; } }
   if (!$('memo').value) $('memo').value = '';
   $('rawText').textContent = rawText || '(인식된 텍스트 없음)';
 

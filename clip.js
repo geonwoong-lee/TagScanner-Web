@@ -26,7 +26,7 @@ async function loadCLIP() {
       updateProgress('CLIP 라이브러리 로딩 중...', 5);
 
       // Transformers.js 동적 import (ESM)
-      const { pipeline, env } = await import(
+      const { pipeline, env, AutoTokenizer, CLIPTextModelWithProjection } = await import(
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/dist/transformers.min.js'
       );
 
@@ -55,22 +55,24 @@ async function loadCLIP() {
 
       updateProgress('CLIP 텍스트 모델 다운로드 중...', 60);
 
-      // 텍스트 특징 추출 (zero-shot 분류용)
-      const textP = await pipeline(
-        'feature-extraction',
-        'Xenova/clip-vit-base-patch32',
-        {
-          quantized: true,
-          progress_callback: (data) => {
-            if (data.status === 'downloading' && data.progress) {
-              updateProgress(
-                `텍스트 모델 다운로드: ${Math.round(data.progress)}%`,
-                60 + data.progress * 0.35
-              );
-            }
-          },
+      // 글자 embedding은 전용 모델을 직접 쓴다.
+      // feature-extraction 파이프라인을 쓰면 CLIP 전체 모델이 올라와서
+      // 글자만 넣었을 때 "이미지 입력이 없다"며 실패한다.
+      const onProgress = (data) => {
+        if (data.status === 'downloading' && data.progress) {
+          updateProgress(
+            `텍스트 모델 다운로드: ${Math.round(data.progress)}%`,
+            60 + data.progress * 0.35
+          );
         }
+      };
+      const tokenizer = await AutoTokenizer.from_pretrained(
+        'Xenova/clip-vit-base-patch32', { progress_callback: onProgress }
       );
+      const textModel = await CLIPTextModelWithProjection.from_pretrained(
+        'Xenova/clip-vit-base-patch32', { quantized: true, progress_callback: onProgress }
+      );
+      const textP = { tokenizer, model: textModel };
 
       updateProgress('로딩 완료', 100);
 
@@ -105,10 +107,17 @@ async function computeImageEmbedding(imageDataUrl) {
 /**
  * 텍스트 → 512차원 embedding 벡터 (zero-shot 분류용)
  */
+// 같은 문구를 반복해서 계산하지 않도록 담아 둔다 (스타일 분류는 매번 같은 문구를 쓴다)
+const textEmbeddingCache = new Map();
+
 async function computeTextEmbedding(text) {
+  if (textEmbeddingCache.has(text)) return textEmbeddingCache.get(text);
   const { textPipeline } = await loadCLIP();
-  const output = await textPipeline(text, { pooling: 'mean', normalize: true });
-  return Array.from(output.data);
+  const inputs = textPipeline.tokenizer([text], { padding: true, truncation: true });
+  const { text_embeds } = await textPipeline.model(inputs);
+  const vec = Array.from(text_embeds.data);
+  textEmbeddingCache.set(text, vec);
+  return vec;
 }
 
 /**
@@ -161,6 +170,42 @@ async function classifyStyle(imageEmbedding, textLabels) {
   return scored;
 }
 
+/**
+ * 택 사진으로 브랜드 후보를 추정한다.
+ * 글자가 안 읽히는 택을 위한 보완 수단이다. 자동으로 채우지 않고 후보만 돌려준다.
+ *
+ * 기준 벡터에 없는 브랜드는 "모른다"고 답할 방법이 없다.
+ * 맞힌 경우 유사도 중앙값 0.92, 틀린 경우도 0.89까지 올라와 구간이 겹친다.
+ * 그래서 점수로 거르지 않고, 사용자가 보고 고르게 한다.
+ */
+function decodeBrandVectors() {
+  const src = (typeof window !== 'undefined' && window.BRAND_VECTORS) || null;
+  if (!src || !src.vectors) return null;
+  const out = {};
+  for (const [brand, b64] of Object.entries(src.vectors)) {
+    const bin = atob(b64);
+    const vec = new Array(bin.length);
+    for (let i = 0; i < bin.length; i++) {
+      const byte = bin.charCodeAt(i);
+      vec[i] = (byte > 127 ? byte - 256 : byte) / src.scale;
+    }
+    out[brand] = vec;
+  }
+  return out;
+}
+
+let brandVectorCache = null;
+
+async function suggestBrandByTagImage(imageDataUrl, topK = 2) {
+  const table = brandVectorCache || (brandVectorCache = decodeBrandVectors());
+  if (!table) return [];
+  const emb = await computeImageEmbedding(imageDataUrl);
+  return Object.entries(table)
+    .map(([brand, vec]) => ({ brand, similarity: cosineSimilarity(emb, vec) }))
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, topK);
+}
+
 // ============================================================
 // 스타일 카테고리 정의
 // ============================================================
@@ -198,6 +243,7 @@ function setProgressCallback(cb) {
 window.CLIP = {
   loadCLIP,
   computeImageEmbedding,
+  suggestBrandByTagImage,
   computeTextEmbedding,
   cosineSimilarity,
   findSimilar,
