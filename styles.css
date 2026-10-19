@@ -2787,3 +2787,56 @@ img.photo-missing {
 .external-actions .primary-btn:last-child {
   margin-bottom: 0;
 }
+
+/* ---- 택 모양으로 브랜드 추천 ---- */
+.brand-image-suggest {
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.brand-image-hint {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.brand-image-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.brand-image-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-iris-60);
+  border-radius: var(--radius-pill);
+  background: white;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.brand-image-chip:active {
+  background: var(--color-iris-60);
+}
+
+.brand-image-score {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-iris-100);
+}
+
+.brand-image-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  line-height: 1.5;
+}

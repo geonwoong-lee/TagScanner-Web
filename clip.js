@@ -170,6 +170,42 @@ async function classifyStyle(imageEmbedding, textLabels) {
   return scored;
 }
 
+/**
+ * 택 사진으로 브랜드 후보를 추정한다.
+ * 글자가 안 읽히는 택을 위한 보완 수단이다. 자동으로 채우지 않고 후보만 돌려준다.
+ *
+ * 기준 벡터에 없는 브랜드는 "모른다"고 답할 방법이 없다.
+ * 맞힌 경우 유사도 중앙값 0.92, 틀린 경우도 0.89까지 올라와 구간이 겹친다.
+ * 그래서 점수로 거르지 않고, 사용자가 보고 고르게 한다.
+ */
+function decodeBrandVectors() {
+  const src = (typeof window !== 'undefined' && window.BRAND_VECTORS) || null;
+  if (!src || !src.vectors) return null;
+  const out = {};
+  for (const [brand, b64] of Object.entries(src.vectors)) {
+    const bin = atob(b64);
+    const vec = new Array(bin.length);
+    for (let i = 0; i < bin.length; i++) {
+      const byte = bin.charCodeAt(i);
+      vec[i] = (byte > 127 ? byte - 256 : byte) / src.scale;
+    }
+    out[brand] = vec;
+  }
+  return out;
+}
+
+let brandVectorCache = null;
+
+async function suggestBrandByTagImage(imageDataUrl, topK = 2) {
+  const table = brandVectorCache || (brandVectorCache = decodeBrandVectors());
+  if (!table) return [];
+  const emb = await computeImageEmbedding(imageDataUrl);
+  return Object.entries(table)
+    .map(([brand, vec]) => ({ brand, similarity: cosineSimilarity(emb, vec) }))
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, topK);
+}
+
 // ============================================================
 // 스타일 카테고리 정의
 // ============================================================
@@ -207,6 +243,7 @@ function setProgressCallback(cb) {
 window.CLIP = {
   loadCLIP,
   computeImageEmbedding,
+  suggestBrandByTagImage,
   computeTextEmbedding,
   cosineSimilarity,
   findSimilar,
