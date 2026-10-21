@@ -23,7 +23,7 @@
     // 그러면 안에 적힌 app.js 주소도 예전 것이라 수정사항이 통째로 반영되지 않는다.
     // 배포된 버전을 확인해서 다르면 주소에 값을 붙여 한 번만 다시 받는다.
     (function () {
-      var LOADED = '2026-10-19b';
+      var LOADED = '2026-10-21b';
       if (location.search.indexOf('fresh=') !== -1) return;
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
@@ -35,7 +35,7 @@
         .catch(function () { /* 확인 못 하면 그냥 쓴다 */ });
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=2026-10-19b">
+  <link rel="stylesheet" href="styles.css?v=2026-10-21b">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1A1A1A">
   <meta name="description" content="옷 태그를 찍으면 브랜드, 가격, 사이즈, 소재를 읽어 정리해 줍니다.">
@@ -162,6 +162,17 @@
         <div class="spinner"></div>
         <div id="progressText">OCR 인식 중...</div>
         <div class="progress-bar"><div id="progressFill"></div></div>
+      </div>
+
+      <!-- 잘 안 찍혔을 때 다시 찍을 기회를 준다 -->
+      <div class="retake-box" id="retakeBox" hidden>
+        <p class="retake-title">다시 찍는 게 좋겠어요</p>
+        <ul class="retake-reasons" id="retakeReasons"></ul>
+        <p class="retake-tip">밝은 곳에서 택이 화면을 가득 채우게, 손 그림자가 지지 않도록 찍어 주세요.</p>
+        <div class="retake-actions">
+          <button type="button" class="retake-btn primary" id="retakeAgain">다시 촬영</button>
+          <button type="button" class="retake-btn" id="retakeKeep">이대로 진행</button>
+        </div>
       </div>
 
       <form id="reviewForm" class="form" hidden>
@@ -673,15 +684,15 @@
 
   <!-- Tesseract.js (브라우저 OCR, 한국어+영어 지원) -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-  <script src="config.js?v=2026-10-19b"></script>
-  <script src="fabric_dict.js?v=2026-10-19b"></script>
-  <script src="brands.js?v=2026-10-19b"></script>
-  <script src="tag_profiles.js?v=2026-10-19b"></script>
-  <script src="parser.js?v=2026-10-19b"></script>
-  <script src="brand_vectors.js?v=2026-10-19b"></script>
-  <script src="clip.js?v=2026-10-19b"></script>
-  <script src="photos.js?v=2026-10-19b"></script>
-  <script src="cloud.js?v=2026-10-19b"></script>
-  <script src="app.js?v=2026-10-19b"></script>
+  <script src="config.js?v=2026-10-21b"></script>
+  <script src="fabric_dict.js?v=2026-10-21b"></script>
+  <script src="brands.js?v=2026-10-21b"></script>
+  <script src="tag_profiles.js?v=2026-10-21b"></script>
+  <script src="parser.js?v=2026-10-21b"></script>
+  <script src="brand_vectors.js?v=2026-10-21b"></script>
+  <script src="clip.js?v=2026-10-21b"></script>
+  <script src="photos.js?v=2026-10-21b"></script>
+  <script src="cloud.js?v=2026-10-21b"></script>
+  <script src="app.js?v=2026-10-21b"></script>
 </body>
 </html>

@@ -293,6 +293,86 @@ async function runOcr({ rawData, processedData, engine, modeIndex = 0 }) {
   return { text, logos: [] };
 }
 
+// ============================================================
+// 촬영 품질 점검
+// 완벽하게 가려낼 필요는 없다. 누가 봐도 잘못된 경우만 잡아서
+// 다시 찍을 기회를 주는 것이 목적이다.
+// ============================================================
+
+// 사진 자체의 상태를 본다. 캔버스 픽셀만 보므로 비용이 거의 없다.
+function measurePhoto(canvas) {
+  const side = 160; // 작게 줄여서 본다. 큰 사진을 다 훑을 이유가 없다
+  const small = document.createElement('canvas');
+  small.width = side;
+  small.height = side;
+  const ctx = small.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(canvas, 0, 0, side, side);
+  const { data } = ctx.getImageData(0, 0, side, side);
+
+  // 밝기 (0~255)
+  const gray = new Float32Array(side * side);
+  let sum = 0;
+  for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+    const g = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    gray[p] = g;
+    sum += g;
+  }
+  const brightness = sum / gray.length;
+
+  // 선명도: 옆 픽셀과의 차이가 얼마나 들쭉날쭉한지 (흐리면 차이가 작다)
+  let edgeSum = 0;
+  let edgeSq = 0;
+  let n = 0;
+  for (let y = 1; y < side - 1; y++) {
+    for (let x = 1; x < side - 1; x++) {
+      const i = y * side + x;
+      const lap = 4 * gray[i] - gray[i - 1] - gray[i + 1] - gray[i - side] - gray[i + side];
+      edgeSum += lap;
+      edgeSq += lap * lap;
+      n++;
+    }
+  }
+  const mean = edgeSum / n;
+  const sharpness = edgeSq / n - mean * mean;
+
+  return { brightness: Math.round(brightness), sharpness: Math.round(sharpness) };
+}
+
+// 상품명에 품번이나 잡음이 섞였는지
+function looksLikeCode(text) {
+  const s = String(text || '').trim();
+  if (!s) return false;
+  // 영문 대문자와 숫자만으로 된 덩어리가 들어 있으면 품번일 가능성이 높다
+  return /(^|\s)(?=[A-Z0-9-]*\d)[A-Z0-9-]{6,}(\s|$)/.test(s);
+}
+
+// 다시 찍는 게 나은 상황인지 판단한다. 이유를 함께 돌려준다.
+function checkScanQuality({ photo, fields, rawText }) {
+  const reasons = [];
+  const textLength = String(rawText || '').replace(/\s/g, '').length;
+
+  // 기준은 평가셋 사진으로 재서 정했다 (앱과 같은 경로로 측정).
+  //   정상 사진: 밝기 118~211, 선명도 2,593 이상
+  //   어둡게 만든 사진 60 / 과노출 243 / 흐리게 만든 사진 497 이하
+  // 정상 범위에서 충분히 떨어진 값으로 잡아 멀쩡한 사진을 붙잡지 않게 했다.
+  if (photo && photo.brightness < 90) reasons.push({ code: 'dark', text: '사진이 어둡습니다' });
+  if (photo && photo.brightness > 235) reasons.push({ code: 'bright', text: '빛 반사가 심합니다' });
+  if (photo && photo.sharpness < 1200) reasons.push({ code: 'blurry', text: '초점이 흐립니다' });
+
+  if (textLength < 15) {
+    reasons.push({ code: 'few_text', text: '글자를 거의 읽지 못했습니다' });
+  } else {
+    const found = ['brand', 'price', 'size'].filter((k) => fields && fields[k]);
+    if (found.length === 0) reasons.push({ code: 'no_fields', text: '브랜드, 가격, 사이즈를 하나도 찾지 못했습니다' });
+  }
+
+  if (fields && looksLikeCode(fields.productName)) {
+    reasons.push({ code: 'name_is_code', text: '상품명에 품번이 섞였습니다' });
+  }
+
+  return { needsRetake: reasons.length > 0, reasons };
+}
+
 // ---- 사진 처리 (카메라/갤러리 공통) ----
 async function handleImageSelected(file) {
   if (!file) return;
@@ -339,6 +419,7 @@ async function handleImageSelected(file) {
     const engine = pickEngine();
     ocrAttempts = 0;
     const startedAt = performance.now();
+    const photoStats = measurePhoto(storageCanvas);
     const ocrResult = await runOcr({ rawData, processedData, engine, modeIndex: ocrAttempts });
     finishOcr({
       photoData,
@@ -349,6 +430,7 @@ async function handleImageSelected(file) {
       engine,
       primaryKind,
       ocrSeconds: Math.round((performance.now() - startedAt) / 100) / 10,
+      photoStats,
     });
   } catch (e) {
     console.error(e);
@@ -406,6 +488,31 @@ async function renderBrandImageSuggest(tagPhotoDataUrl) {
     console.warn('택 모양 브랜드 추정 실패', e);
     box.hidden = true;
   }
+}
+
+// 잘 안 찍혔으면 다시 찍을지 물어본다. 강제하지 않고 그대로 진행할 수도 있다.
+function renderRetakeNotice({ photoStats, fields, rawText, engine }) {
+  const box = $('retakeBox');
+  if (!box) return;
+  box.hidden = true;
+
+  // 옷 사진 모드는 글자를 읽을 이유가 없으므로 따지지 않는다
+  if (engine === 'none') return;
+
+  const result = checkScanQuality({ photo: photoStats, fields, rawText });
+  if (!result.needsRetake) return;
+
+  $('retakeReasons').innerHTML = result.reasons
+    .map((r) => `<li>${escapeHtml(r.text)}</li>`)
+    .join('');
+  box.hidden = false;
+
+  logEvent('scan_quality_warned', {
+    reasons: result.reasons.map((r) => r.code).join(','),
+    brightness: photoStats ? photoStats.brightness : 0,
+    sharpness: photoStats ? photoStats.sharpness : 0,
+    text_length: String(rawText || '').length,
+  });
 }
 
 // ---- 소재·원단 표시 ----
@@ -543,7 +650,7 @@ async function addReviewPhotos(files, kind) {
   }
 }
 
-function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, primaryKind = 'tag', extraPhotos = [], ocrSeconds = null }) {
+function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, primaryKind = 'tag', extraPhotos = [], ocrSeconds = null, photoStats = null }) {
   const lines = window.splitLines(rawText);
   const fields = window.parseFields(lines, { logos: logos || [] });
 
@@ -578,6 +685,8 @@ function finishOcr({ photoData, rawData, processedData, rawText, logos, engine, 
   renderCareChips();
   renderFabricTags(fields.fabric);
   renderBrandSuggest(fields, lines);
+  renderRetakeNotice({ photoStats, fields, rawText, engine });
+
   // 글자로 브랜드를 못 찾았거나, 사전에 없어 그냥 한 줄을 집어온 경우
   // 택 사진 모양으로 후보를 제안한다
   const brandIsGuess = !fields.brand || !fields.brandSource || fields.brandSource === 'fallback';
@@ -2632,6 +2741,24 @@ function bindEvents() {
     applyPilotGate();
     showToast('로그아웃했습니다');
   });
+
+  const retakeAgain = $('retakeAgain');
+  if (retakeAgain) {
+    retakeAgain.addEventListener('click', () => {
+      logEvent('scan_retake_chosen', {});
+      currentReview = null;
+      $('retakeBox').hidden = true;
+      showScreen('main');
+      $('cameraInput').click();
+    });
+  }
+  const retakeKeep = $('retakeKeep');
+  if (retakeKeep) {
+    retakeKeep.addEventListener('click', () => {
+      logEvent('scan_result_kept', {});
+      $('retakeBox').hidden = true;
+    });
+  }
 
   $('detailSetCover').addEventListener('click', setDetailCover);
 
