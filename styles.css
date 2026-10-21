@@ -2840,3 +2840,100 @@ img.photo-missing {
   color: var(--color-text-tertiary);
   line-height: 1.5;
 }
+
+/* ---- 재촬영 안내 ---- */
+.retake-box {
+  margin: 0 20px 14px;
+  padding: 14px 16px;
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-md);
+}
+
+.retake-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.retake-reasons {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.retake-tip {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.retake-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.retake-btn {
+  flex: 1;
+  padding: 12px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: white;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.retake-btn.primary {
+  background: var(--color-black);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ---- 구글 로그인 ---- */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 12px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: white;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.google-btn:active {
+  background: var(--color-bg-soft);
+}
+
+.google-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
