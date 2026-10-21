@@ -2893,3 +2893,47 @@ img.photo-missing {
   color: #fff;
   border-color: transparent;
 }
+
+/* ---- 구글 로그인 ---- */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 12px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: white;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.google-btn:active {
+  background: var(--color-bg-soft);
+}
+
+.google-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

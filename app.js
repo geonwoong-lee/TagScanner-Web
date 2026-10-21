@@ -57,6 +57,7 @@ const screens = {
   compare: $('compareScreen'),
   compareResult: $('compareResultScreen'),
   auth: $('authScreen'),
+  onboard: $('onboardScreen'),
   myPage: $('myPageScreen'),
   filter: $('filterScreen'),
 };
@@ -77,6 +78,7 @@ let reviewSelectedCategory = ''; // 등록 화면에서 선택된 카테고리
 
 const SCREEN_TITLES = {
   main: '촬영', review: '상품 등록', list: '상품 목록', detail: '상품 상세',
+  onboard: '참가 정보 입력',
   settings: '설정', compare: '찜 목록', compareResult: '비교 결과',
   auth: '로그인', myPage: '마이페이지', filter: '필터',
 };
@@ -2702,6 +2704,10 @@ function bindEvents() {
     btn.addEventListener('click', () => setAuthMode(btn.dataset.mode));
   });
   $('authForm').addEventListener('submit', handleAuthSubmit);
+  const googleBtn = $('authGoogle');
+  if (googleBtn) googleBtn.addEventListener('click', startGoogleLogin);
+  const onboardForm = $('onboardForm');
+  if (onboardForm) onboardForm.addEventListener('submit', handleOnboardSubmit);
   $('btnSyncNow').addEventListener('click', async () => {
     if (!(window.Cloud && window.Cloud.user())) {
       showToast('먼저 로그인해 주세요');
@@ -3349,6 +3355,61 @@ function setAuthMode(mode) {
   $('authError').hidden = true;
 }
 
+async function startGoogleLogin() {
+  const btn = $('authGoogle');
+  $('authError').hidden = true;
+  btn.disabled = true;
+  try {
+    logEvent('google_login_started', {});
+    await window.Cloud.signInWithGoogle();
+    // 여기서 구글 쪽으로 넘어간다. 돌아오면 페이지가 새로 뜬다.
+  } catch (err) {
+    btn.disabled = false;
+    showAuthError(errText(err));
+  }
+}
+
+// 구글로 들어온 사람은 가입 화면을 거치지 않아 참가자 번호와 동의가 비어 있다.
+// 그 둘을 받기 전에는 앱을 쓰지 못하게 한다. 동의 없이 수집하면 안 된다.
+async function needsOnboarding() {
+  if (!(window.Cloud && window.Cloud.user())) return false;
+  const status = await window.Cloud.profileStatus();
+  if (!status) return false; // 확인 못 하면 막지 않는다
+  return !status.consented;
+}
+
+async function handleOnboardSubmit(e) {
+  e.preventDefault();
+  const btn = $('onboardSubmit');
+  const code = $('onboardCode').value.trim();
+  $('onboardError').hidden = true;
+
+  if (!$('onboardConsent').checked) {
+    const el = $('onboardError');
+    el.textContent = '데이터 수집에 동의해야 시작할 수 있습니다.';
+    el.hidden = false;
+    return;
+  }
+
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = '저장 중...';
+  try {
+    await window.Cloud.saveProfile({ participantCode: code, consent: true });
+    logEvent('onboarding_done', { has_code: Boolean(code) });
+    showScreen('main');
+    showToast('시작할 준비가 됐어요');
+    window.Cloud.syncNow().then(renderSyncStatus);
+  } catch (err) {
+    const el = $('onboardError');
+    el.textContent = errText(err);
+    el.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
 function showAuthError(message) {
   const el = $('authError');
   el.textContent = message;
@@ -3461,6 +3522,14 @@ function applyPilotGate() {
     return;
   }
   if (document.querySelector('.screen.active')?.id === 'authScreen') showScreen('main');
+
+  // 참가자 번호와 동의가 비어 있으면 먼저 받는다
+  needsOnboarding().then((need) => {
+    if (!need || !window.Cloud.user()) return;
+    const u = window.Cloud.user();
+    $('onboardWho').textContent = (u.email || '') + ' 계정으로 들어왔습니다';
+    showScreen('onboard');
+  }).catch((e) => console.warn('참가 정보 확인 실패', e));
 }
 
 // 참가자 기기에서 터진 오류를 남긴다.

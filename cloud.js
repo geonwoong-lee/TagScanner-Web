@@ -165,6 +165,46 @@
     return data;
   }
 
+  // 구글 계정으로 들어오기.
+  // 돌아올 주소를 지금 페이지로 지정한다. 물음표 뒤 값은 떼어낸다.
+  async function signInWithGoogle() {
+    if (!client) throw new Error('서버에 연결되어 있지 않습니다');
+    const back = location.origin + location.pathname;
+    const { error } = await client.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: back },
+    });
+    if (error) throw error;
+  }
+
+  // 가입은 됐는데 참가자 번호나 동의 기록이 없는 계정인지 확인한다.
+  // 구글로 들어온 사람은 가입 화면을 거치지 않아 둘 다 비어 있다.
+  async function profileStatus() {
+    if (!client || !currentUser) return null;
+    const { data, error } = await client
+      .from('profiles')
+      .select('participant_code,consented_at')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+    if (error) {
+      console.warn('프로필 확인 실패', error.message);
+      return null;
+    }
+    return {
+      participantCode: data?.participant_code || '',
+      consented: Boolean(data?.consented_at),
+    };
+  }
+
+  async function saveProfile({ participantCode, consent }) {
+    if (!client || !currentUser) throw new Error('로그인이 필요합니다');
+    const row = { id: currentUser.id };
+    if (participantCode) row.participant_code = participantCode;
+    if (consent) row.consented_at = new Date().toISOString();
+    const { error } = await client.from('profiles').upsert(row);
+    if (error) throw error;
+  }
+
   async function signIn(email, password) {
     if (!client) throw new Error('서버에 연결되어 있지 않습니다');
     const { data, error } = await client.auth.signInWithPassword({ email, password });
@@ -399,6 +439,7 @@
 
   window.Cloud = {
     enabled, init, user, signUp, signIn, signOut, setConsent, forgetOwner,
+    signInWithGoogle, profileStatus, saveProfile,
     blocked: () => blockedReason,
     isReady: () => ready,
     onSync: (fn) => { syncListeners.push(fn); },
