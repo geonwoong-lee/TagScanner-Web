@@ -23,7 +23,7 @@
     // 그러면 안에 적힌 app.js 주소도 예전 것이라 수정사항이 통째로 반영되지 않는다.
     // 배포된 버전을 확인해서 다르면 주소에 값을 붙여 한 번만 다시 받는다.
     (function () {
-      var LOADED = '2026-10-21d';
+      var LOADED = '2026-11-06a';
       if (location.search.indexOf('fresh=') !== -1) return;
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
@@ -35,7 +35,7 @@
         .catch(function () { /* 확인 못 하면 그냥 쓴다 */ });
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=2026-10-21d">
+  <link rel="stylesheet" href="styles.css?v=2026-11-06a">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1A1A1A">
   <meta name="description" content="옷 태그를 찍으면 브랜드, 가격, 사이즈, 소재를 읽어 정리해 줍니다.">
@@ -596,26 +596,17 @@
     </div>
 
     <div class="mypage-container">
-      <!-- 데이터 분석 섹션 -->
-      <h3 class="mypage-section-title">내 데이터 분석</h3>
-      <div class="mypage-stats">
-        <div class="mypage-stat-row">
-          <span class="mypage-stat-label">📦 총 저장 상품</span>
-          <span class="mypage-stat-value" id="statTotal">0개</span>
-        </div>
-        <div class="mypage-stat-row">
-          <span class="mypage-stat-label">♡ 찜한 상품</span>
-          <span class="mypage-stat-value" id="statFavorites">0%</span>
-        </div>
-        <div class="mypage-stat-row">
-          <span class="mypage-stat-label">🏷 등록 브랜드</span>
-          <span class="mypage-stat-value" id="statBrands">0개</span>
-        </div>
-        <div class="mypage-stat-row">
-          <span class="mypage-stat-label">💰 평균 가격</span>
-          <span class="mypage-stat-value" id="statAvgPrice">-</span>
-        </div>
-      </div>
+      <!-- FR-08 나의 소비 성향 -->
+      <h3 class="mypage-section-title">나의 소비 성향</h3>
+      <div id="insightPanel" class="insight-panel"></div>
+
+      <!-- FR-09 저장한 상품 중 먼저 살펴볼 것 -->
+      <h3 class="mypage-section-title">먼저 살펴볼 상품</h3>
+      <p class="insight-caption">
+        찜과 비교 여부, 자주 저장한 카테고리와 브랜드, 평소 가격대를 기준으로
+        저장한 상품 안에서 순서를 매겼습니다. 구매 확률이 아닙니다.
+      </p>
+      <div id="recommendPanel" class="recommend-panel"></div>
 
       <!-- 스타일 분석 (CLIP 기반) -->
       <h3 class="mypage-section-title">🎨 스타일 분석</h3>
@@ -732,15 +723,16 @@
 
   <!-- Tesseract.js (브라우저 OCR, 한국어+영어 지원) -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-  <script src="config.js?v=2026-10-21d"></script>
-  <script src="fabric_dict.js?v=2026-10-21d"></script>
-  <script src="brands.js?v=2026-10-21d"></script>
-  <script src="tag_profiles.js?v=2026-10-21d"></script>
-  <script src="parser.js?v=2026-10-21d"></script>
-  <script src="brand_vectors.js?v=2026-10-21d"></script>
-  <script src="clip.js?v=2026-10-21d"></script>
-  <script src="photos.js?v=2026-10-21d"></script>
-  <script src="cloud.js?v=2026-10-21d"></script>
-  <script src="app.js?v=2026-10-21d"></script>
+  <script src="config.js?v=2026-11-06a"></script>
+  <script src="fabric_dict.js?v=2026-11-06a"></script>
+  <script src="brands.js?v=2026-11-06a"></script>
+  <script src="tag_profiles.js?v=2026-11-06a"></script>
+  <script src="parser.js?v=2026-11-06a"></script>
+  <script src="brand_vectors.js?v=2026-11-06a"></script>
+  <script src="clip.js?v=2026-11-06a"></script>
+  <script src="photos.js?v=2026-11-06a"></script>
+  <script src="cloud.js?v=2026-11-06a"></script>
+  <script src="insights.js?v=2026-11-06a"></script>
+  <script src="app.js?v=2026-11-06a"></script>
 </body>
 </html>
