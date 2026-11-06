@@ -2937,3 +2937,223 @@ img.photo-missing {
   opacity: 0.6;
   cursor: default;
 }
+
+/* ---- FR-08 나의 소비 성향 ---- */
+.insight-panel,
+.recommend-panel {
+  margin-bottom: 24px;
+}
+
+.insight-caption {
+  margin: -4px 0 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.insight-empty {
+  padding: 18px 16px;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.insight-note {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--color-iris-100);
+}
+
+.insight-muted {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-text-tertiary);
+}
+
+.insight-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.insight-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.insight-k { font-size: 12px; color: var(--color-text-secondary); }
+.insight-v { font-size: 20px; font-weight: 800; }
+.insight-s { font-size: 12px; font-weight: 700; color: var(--color-fuschia-100); }
+
+.insight-block {
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.insight-h {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.insight-kv {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.insight-kv span { color: var(--color-text-secondary); }
+
+.insight-bar-row {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.insight-bar-label { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.insight-bar-track {
+  height: 8px;
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.insight-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-fuschia-100);
+  border-radius: var(--radius-pill);
+}
+
+.insight-bar-value { color: var(--color-text-secondary); white-space: nowrap; }
+
+.insight-bar-sub {
+  margin: 2px 0 0 72px;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.insight-brands {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.insight-brands li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.insight-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-black);
+  color: #fff;
+  font-size: 12px;
+}
+
+.insight-count {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+/* ---- FR-09 먼저 살펴볼 상품 ---- */
+.recommend-card {
+  display: grid;
+  grid-template-columns: 22px 56px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  background: white;
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.recommend-rank { font-size: 18px; font-weight: 800; color: var(--color-fuschia-100); }
+
+.recommend-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-bg-soft);
+}
+
+.recommend-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.recommend-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.recommend-name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommend-meta { font-size: 12px; color: var(--color-text-secondary); }
+
+.recommend-reasons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+
+.recommend-reasons em {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-fuschia-60);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.recommend-twin,
+.recommend-notes { font-size: 11px; color: var(--color-text-tertiary); }
+
+.recommend-score {
+  font-size: 18px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.recommend-score small { font-size: 11px; font-weight: 600; margin-left: 1px; }
+
+.recommend-detail {
+  margin: 4px 4px 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.recommend-detail summary { cursor: pointer; padding: 4px 0; }
+
+.recommend-parts { display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 4px 0 2px; }

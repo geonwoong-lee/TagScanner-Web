@@ -1899,6 +1899,137 @@ async function renderStyleAnalysis() {
 }
 
 // ---- 마이페이지 통계/렌더링 ----
+// ============================================================
+// FR-08 나의 소비 성향 / FR-09 먼저 살펴볼 상품
+// 계산은 insights.js가 하고 여기서는 그리기만 한다.
+// 대상은 지금 로그인한 사람이 이 기기에 가진 상품뿐이다.
+// 계정이 바뀌면 기기 자료를 비우므로 다른 사람 상품은 섞이지 않는다.
+// ============================================================
+const pct = (r) => `${Math.round(r * 1000) / 10}%`;
+const won = (n) => (n == null ? '정보 없음' : formatWon(Math.round(n)));
+
+function renderInsights(tags) {
+  const box = $('insightPanel');
+  if (!box || !window.Insights) return;
+  const items = window.Insights.fromTags(tags, parsePriceNumber);
+  const a = window.Insights.analyze(items);
+
+  if (a.empty) {
+    box.innerHTML = `<p class="insight-empty">아직 저장한 상품이 없어요. 상품을 저장하면 여기에 성향이 나타납니다.</p>`;
+    return;
+  }
+
+  const few = a.total < 5
+    ? `<p class="insight-note">저장한 상품이 ${a.total}개라 결과가 쉽게 바뀝니다.</p>`
+    : '';
+
+  const catRows = a.categories.map((c) => `
+    <div class="insight-bar-row">
+      <span class="insight-bar-label">${escapeHtml(c.name)}</span>
+      <span class="insight-bar-track"><span class="insight-bar-fill" style="width:${Math.max(4, c.ratio * 100)}%"></span></span>
+      <span class="insight-bar-value">${c.count}개 · ${pct(c.ratio)}</span>
+    </div>
+    ${c.medianPrice != null ? `<div class="insight-bar-sub">가격 중앙값 ${won(c.medianPrice)}</div>` : ''}
+  `).join('');
+
+  const noCategory = items.filter((it) => !String(it.category || '').trim()).length;
+  const brandRows = a.topBrands.length
+    ? a.topBrands.map((b, i) => `
+        <li><span class="insight-rank">${i + 1}</span>${escapeHtml(b.name)}<span class="insight-count">${b.count}개</span></li>
+      `).join('')
+    : '<li class="insight-muted">브랜드가 적힌 상품이 없습니다</li>';
+
+  box.innerHTML = `
+    ${few}
+    <div class="insight-cards">
+      <div class="insight-card"><span class="insight-k">저장</span><span class="insight-v">${a.total}개</span></div>
+      <div class="insight-card"><span class="insight-k">찜</span><span class="insight-v">${a.liked.count}개</span><span class="insight-s">${pct(a.liked.ratio)}</span></div>
+      <div class="insight-card"><span class="insight-k">비교</span><span class="insight-v">${a.compared.count}개</span><span class="insight-s">${pct(a.compared.ratio)}</span></div>
+    </div>
+
+    <div class="insight-block">
+      <p class="insight-h">가격</p>
+      <div class="insight-kv"><span>전체 평균</span><b>${won(a.price.mean)}</b></div>
+      <div class="insight-kv"><span>전체 중앙값</span><b>${won(a.price.median)}</b></div>
+      <div class="insight-kv"><span>찜한 상품 중앙값</span><b>${won(a.price.likedMedian)}</b></div>
+      ${a.price.missing ? `<p class="insight-muted">가격이 없는 상품 ${a.price.missing}개는 빼고 계산했습니다.</p>` : ''}
+    </div>
+
+    <div class="insight-block">
+      <p class="insight-h">카테고리별 저장 비율</p>
+      ${catRows || '<p class="insight-muted">카테고리가 적힌 상품이 없습니다</p>'}
+      ${noCategory ? `<p class="insight-muted">카테고리가 없는 상품 ${noCategory}개는 빼고 셌습니다.</p>` : ''}
+    </div>
+
+    <div class="insight-block">
+      <p class="insight-h">관심 브랜드 TOP3</p>
+      <ol class="insight-brands">${brandRows}</ol>
+    </div>
+  `;
+}
+
+const PART_LABELS = { liked: '찜', compared: '비교', category: '카테고리', brand: '브랜드', price: '가격' };
+
+function renderRecommendations(tags) {
+  const box = $('recommendPanel');
+  if (!box || !window.Insights) return;
+  const items = window.Insights.fromTags(tags, parsePriceNumber);
+  const recs = window.Insights.recommend(items, 3);
+
+  if (!recs.length) {
+    const closed = items.length > 0;
+    box.innerHTML = `<p class="insight-empty">${closed
+      ? '저장한 상품을 모두 사거나 포기하기로 정했어요. 아직 정하지 않은 상품이 생기면 여기에 나옵니다.'
+      : '상품을 저장하면 먼저 살펴볼 순서를 알려 드립니다.'}</p>`;
+    return;
+  }
+
+  const W = window.Insights.WEIGHTS;
+  box.innerHTML = recs.map((r, i) => {
+    const t = r.item.raw;
+    const name = [t.brand, t.productName].filter(Boolean).join(' ') || '이름 없는 상품';
+    const meta = [t.category, t.price].filter(Boolean).join(' · ');
+
+    // 위에 이미 나온 상품과 카테고리·브랜드·가격이 똑같으면 알려 준다.
+    // 같은 상품일 수도 있지만 확인할 수 없으므로 지우지 않고 표시만 한다.
+    const twin = recs.slice(0, i).find((p) =>
+      p.item.category === r.item.category && p.item.brand === r.item.brand && p.item.price === r.item.price);
+
+    const parts = Object.keys(PART_LABELS).map((k) =>
+      `<span>${PART_LABELS[k]} ${r.parts[k].toFixed(2)} / ${W[k]}</span>`).join('');
+
+    return `
+      <button type="button" class="recommend-card" data-id="${t.id}">
+        <span class="recommend-rank">${i + 1}</span>
+        <span class="recommend-thumb">${coverImg(t)}</span>
+        <span class="recommend-body">
+          <span class="recommend-name">${escapeHtml(name)}</span>
+          <span class="recommend-meta">${escapeHtml(meta)}</span>
+          <span class="recommend-reasons">${r.reasons.map((x) => `<em>${escapeHtml(x)}</em>`).join('')}</span>
+          ${twin ? '<span class="recommend-twin">위 상품과 카테고리·브랜드·가격이 같습니다</span>' : ''}
+          ${r.notes.length ? `<span class="recommend-notes">${escapeHtml(r.notes.join(', '))}</span>` : ''}
+        </span>
+        <span class="recommend-score">${r.total.toFixed(2)}<small>점</small></span>
+      </button>
+      <details class="recommend-detail"><summary>점수 구성</summary><div class="recommend-parts">${parts}</div></details>
+    `;
+  }).join('') + `
+    <p class="insight-muted">찜 ${W.liked}, 비교 ${W.compared}, 카테고리 ${W.category}, 브랜드 ${W.brand}, 가격 ${W.price}점 만점.
+      처음 정한 가중치이며 검증을 거친 값은 아닙니다. 사거나 포기하기로 정한 상품은 빠집니다.</p>
+  `;
+
+  box.querySelectorAll('.recommend-card').forEach((el) => {
+    el.addEventListener('click', () => {
+      const id = Number(el.dataset.id);
+      const rank = [...box.querySelectorAll('.recommend-card')].indexOf(el) + 1;
+      logEvent('recommend_opened', { rank });
+      openDetail(id);
+    });
+  });
+  PhotoStore.hydrate(box);
+  logEvent('recommend_shown', { count: recs.length, candidates: items.filter((x) => x.decision !== 'bought' && x.decision !== 'dropped').length });
+}
+
 function renderMyPage() {
   renderInstallHint();
   const tags = loadTags();
@@ -1923,13 +2054,9 @@ function renderMyPage() {
     ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length)
     : null;
 
-  $('statTotal').textContent = `${total}개`;
-  $('statFavorites').textContent =
-    total > 0 ? `${Math.round((favCount / total) * 100)}% (${favCount}개)` : '0%';
-  $('statBrands').textContent = `${brandSet.size}개`;
-  $('statAvgPrice').textContent = avgPrice
-    ? `₩${avgPrice.toLocaleString('ko-KR')}`
-    : '-';
+  void favCount; void brandSet; void avgPrice; // 아래 소비 성향 화면이 대신 보여준다
+  renderInsights(tags);
+  renderRecommendations(tags);
 
   // 최근 5개
   const recent = tags.slice(0, 5);
