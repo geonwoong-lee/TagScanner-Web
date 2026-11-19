@@ -2030,6 +2030,52 @@ function renderRecommendations(tags) {
   logEvent('recommend_shown', { count: recs.length, candidates: items.filter((x) => x.decision !== 'bought' && x.decision !== 'dropped').length });
 }
 
+// '샀어요'로 기록한 상품. 날짜는 '샀어요'를 누른 시각(decidedAt)이다.
+function renderPurchases(tags) {
+  const box = $('purchaseList');
+  if (!box) return;
+  const bought = tags
+    .filter((t) => t.decision === 'bought')
+    .sort((a, b) => (b.decidedAt || 0) - (a.decidedAt || 0));
+
+  if (!bought.length) {
+    box.innerHTML = `<div class="mypage-recent-empty">아직 '샀어요'로 기록한 상품이 없습니다.</div>`;
+    return;
+  }
+
+  const priced = bought.map((t) => parsePriceNumber(t.price)).filter((n) => n > 0);
+  const sum = priced.reduce((a, b) => a + b, 0);
+  const noPrice = bought.length - priced.length;
+
+  box.innerHTML = `
+    <div class="purchase-summary">
+      <span>${bought.length}개</span>
+      <strong>${formatWon(sum)}</strong>
+    </div>
+    <div class="mypage-recent-list">
+      ${bought.map((t) => {
+        const name = [t.brand, t.productName].filter(Boolean).join(' ') || '(이름 없음)';
+        const date = t.decidedAt ? new Date(t.decidedAt).toLocaleDateString('ko-KR') : '날짜 기록 없음';
+        return `
+          <div class="mypage-recent-item" data-id="${t.id}">
+            ${coverImg(t)}
+            <div class="mypage-recent-info">
+              <div class="mypage-recent-name">${escapeHtml(name)}</div>
+              <div class="mypage-recent-meta">${date}</div>
+            </div>
+            <div class="purchase-price">${t.price ? escapeHtml(t.price) : '가격 없음'}</div>
+          </div>`;
+      }).join('')}
+    </div>
+    <p class="insight-muted">날짜는 '샀어요'를 누른 날입니다.${noPrice ? ` 가격이 없는 상품 ${noPrice}개는 합계에서 뺐습니다.` : ''}</p>
+  `;
+
+  box.querySelectorAll('.mypage-recent-item').forEach((el) => {
+    el.addEventListener('click', () => openDetail(Number(el.dataset.id)));
+  });
+  PhotoStore.hydrate(box);
+}
+
 function renderMyPage() {
   renderInstallHint();
   const tags = loadTags();
@@ -2057,6 +2103,7 @@ function renderMyPage() {
   void favCount; void brandSet; void avgPrice; // 아래 소비 성향 화면이 대신 보여준다
   renderInsights(tags);
   renderRecommendations(tags);
+  renderPurchases(tags);
 
   // 최근 5개
   const recent = tags.slice(0, 5);

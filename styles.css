@@ -3157,3 +3157,29 @@ img.photo-missing {
 .recommend-detail summary { cursor: pointer; padding: 4px 0; }
 
 .recommend-parts { display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 4px 0 2px; }
+
+/* 구매 기록 */
+.purchase-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 4px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.purchase-summary strong {
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.purchase-price {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-iris-100);
+}
+
+.purchase-panel .insight-muted {
+  margin-top: 8px;
+}
